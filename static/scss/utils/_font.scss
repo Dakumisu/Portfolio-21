@@ -1,15 +1,15 @@
 @font-face {
     font-family: "Title";
-    src: url("/font/Revans.woff2") format("woff2"),
-        url("/font/Revans.woff") format("woff");
+    src: url("../static/font/Rossanova.woff2") format("woff2"),
+        url("../static/font/Rossanova.woff") format("woff");
 }
 @font-face {
-    font-family: "SubTitle";
-    src: url("/font/Chapaza.woff2") format("woff2"),
-        url("/font/Chapaza.woff") format("woff");
+    font-family: "Subtitle";
+    src: url("../static/font/Chapaza.woff2") format("woff2"),
+        url("../static/font/Chapaza.woff") format("woff");
 }
 @font-face {
     font-family: "Text";
-    src: url("/font/AndBasR.woff2") format("woff2"),
-        url("/font/AndBasR.woff") format("woff");
+    src: url("../static/font/AndBasR.woff2") format("woff2"),
+        url("../static/font/AndBasR.woff") format("woff");
 }

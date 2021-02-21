@@ -60,7 +60,7 @@ module.exports = {
                 use:
                 [
                     {
-                        loader: 'file-loader',
+                        loader: 'url-loader',
                         options:
                         {
                             outputPath: 'assets/images/'
@@ -71,16 +71,25 @@ module.exports = {
 
             // Fonts
             {
-                test: /\.(ttf|eot|woff|woff2)$/,
+                test: /\.(otf|ttf|eot|woff|woff2)$/,
                 use:
                 [
                     {
-                        loader: 'file-loader',
+                        loader: 'url-loader',
                         options:
                         {
                             outputPath: 'assets/fonts/'
                         }
                     }
+                ]
+            }, 
+
+            // Shaders
+            {
+                test: /\.(glsl|vs|fs|vert|frag)$/,
+                exclude: /node_modules/,
+                use: [
+                    'raw-loader'
                 ]
             }
         ]

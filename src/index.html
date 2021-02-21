@@ -15,49 +15,145 @@
 </head>
 
 <body>
-    <section class="hero--container">
-        <div class="hero--nav__top">
+    
+    <div class="cursor cursor--small"></div>
+    <canvas class="cursor cursor--canvas" resize></canvas>
+
+    <section class="hud--container">
+        <div class="hud--nav__top">
             <div class="nav--name">
-                <span>Alex Gattefossé</span>
+                <div class="spanName--container"></div>
+                <div class="spanPseudo--container"></div>
             </div>
             <div class="nav--categories">
-                <span>about</span>
-                <span>portofolio</span>
-                <span>contact</span>
+                <span class="link">about</span>
+                <span class="link">projects</span>
+                <span class="link">contact</span>
             </div>
         </div>
-        <div class="hero--main">
-            <div class="hero--img">
-                <div class="img--default">
-                    <img alt="Alex Gattefossé">
-                </div>
-                <div class="img--hover">
-                    <img alt="Alex Gattefossé">
-                </div>
-            </div>
-            <div class="hero--title">
-                <h1>
-                    <span>Alex</span>
-                    <span>Gattefossé</span>
-                </h1>
-                <span class="hero--title__subtitle">a.k.a. Dākumisu</span>
-            </div>
-        </div>
-        <div class="hero--nav__bottom">
-            <div class="hero--sound--btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 25">
-                    <path d="M59.58,12.23c-7.42,10.35-21.13,8.46-27.79-.1-9.5-12.19-20-7.51-27.6.1h0" />
-                </svg>
-            </div>
-            <div class="hero--lang">
-                <span>FR</span>
-            </div>
+        <div class="hud--nav__bottom">
+            <button class="hud--sound--btn link">
+                  <canvas id="canvas-audio"></canvas>
+            </button>
+            <!-- <div class="hud--lang link">
+                <span>EN</span>
+            </div> -->
         </div>
     </section>
+    <div class="scroll--container skewElem" data-scroll-container>
+        <section class="hero--container" data-scroll-section>
+            <div class="hero--main">
+                <div class="hero--content">
+                    <h1 data-scroll data-scroll-speed="1">Hello</h1>
+                    <h2 data-scroll data-scroll-speed="1.7">I'm Alex, I do website</h2>
+                </div>
+            </div>
+        </section>
 
-    <canvas class="webgl"></canvas>
+        <section class="about--container" data-scroll-section>
+            <div class="about--main">
+                <div class="container">
+                    <div class="about--img" data-scroll data-scroll-speed="2">
+                        <div class="img--default">
+                            <img src="../static/img/moi_Default.jpg" alt="Alex Gattefossé">
+                        </div>
+                        <div class="img--hover">
+                            <img src="../static/img/moi_Hover.png" alt="Alex Gattefossé">
+                        </div>
+                    </div>
+                    <div class="about--title" data-scroll data-scroll-speed="1">
+                        <h1>
+                            <span class="name" data-scroll data-scroll-speed="5" data-scroll-delay="0.20">A</span>
+                            <span class="name" data-scroll data-scroll-speed="5" data-scroll-delay="0.19">l</span>
+                            <span class="name" data-scroll data-scroll-speed="5" data-scroll-delay="0.18">e</span>
+                            <span class="name" data-scroll data-scroll-speed="5" data-scroll-delay="0.17">x</span>
+                            <span class="invisible-space" data-scroll data-scroll-speed="5" data-scroll-delay="0.16"> </span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.15">G</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.14">a</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.13">t</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.12">t</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.11">e</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.10">f</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.09">o</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.08">s</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.07">s</span>
+                            <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.06">é</span>
+                        </h1>
+                        <span class="about--title__subtitle" data-scroll data-scroll-speed="5" data-scroll-delay="0.07">a.k.a. Dakumisu</span>
+                    </div>
+                </div>
+            </div>
+            <div class="about--content" data-scroll>
+                <div class="container">
+                    <h2 data-scroll data-scroll-speed="1.5">About me</h2>
+                    <div class="text--container" data-scroll data-scroll-speed="2">
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore dolore porro quod veniam commodi
+                            voluptatum, maiores similique architecto, animi adipisci sequi voluptate quos corporis sit
+                            repudiandae rem harum perspiciatis aut.</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore dolore porro quod veniam commodi
+                            voluptatum, maiores similique architecto, animi adipisci sequi voluptate quos corporis sit
+                            repudiandae rem harum perspiciatis aut.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="projects--container" data-scroll-section>
+            <div class="projects--content" data-scroll>
+                <div class="container">
+                    <h2 data-scroll data-scroll-speed="1.5">Projects</h2>
+                    <div class="text--container" data-scroll data-scroll-speed="2">
+                        <div class="project--container project--container__left">
+                            <h3>Projet</h3>
+                            <h4>categorie</h4>
+                        </div>
+                        <div class="project--container project--container__right ">
+                            <h3>Projet</h3>
+                            <h4>categorie</h4>
+                        </div>
+                        <div class="project--container project--container__left">
+                            <h3>Projet</h3>
+                            <h4>categorie</h4>
+                        </div>
+                        <div class="project--container project--container__right ">
+                            <h3>Projet</h3>
+                            <h4>categorie</h4>
+                        </div>
+                        <div class="project--container project--container__left">
+                            <h3>Projet</h3>
+                            <h4>categorie</h4>
+                        </div>
+                        <div class="project--container project--container__right ">
+                            <h3>Projet</h3>
+                            <h4>categorie</h4>
+                        </div>
+                        <div class="project--container project--container__left">
+                            <h3>Projet</h3>
+                            <h4>categorie</h4>
+                        </div>
+                        <div class="project--container project--container__right ">
+                            <h3>Projet</h3>
+                            <h4>categorie</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="canvas--container">
+            <canvas class="webgl"></canvas>
+        </section>
+
+
+    </div>
+
+    <audio id="audio" controls preload loop>
+        <source type="audio/mpeg">
+    </audio>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.0/paper-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
 </body>
 
 </html>
