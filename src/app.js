@@ -1,6 +1,6 @@
 import './style.css'
 import './locomotiveBase.css'
-import '../static/js/audio.js'
+// import '../static/js/audio.js'
 // import '../static/js/cursor.js'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
@@ -13,24 +13,43 @@ import gsap from 'gsap/gsap-core'
 
 // import vertexShader from './glsl/vertexShader.glsl'
 // import fragmentShader from './glsl/fragmentShader.glsl'
+
+const lerp = (a, b, n) => {
+    return (1 - n) * a + n * b
+}
+
+const map = (value, in_min, in_max, out_min, out_max) => {
+    return (
+        ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+    )
+}
+
+const backgroundContainer = document.querySelector('.background--container')
 const hudContainer = document.querySelector('.hud--container')
 const hudContainerTop = document.querySelector('.hud--container .hud--nav__top')
 const hudContainerBottom = document.querySelector('.hud--container .hud--nav__bottom')
-const scrollContainer = document.querySelector('.scroll--container')
+const scrollContainer = document.querySelector('[data-scroll-container]')
 const aboutContainer = document.querySelector('.about--container')
 const projectsContainer = document.querySelector('.projects--container')
+const contactContainer = document.querySelector('.contact--container')
 const canvasContainer = document.querySelector('.canvas--container')
 
+const navNameSpan = document.querySelectorAll('.spanName--container span')
+const navPseudoSpan = document.querySelectorAll('.spanPseudo--container span')
+
+const titleCat = document.querySelectorAll('.title--cat')
+const outerLinkItems = document.querySelectorAll(".outer--link")
+const innerLinkItems = document.querySelectorAll(".inner--link")
+const buttonContact = document.querySelector(".btn--contact")
+const crossClose = document.querySelector(".close")
+
 const cursor = document.querySelector('.cursor')
+const innerCursor = document.querySelector(".cursor--small")
 const mouse = new THREE.Vector2()
 
 let navName = document.querySelector('.nav--name')
 let nameSpanContainer = document.querySelector('.spanName--container')
 let pseudoSpanContainer = document.querySelector('.spanPseudo--container')
-
-let staggerVelocity = .05
-let durationVelocity = .4
-let easeDefault = "Power3.inOut"
 
 let THREElightBlue = new THREE.Color("#E9EFEF")
 let THREEnormalBlue = new THREE.Color("#48717F")
@@ -43,8 +62,16 @@ const darkBlue = "#29363C"
 const darkerBlue = "#171f22"
 
 let onMouseDown = false
-let mouseOnModel = false
-let isIcebergOnTheLeft = false
+let icebergPosition = 'default'
+let isIcebergRotating = false
+let isContactActive = false
+
+let mouseX = 0
+let mouseY = 0
+let posX = 0
+let posY = 0
+let posXNormalize = 0
+let posYNormalize = 0
 
 // Scene
 const scene = new THREE.Scene()
@@ -62,9 +89,9 @@ camera.position.z = 10
 scene.add(camera)
 
 // Renderer
-const canvas = document.querySelector('canvas.webgl')
+const mainCanvas = document.querySelector('canvas.webgl')
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
+    canvas: mainCanvas,
     antialias: true,
     alpha: true
 })
@@ -134,34 +161,39 @@ toonMaterial.aoMapIntensity = 1
 //     opacity: 1.0
 // })
 
-// Iceberg
+// ------------------------------------------------------------------------------- Init Iceberg -------------------------------------------------------------------------------
 const gltfLoader = new GLTFLoader()
 let icebergModel
+
+let rotationValue
 let rotationYDefault = Math.PI * 1.7
-let rotationYOnTheLeft = Math.PI * 2.1
+let rotationYOnTheCenter = Math.PI * .9
+let rotationYOnTheLeft = Math.PI * .3
 
 gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         icebergModel = addIcebergModel.scene
         icebergModel.traverse((e) => {
             if (e.isMesh) e.material = toonMaterial
         })
-        icebergModel.scale.set(.02, .02, .02)
+        icebergModel.scale.set(.28, .28, .28)
         icebergModel.rotation.y = rotationYDefault
-        icebergModel.position.set(0, .5, 0)
+        icebergModel.position.set(4, 1, 0)
+        // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
+        // gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
         scene.add(icebergModel)
 
-        icebergModel.on('click', () => {
-            canvasContainer.style.zIndex = -1
-            if (icebergModel.scale.x == 0.02) {
-                gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
-                gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
-                // gsap.to(icebergModel.rotation, .5, { y: icebergModel.rotation.y += Math.PI * .25, ease: Power4.easeInOut })
-            } 
-            // else if (icebergModel.scale.x == 0.28) {
-            //     gsap.to(icebergModel.scale, 1, { x: 0.02, y: 0.02, z: 0.02, ease: Expo.easeInOut })
-            //     gsap.to(icebergModel.position, 1, { x: 0, ease: Expo.easeInOut })
-            // }
-        })
+        // icebergModel.on('click', () => {
+        //     canvasContainer.style.zIndex = -1
+        //     if (icebergModel.scale.x == 0.02) {
+                // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
+                // gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
+        //         // gsap.to(icebergModel.rotation, .5, { y: icebergModel.rotation.y += Math.PI * .25, ease: Power4.easeInOut })
+        //     } 
+        //     // else if (icebergModel.scale.x == 0.28) {
+        //     //     gsap.to(icebergModel.scale, 1, { x: 0.02, y: 0.02, z: 0.02, ease: Expo.easeInOut })
+        //     //     gsap.to(icebergModel.position, 1, { x: 0, ease: Expo.easeInOut })
+        //     // }
+        // })
 
         // icebergModel.on('mousedown', () => {
         //     if (icebergModel.scale.x == 0.28) {
@@ -212,71 +244,107 @@ function test() {
 //     cursor.classList.remove('onMouseDown')
 // })
 
-// Init HTML - top nav
-let text = "Alex Gattefossé"
-let chars = text.split('')
 
-chars.forEach(letter => {
-    let char = document.createElement('span')
-    char.innerHTML = letter
-    nameSpanContainer.append(char)
-})
-
-text = "Dakumisu"
-chars = text.split('')
-
-chars.forEach(letter => {
-    let char = document.createElement('span')
-    char.innerHTML = letter
-    pseudoSpanContainer.append(char)
-})
-
-let navNameSpan = document.querySelectorAll('.spanName--container span')
-let navPseudoSpan = document.querySelectorAll('.spanPseudo--container span')
-
-// Home Page
+// ------------------------------------------------------------------------------- Home Page -------------------------------------------------------------------------------
 navName.addEventListener('mouseenter', () => {
-    TweenMax.to(navNameSpan, durationVelocity, { y: -20, rotationZ: -15, stagger: { each: staggerVelocity, from: 'start'}, ease: easeDefault, delay: .1 })
-    TweenMax.to(navPseudoSpan, durationVelocity, { y: -30, rotationZ: 0, stagger: { each: staggerVelocity, from: 'start'}, ease: easeDefault, delay: .1 })
+    TweenMax.to(navNameSpan, .4, { y: -20, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
+    TweenMax.to(navPseudoSpan, .4, { y: -30, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
 })
 navName.addEventListener('mouseleave', () => {
-    TweenMax.to(navNameSpan, durationVelocity, { y: 0, rotationZ: 0, stagger: { each: staggerVelocity, from: 'start'}, ease: easeDefault, delay: .1 })
-    TweenMax.to(navPseudoSpan, durationVelocity, { y: -10, rotationZ: -15, stagger: { each: staggerVelocity, from: 'start'}, ease: easeDefault, delay: .1 })
+    TweenMax.to(navNameSpan, .4, { y: 0, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
+    TweenMax.to(navPseudoSpan, .4, { y: -10, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
 })
 
-//Mouse move interaction
-window.addEventListener('mousemove', e => {
-    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
-    if (icebergModel && !onMouseDown) {
-        // gsap.to(icebergModel.rotation, .3, { x: mouse.x / 50, ease: Power1.easeOut })
-        gsap.to(icebergModel.rotation, 1, { z: mouse.y / 40 })
-        if (isIcebergOnTheLeft) {
-            gsap.to(icebergModel.rotation, 1, { y: rotationYOnTheLeft + mouse.x / 20 })
-        } else {
-            gsap.to(icebergModel.rotation, 1, { y: rotationYDefault + mouse.x / 20 })
-        }
-        // if (mouse.x > 0) {
-        //     gsap.to(icebergModel.rotation, .5, { x: mouse.x })
-        // } else {
-        //     gsap.to(icebergModel.rotation, .5, { x: mouse.x })
-        // }
-    }
-    gsap.to(hudContainerTop, .3, { x: mouse.x * -5 })
-    gsap.to(hudContainerTop, .3, { y: mouse.y * 5 })
-    gsap.to(hudContainerBottom, .3, { x: mouse.x * -5 })
-    gsap.to(hudContainerBottom, .3, { y: mouse.y * 5 })
+let icebergRotY = 0
+let icebergPosX = 0
+// ------------------------------------------------------------------------------- Contact -------------------------------------------------------------------------------
+buttonContact.addEventListener('click', () => {
+    icebergRotY = icebergModel.rotation.y
+    icebergPosX = icebergModel.position.x
+    gsap.to(icebergModel.scale, .75, { x: 0, y: 0, z: 0, ease: Back.easeIn })
+    gsap.to(icebergModel.rotation, .75, { y: rotationValue - Math.PI * .75,  ease: Power2.easeIn })
+    
+    TweenMax.to(contactContainer, .75, { opacity: 1, pointerEvents: 'all', ease: Power4.easeInOut, delay: .75 })
+    
+    gsap.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 1.25 })
+
+    isIcebergRotating = true
+    setTimeout(() => {
+        icebergModel.scale.set(.30, .35, .30)
+        icebergModel.position.x = 25
+        isContactActive = true
+        canvasContainer.style.zIndex = 7
+    }, 1000);
 })
 
+crossClose.addEventListener('click', () => {
+    gsap.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
+    TweenMax.to(contactContainer, .75, { opacity: 0, pointerEvents: 'none', ease: Power4.easeInOut, delay: .5 })
+    gsap.to(icebergModel.rotation, 1.25, { y: icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
+    gsap.to(icebergModel.scale, 1.5, { x: .28, y: .28, z: .28, ease: Elastic.easeOut, delay: 1.1 })
+    
+    setTimeout(() => {
+        icebergModel.scale.set(0.00001, 0.00001, 0.00001)
+        icebergModel.position.x = icebergPosX
+        isContactActive = false
+        canvasContainer.style.zIndex = -1
+        setTimeout(() => {
+            icebergModel.rotation.y = icebergRotY - Math.PI * .75
+        }, 100);
+        setTimeout(() => {
+            isIcebergRotating = false
+        }, 1500);
+    }, 1000);
+})
+
+
+crossClose.addEventListener('mouseenter', () => {
+    TweenMax.to('.line-1', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
+    TweenMax.to('.line-2', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
+})
+crossClose.addEventListener('mouseleave', () => {
+    TweenMax.to('.line-1', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
+    TweenMax.to('.line-2', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
+})
+
+
+// ------------------------------------------------------------------------------- Mouse move interaction -------------------------------------------------------------------------------
 // Cursor Custom
-let clientX = -100
-let clientY = -100
-const innerCursor = document.querySelector(".cursor--small")
+TweenMax.to({}, 0.01, {
+    repeat: -1,
+    onRepeat: function () {
+        posX += (mouseX - posX) / 4;
+        posY += (mouseY - posY) / 4;
 
+        TweenMax.set(innerCursor, {
+            x: posX,
+            y: posY
+        })
+
+        if (icebergModel && !isIcebergRotating && !isContactActive) {
+            rotationValue = icebergModel.rotation.y
+            gsap.to(icebergModel.rotation, 1, { z: posYNormalize / 30 })
+            if (icebergPosition == 'default') {
+                gsap.to(icebergModel.rotation, { y: rotationYDefault + posXNormalize / 10 })
+            } else if (icebergPosition == 'center') {
+                gsap.to(icebergModel.rotation, { y: rotationYOnTheCenter + posXNormalize / 10 })
+            } else if (icebergPosition == 'left') {
+                gsap.to(icebergModel.rotation, { y: rotationYOnTheLeft + posXNormalize / 10 })
+            }
+        }
+        TweenMax.set(hudContainerTop, { x: posXNormalize * -5 })
+        TweenMax.set(hudContainerTop, { y: posYNormalize * 5 })
+        TweenMax.set(hudContainerBottom, { x: posXNormalize * -5 })
+        TweenMax.set(hudContainerBottom, { y: posYNormalize * 5 })
+    }
+})
 
 document.addEventListener("mousemove", e => {
-    clientX = e.clientX
-    clientY = e.clientY
+    mouseX = e.clientX
+    mouseY = e.clientY
+
+    posXNormalize = (posX / window.innerWidth) * 2 - 1
+    posYNormalize = - (posY / window.innerWidth) * 2 + 1
 })
 
 let lastX = 0
@@ -291,7 +359,7 @@ const shapeBounds = {
     height: 75
 }
 paper.setup(cursorCanvas)
-const strokeColor = darkerBlue
+const strokeColor = lightBlue
 const fillColor = normalBlue
 const strokeWidth = .5
 const segments = 8
@@ -319,47 +387,54 @@ group.applyMatrix = false
 const noiseObjects = polygon.segments.map(() => new SimplexNoise())
 let bigCoordinates = []
 
-const lerp = (a, b, n) => {
-    return (1 - n) * a + n * b
-}
-
-const map = (value, in_min, in_max, out_min, out_max) => {
-    return (
-        ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
-    )
-}
-
 paper.view.onFrame = event => {
-    lastX = lerp(lastX, clientX, 0.9)
-    lastY = lerp(lastY, clientY, 0.9)
+    lastX = lerp(lastX, mouseX, 0.7)
+    lastY = lerp(lastY, mouseY, 0.7)
     group.position = new paper.Point(lastX, lastY)
 }
 
-const handleMouseEnter = e => {
+outerLinkItems.forEach(item => {
+    item.addEventListener("mouseenter", outerHandleMouseEnter)
+    item.addEventListener("mouseleave", outerHandleMouseLeave)
+})
+
+innerLinkItems.forEach(item => {
+    item.addEventListener("mouseenter", innerHandleMouseEnter)
+    item.addEventListener("mouseleave", innerHandleMouseLeave)
+})
+
+function innerHandleMouseEnter() {
+    TweenMax.to(innerCursor, .75, { padding: 25, backgroundColor: lightBlue, ease: Expo.easeOut })
+    gsap.to(polygon.strokeColor, .75, { alpha: 0, ease: Expo.easeOut })
+}
+
+function innerHandleMouseLeave() {
+    TweenMax.to(innerCursor, .75, { padding: 5, backgroundColor: 'transparent', ease: Expo.easeOut })
+    gsap.to(polygon.strokeColor, .75, { alpha: 1, ease: Expo.easeOut })
+}
+
+function outerHandleMouseEnter(e) {
     const navItem = e.currentTarget
     const navItemBox = navItem.getBoundingClientRect()
     stuckX = Math.round(navItemBox.left + navItemBox.width / 2)
     stuckY = Math.round(navItemBox.top + navItemBox.height / 2)
     isStuck = true
+    TweenMax.to(innerCursor, .75, { padding: 0, opacity: 0, ease: Expo.easeOut })
     // gsap.to(polygon.strokeColor, .5, { alpha: 1 })
     // gsap.to(polygon.fillColor, .5, { alpha: 0 })
 }
 
-const handleMouseLeave = () => {
+function outerHandleMouseLeave() {
     isStuck = false
+    TweenMax.to(innerCursor, .75, { padding: 5, opacity: 1, ease: Expo.easeOut })
     // gsap.to(polygon.strokeColor, .5, { alpha: 0 })
     // gsap.to(polygon.fillColor, .5, { alpha: 1 })
 }
-const linkItems = document.querySelectorAll(".link")
-linkItems.forEach(item => {
-    item.addEventListener("mouseenter", handleMouseEnter)
-    item.addEventListener("mouseleave", handleMouseLeave)
-})
 
 paper.view.onFrame = event => {
     if (!isStuck) {
-        lastX = lerp(lastX, clientX, 0.2)
-        lastY = lerp(lastY, clientY, 0.2)
+        lastX = lerp(lastX, mouseX, 0.2)
+        lastY = lerp(lastY, mouseY, 0.2)
         group.position = new paper.Point(lastX, lastY)
         polygon.scale(1)
     } else if (isStuck) {
@@ -410,10 +485,112 @@ paper.view.onFrame = event => {
     polygon.smooth()
 }
 
+// ------------------------------------------------------------------------------- Audio -------------------------------------------------------------------------------
+const deg = (a) => a * Math.PI / 180 
 
-// Scroll Smooth
+class AudioSwitcher {
+  constructor(opt) {
+    Object.assign(this, opt)
+
+    this.active = false
+    this.hover = false
+    this.volume = 0
+    this.settings = {
+      width: 60,
+      height: 7,
+      amplitude: -0.18,
+      hoverHeight: 1.5,
+      hoverAmplitude: -0.1,
+      speed: 3.5
+    }
+
+    this.init()
+  }
+
+  init() {
+    this.button.addEventListener('click', () => {
+      this.active = !this.active
+      this.button.classList.toggle('active')
+      const toggle = this.active ? 'play' : 'pause'
+      this.audio[toggle]()
+      this.hover = false
+    })
+
+    this.button.addEventListener('mouseenter', () => {
+      this.hover = true
+    })
+    this.button.addEventListener('mouseleave', () => {
+      this.hover = false
+    })
+
+    window.addEventListener('blur', () => {
+      this.audio.muted = true
+    })
+    window.addEventListener('focus', () => {
+      this.audio.muted = false
+    })
+
+    this.ctx = this.soundCanvas.getContext('2d')
+    this.width = this.soundCanvas.clientWidth
+    this.height = this.soundCanvas.clientHeight
+    this.amp = 0
+    this.h = 0
+    this.devicePixelRatio = window.devicePixelRatio || 1
+    this.soundCanvas.width = this.width * this.devicePixelRatio
+    this.soundCanvas.height = this.height * this.devicePixelRatio
+    this.soundCanvas.style.width = `${this.width}px`
+    this.soundCanvas.style.height = `${this.height}px`
+    this.ctx.scale(this.devicePixelRatio, this.devicePixelRatio)
+  }
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.soundCanvas.width, this.soundCanvas.height)
+  }
+
+  draw(time) {
+    this.ctx.fillStyle = this.color
+
+    for (let i = 0; i < this.settings.width; i++) {
+      this.ctx.beginPath()
+      const x = (this.width / 2) - (this.settings.width / 2 * 0.5) + i * .6
+      const t = (time * this.settings.speed) + (i * this.amp)
+      const y = (this.height / 2) + (-Math.cos(t) * this.h)
+      this.ctx.ellipse(x, y, .5, .5, deg(360), 0, deg(360))
+      this.ctx.closePath()
+      this.ctx.fill()
+    }
+  }
+
+  animate(time) {
+    let height = this.hover ? this.settings.hoverHeight : 0
+    height = this.active ? this.settings.height : height
+    this.h = lerp(this.h, height, 0.04)
+
+    let amplitude = this.hover ? this.settings.hoverAmplitude : 0
+    amplitude = this.active ? this.settings.amplitude : amplitude
+    this.amp = lerp(this.amp, amplitude, 0.04)
+
+    const volume = this.active ? 1 : 0
+    this.volume = lerp(this.volume, volume, 0.04)
+    this.audio.volume = this.volume
+
+    this.clear()
+    this.draw(time)
+  }
+}
+
+const audioSwitcher = new AudioSwitcher({
+  button: document.querySelector('.hud--sound--btn'),
+  soundCanvas: document.querySelector('#canvas-audio'),
+  audio: document.querySelector('#audio'),
+  color: lightBlue,
+})
+
+
+// ------------------------------------------------------------------------------- Scroll Smooth -------------------------------------------------------------------------------
 const locoScroll = new LocomotiveScroll({
     el: scrollContainer,
+    direction: 'vertical',
     smooth: true,
     getDirection: true,
     smoothMobile: true,
@@ -421,7 +598,7 @@ const locoScroll = new LocomotiveScroll({
     multiplier: 0.5,
     lerp: 0.08,
     // reloadOnContextChange: true,
-    // draggingClass: true
+    draggingClass: true
 })
 
 /* ADD LOCOSCROLL */
@@ -445,24 +622,34 @@ ScrollTrigger.scrollerProxy(scrollContainer, {
 ScrollTrigger.create({
     trigger: aboutContainer,
     scroller: scrollContainer,
-    start: "30% bottom", 
-    end: "=+99999%",
+    start: "50% bottom", 
+    endTrigger: "html",
+    // end:"bottom top",
+    // end: "=+100%",
     scrub: true,
     // onUpdate: self => {
     //     // console.log("progress:", self.progress.toFixed(3))
     //     icebergModel.position.x = 4 + self.progress * -4
     // },
     onToggle: toggleOnAbout => {
-        console.log("toggled, isActive:", toggleOnAbout.isActive)
+        // console.log("toggled, isActive:", toggleOnAbout.isActive)
         if (toggleOnAbout.isActive) {
-            isIcebergOnTheLeft = toggleOnAbout.isActive
+            icebergPosition = 'center'
+            isIcebergRotating = true
+            setTimeout(() => {
+                isIcebergRotating = false
+            }, 1700)
             gsap.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-            gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheLeft , ease: Elastic.easeOut })
+            gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheCenter , ease: Power2.easeOut })
             // gsap.to(icebergModel.scale, 1, { x: 0.22, y: 0.22, z: 0.22, ease: Elastic.easeOut })
         } else {
-            isIcebergOnTheLeft = toggleOnAbout.isActive
+            icebergPosition = 'default'
+            isIcebergRotating = true
+            setTimeout(() => {
+                isIcebergRotating = false
+            }, 1700)
             gsap.to(icebergModel.position, 3.5, { x: 4, ease: Elastic.easeOut })
-            gsap.to(icebergModel.rotation, 1.5, { y: rotationYDefault , ease: Elastic.easeOut })
+            gsap.to(icebergModel.rotation, 1.5, { y: rotationYDefault , ease: Power2.easeOut })
             // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
         }
     },
@@ -475,21 +662,55 @@ ScrollTrigger.create({
     scrub: true,
     onToggle: toggleOnProjects => {
         if (toggleOnProjects.isActive) {
+            icebergPosition = 'left'
+            isIcebergRotating = true
+            setTimeout(() => {
+                isIcebergRotating = false
+            }, 1700)
             gsap.to(hemisphereLightUp, .5, { intensity: 0 })
             gsap.to(hemisphereLightDown, .5, { intensity: .9 })
-            TweenMax.to('body', .5, { backgroundColor: darkerBlue })
+            gsap.to(icebergModel.position, 3.5, { x: -6, ease: Elastic.easeOut })
+            gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheLeft, ease: Power2.easeOut })
+            // gsap.to(audioSwitcher, .5, { color: lightBlue })
+            // gsap.to(polygon, .5, { strokeColor: lightBlue })
+            // TweenMax.to(innerCursor, .5, { borderColor: lightBlue })
+            TweenMax.to(backgroundContainer, .5, { backgroundColor: darkerBlue })
+            TweenMax.to(aboutContainer, .5, { color: lightBlue })
             TweenMax.to(projectsContainer, .5, { color: lightBlue })
-            TweenMax.to(document.querySelectorAll('.project--container h4'), .5, { color: normalBlue })
-            TweenMax.to(polygon, .5, { strokeColor: lightBlue })
-            hudContainerTop.style.color = lightBlue
+            TweenMax.to(contactContainer, .5, { color: lightBlue, backgroundColor: darkerBlue })
+            TweenMax.to('.line-1', .5, { backgroundColor: lightBlue })
+            TweenMax.to('.line-2', .5, { backgroundColor: lightBlue })
+            TweenMax.to(titleCat, .5, { webkitTextStrokeColor: lightBlue })
+            // hudContainerTop.style.color = lightBlue
+            // hudContainerBottom.style.color = lightBlue
+            titleCat.forEach(e => {
+                e.style.webkitTextStrokeWidth = ".06vw "
+            })
         } else {
+            icebergPosition = 'center'
+            isIcebergRotating = true
+            setTimeout(() => {
+                isIcebergRotating = false
+            }, 1700)
             gsap.to(hemisphereLightUp, .5, { intensity: 1.3 })
             gsap.to(hemisphereLightDown, .5, { intensity: 0 })
-            TweenMax.to('body', .5, { backgroundColor: lightBlue })
+            gsap.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
+            gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheCenter, ease: Power2.easeOut })
+            // gsap.to(audioSwitcher, .5, { color: darkerBlue })
+            // gsap.to(polygon, .5, { strokeColor: darkerBlue })
+            // TweenMax.to(innerCursor, .5, { borderColor: darkerBlue })
+            TweenMax.to(backgroundContainer, .5, { backgroundColor: lightBlue })
+            TweenMax.to(aboutContainer, .5, { color: darkerBlue })
             TweenMax.to(projectsContainer, .5, { color: darkerBlue })
-            TweenMax.to(document.querySelectorAll('.project--container h4'), .5, { color: darkerBlue })
-            TweenMax.to(polygon, .5, { strokeColor: darkerBlue })
-            hudContainerTop.style.color = darkerBlue
+            TweenMax.to(contactContainer, .5, { color: darkerBlue, backgroundColor: lightBlue })
+            TweenMax.to('.line-1', .5, { backgroundColor: darkerBlue })
+            TweenMax.to('.line-2', .5, { backgroundColor: darkerBlue })
+            TweenMax.to(titleCat, .5, { webkitTextStrokeColor: darkerBlue })
+            // hudContainerTop.style.color = darkerBlue
+            // hudContainerBottom.style.color = darkerBlue
+            titleCat.forEach(e => {
+                e.style.webkitTextStrokeWidth = ".08vw "
+            })
         }
     },
 })
@@ -509,7 +730,7 @@ ScrollTrigger.create({
             gsap.to(proxy, {
                 skew: 0,
                 duration: 0.4,
-                ease: "power3",
+                ease: Power4,
                 overwrite: true,
                 onUpdate: () => skewSetter(proxy.skew)
             })
@@ -520,9 +741,9 @@ ScrollTrigger.create({
 const clock = new THREE.Clock()
 const tick = () => {
     const elapsedTime = clock.getElapsedTime()
-    // if (icebergModel) {
-    //     icebergModel.rotation.y = elapsedTime * Math.PI * -0.01
-    // }
+    if (icebergModel && isContactActive) {
+        icebergModel.rotation.y = elapsedTime * Math.PI * -0.03
+    }
 
     // // Update controls
     // controls.update()
@@ -530,10 +751,10 @@ const tick = () => {
     // Render
     renderer.render(scene, camera)
 
-    TweenMax.set(innerCursor, {
-        x: clientX,
-        y: clientY
-      })
+    const time = performance.now() / 1000
+    if (audioSwitcher) {
+        audioSwitcher.animate(time)
+    }
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)

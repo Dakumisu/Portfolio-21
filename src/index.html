@@ -21,31 +21,75 @@
 
     <section class="hud--container">
         <div class="hud--nav__top">
-            <div class="nav--name">
-                <div class="spanName--container"></div>
-                <div class="spanPseudo--container"></div>
+            <div class="nav--name inner--link">
+                <div class="spanName--container">
+                    <span>A</span>
+                    <span>l</span>
+                    <span>e</span>
+                    <span>x</span>
+                    <span id="espace"> </span>
+                    <span>G</span>
+                    <span>a</span>
+                    <span>t</span>
+                    <span>t</span>
+                    <span>e</span>
+                    <span>f</span>
+                    <span>o</span>
+                    <span>s</span>
+                    <span>s</span>
+                    <span>é</span>
+                </div>
+                <div class="spanPseudo--container">
+                    <span>D</span>
+                    <span>a</span>
+                    <span>k</span>
+                    <span>u</span>
+                    <span>m</span>
+                    <span>i</span>
+                    <span>s</span>
+                    <span>u</span>
+                </div>
             </div>
             <div class="nav--categories">
-                <span class="link">about</span>
-                <span class="link">projects</span>
-                <span class="link">contact</span>
+                <span class="outer--link">about</span>
+                <span class="outer--link">projects</span>
             </div>
         </div>
         <div class="hud--nav__bottom">
-            <button class="hud--sound--btn link">
+            <button class="hud--sound--btn outer--link">
                   <canvas id="canvas-audio"></canvas>
             </button>
-            <!-- <div class="hud--lang link">
-                <span>EN</span>
-            </div> -->
+            <div class="hud--lang">
+                <span class="outer--link btn--contact">Contact</span>
+            </div>
         </div>
     </section>
+
+    <section class="contact--container">
+        <div class="content--container">
+            <div class="close outer--link">
+                <span class="line-1"></span>
+                <span class="line-2"></span>
+            </div>
+            <h2 class="title--cat">Contact</h2>
+            <div class="content">
+                <span class="inner--link">Instagram</span>
+                <span class="inner--link">Twitter</span>
+                <span class="inner--link">Behance</span>
+                <span class="inner--link">Linkedin</span>
+                <span class="inner--link">GitHub</span>
+                <span class="inner--link">Awwwards</span>
+                <span class="inner--link">Mail</span>
+            </div>
+        </div>
+    </section>
+
     <div class="scroll--container skewElem" data-scroll-container>
         <section class="hero--container" data-scroll-section>
             <div class="hero--main">
                 <div class="hero--content">
                     <h1 data-scroll data-scroll-speed="1">Hello</h1>
-                    <h2 data-scroll data-scroll-speed="1.7">I'm Alex, I do website</h2>
+                    <h2 data-scroll data-scroll-speed="1.7">I'm Alex, I do websites and more</h2>
                 </div>
             </div>
         </section>
@@ -53,7 +97,7 @@
         <section class="about--container" data-scroll-section>
             <div class="about--main">
                 <div class="container">
-                    <div class="about--img" data-scroll data-scroll-speed="2">
+                    <div class="about--img inner--link" data-scroll data-scroll-speed="2">
                         <div class="img--default">
                             <img src="../static/img/moi_Default.jpg" alt="Alex Gattefossé">
                         </div>
@@ -85,8 +129,8 @@
             </div>
             <div class="about--content" data-scroll>
                 <div class="container">
-                    <h2 data-scroll data-scroll-speed="1.5">About me</h2>
-                    <div class="text--container" data-scroll data-scroll-speed="2">
+                    <h2 class="title--cat" data-scroll data-scroll-speed="1.5">About me</h2>
+                    <div class="text--container" data-scroll data-scroll-speed="3">
                         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore dolore porro quod veniam commodi
                             voluptatum, maiores similique architecto, animi adipisci sequi voluptate quos corporis sit
                             repudiandae rem harum perspiciatis aut.</p>
@@ -101,51 +145,88 @@
         <section class="projects--container" data-scroll-section>
             <div class="projects--content" data-scroll>
                 <div class="container">
-                    <h2 data-scroll data-scroll-speed="1.5">Projects</h2>
-                    <div class="text--container" data-scroll data-scroll-speed="2">
-                        <div class="project--container project--container__left">
-                            <h3>Projet</h3>
-                            <h4>categorie</h4>
+                    <h2 class="title--cat" data-scroll data-scroll-speed="1.5">Projects</h2>
+                    <div class="text--container" data-scroll data-scroll-speed="1.5">
+                        <div class="projects projects--web_dev">
+                            <div class="title" data-scroll data-scroll-speed="2" data-scroll-delay=".5">
+                                <span></span>
+                                <h3>Web Development</h3>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
+                                <span class="inner--link">ID 2021</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
+                                <span class="inner--link">Portfolio 2020</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
+                                <span class="inner--link">CMS Portolio</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
+                                <span class="inner--link">E-Morpion</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
+                                <span class="inner--link">Gamovore</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
+                                <span class="inner--link">Retrowave Trending</span>
+                            </div>
                         </div>
-                        <div class="project--container project--container__right ">
-                            <h3>Projet</h3>
-                            <h4>categorie</h4>
+                        <div class="projects projects--design">
+                            <div class="title" data-scroll data-scroll-speed="2" data-scroll-delay=".53">
+                                <span></span>
+                                <h3>Design</h3>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".13">
+                                <span class="inner--link">Jam Cloud</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".13">
+                                <span class="inner--link">Terre de Bois</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".13">
+                                <span class="inner--link">Chara-Mushroom</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".13">
+                                <span class="inner--link">Letter Mask</span>
+                            </div>
                         </div>
-                        <div class="project--container project--container__left">
-                            <h3>Projet</h3>
-                            <h4>categorie</h4>
+                        <div class="projects projects--video">
+                            <div class="title" data-scroll data-scroll-speed="2" data-scroll-delay=".56">
+                                <span></span>
+                                <h3>Video</h3>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".16">
+                                <span class="inner--link">MMI TV</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".16">
+                                <span class="inner--link">Inside</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".16">
+                                <span class="inner--link">1984 Analysis</span>
+                            </div>
                         </div>
-                        <div class="project--container project--container__right ">
-                            <h3>Projet</h3>
-                            <h4>categorie</h4>
-                        </div>
-                        <div class="project--container project--container__left">
-                            <h3>Projet</h3>
-                            <h4>categorie</h4>
-                        </div>
-                        <div class="project--container project--container__right ">
-                            <h3>Projet</h3>
-                            <h4>categorie</h4>
-                        </div>
-                        <div class="project--container project--container__left">
-                            <h3>Projet</h3>
-                            <h4>categorie</h4>
-                        </div>
-                        <div class="project--container project--container__right ">
-                            <h3>Projet</h3>
-                            <h4>categorie</h4>
+                        <div class="projects projects--photo">
+                            <div class="title" data-scroll data-scroll-speed="2" data-scroll-delay=".59">
+                                <span></span>
+                                <h3>Photographs</h3>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".19">
+                                <span class="inner--link">Numeric</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".19">
+                                <span class="inner--link">Argentic</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
-
-        <section class="canvas--container">
-            <canvas class="webgl"></canvas>
-        </section>
-
-
     </div>
+
+    <section class="canvas--container">
+        <canvas class="webgl"></canvas>
+    </section>
+
+    <div class="background--container"></div>
 
     <audio id="audio" controls preload loop>
         <source type="audio/mpeg">

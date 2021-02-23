@@ -15,6 +15,11 @@ h1, h2 {
     font-family: Title;
 }
 
+.title--cat {
+    color : transparent;
+    -webkit-text-stroke: .08vw $darkBlue;
+}
+
 h3, h4 {
     font-family: Subtitle;
 }
@@ -30,6 +35,15 @@ p {
 body {
     margin: 0;
     overflow-x: hidden;
+}
+
+.background--container {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    z-index: -2;
+    top: 0;
+    left: 0;
     background-color: $lightBlue;
 }
 
@@ -38,25 +52,22 @@ body {
     left: 0;
     top: 0;
     pointer-events: none;
-    // mix-blend-mode: difference;
+    mix-blend-mode: difference;
 }
 
 .cursor--small {
-    display: none;
-    width: 6px;
-    height: 6px;
-    left: -3px;
-    top: -3px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    padding: 5px;
     border-radius: 50%;
     z-index: 100;
-    background: $darkBlue;
+    border: .1px solid $lightBlue;
 }
 
 .cursor--canvas {
     width: 100vw;
     height: 100vh;
     z-index: 101;
-    mix-blend-mode: difference;
 }
 
 .onMouseDown {
@@ -77,8 +88,8 @@ body {
     //     justify-content: center;
     // }
     &--nav__top,  &--nav__bottom {
-        color: $darkBlue;
-        transition: color .5 ease-in-out;
+        color: $lightBlue;
+        // transition: color .5s ease-in-out;
         font-size: 13px;
         font-family: SubTitle;
         width: 100% - 7%;
@@ -90,42 +101,50 @@ body {
         z-index: 5;
         left: 50%;
         transform: translateX(-50%);
+        mix-blend-mode: difference;
     }
     &--nav__top {
         top: 5%;
         height: fit-content;
         .nav {
             &--name {
-                // mix-blend-mode: difference;
                 position: relative;
                 display: flex;
                 height: 20px;
                 width: fit-content;
                 align-self: flex-start;
                 flex-direction: column;
-                overflow: hidden;
                 .spanName--container {
+                    pointer-events: none;
                     position: relative;
                     span {
                         display: inline-block;
-                        padding: 5px 0;
+                        padding: 5px 0px;
                     }
                 }
                 .spanPseudo--container {
+                    pointer-events: none;
                     position: relative;
                     span {
-                        padding: 5px 0;
+                        opacity: 0;
+                        padding: 5px 0px;
                         transform: translateY(-10px) rotateZ(15deg);
                         display: inline-block;
                         position: relative;
                     }
+                }
+                span {
+                    margin: 0 -2px;
+                }
+                #espace {
+                    margin: 0 1px;
                 }
             }
             &--categories {
                 display: flex;
                 align-self: flex-end;
                 justify-content: space-between;
-                width: 270px;
+                width: 170px;
                 span {
                     padding: 5px 10px;
                 }
@@ -334,7 +353,7 @@ body {
     }
     &--content {
         width: 100vw;
-        height: 100vh;
+        height: 50vh;
         display: flex;
         justify-content: center;
         // background-color: rgba($lightBlue, .5);
@@ -405,36 +424,132 @@ body {
             .text--container {
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
-                width: 60%;
+                justify-content: flex-end;
+                align-self: flex-end;
+                width: 50%;
                 text-align: center;
-                h3 {
-                    font-size: 2.5vw;
-                    margin: 0;
+                .title {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    span {
+                        height: 1px;
+                        width: 50%;
+                        background: $lightBlue;
+                        padding: 0;
+                    }
+                    h3 {
+                        font-size: 1vw;
+                        margin: 0 0 0 20px;
+                        width: fit-content;
+                        padding: 0;
+                    }
                 }
-                h4 {
-                    font-size: .8vw;
+                .projects {
+                    margin-bottom: 5vh;
+                }
+                span {
+                    font-size: 2vw;
+                    opacity: .7;
                     margin: 0;
+                    padding: 10px 10px 10px 0;
+                    font-family: Subtitle;
                 }
                 .project--container {
-                    &__left {
-                        display: flex;
-                        flex-direction: column;
-                        justify-self: flex-start;
-                        text-align: left;
-                        margin: 10px 0;
-                    }
-                    &__right {
-                        display: flex;
-                        flex-direction: column;
-                        justify-self: flex-end;
-                        text-align: right;
-                        margin: 10px 0;
-                    }
+                    text-align: left;
                 }
             }
         } 
     }
+}
+
+.contact {
+    &--container {
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        color: $darkBlue;
+        background-color: $lightBlue;
+        z-index: 6;
+        opacity: 0;
+        pointer-events: none;
+        
+        .content--container {
+            width: 80vw;
+            height: 100vh;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+    
+            h2 {
+                text-align: left;
+                position: relative;
+                // top: 80px;
+                // left: 50%;
+                // transform: translate(-50%, 0);
+                font-size: 5vw;
+                margin: 0;
+            }
+    
+            .content {
+                width: 50%;
+                height: 60%;
+                // background-color: red;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                justify-content: space-around;
+                margin: 3% 0 0 0;
+    
+                span {
+                    text-align: center;
+                    font-size: 1.3vw;
+                    opacity: .8;
+                    margin: 0;
+                    padding: 10px 15px;
+                    font-family: Subtitle;
+                }
+            }
+
+            .close {
+                position: relative;
+                width: 20px;
+                height: 20px;
+                // background-color: red;
+                left: 50%;
+                top: -5%;
+                transform: translate(-50%, 0);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                span {
+                    position: absolute;
+                    width: 100%;
+                    height: 1px;
+                    background-color: $darkBlue;
+
+                    &:nth-child(1) {
+                        transform: rotate(45deg);
+                        transition: transform .75 ease-in-out;
+                    }
+                    &:nth-child(2) {
+                        transform: rotate(-45deg);
+                        transition: transform .75 ease-in-out;
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 .canvas--container {
@@ -443,7 +558,8 @@ body {
     position: fixed;
     width: 100vw;
     height: 100vh;
-    z-index: 1;
+    z-index: -1;
+    pointer-events: none;
 
     .webgl {
         top: 0;
