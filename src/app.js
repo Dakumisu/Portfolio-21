@@ -11,8 +11,8 @@ gsap.registerPlugin(ScrollTrigger)
 import LocomotiveScroll from 'locomotive-scroll'
 import gsap from 'gsap/gsap-core'
 
-// import vertexShader from './glsl/vertexShader.glsl'
-// import fragmentShader from './glsl/fragmentShader.glsl'
+import vertexShader from './glsl/vertexShader.glsl'
+import fragmentShader from './glsl/fragmentShader.glsl'
 
 const lerp = (a, b, n) => {
     return (1 - n) * a + n * b
@@ -46,6 +46,7 @@ const crossClose = document.querySelector(".close")
 const cursor = document.querySelector('.cursor')
 const innerCursor = document.querySelector(".cursor--small")
 const mouse = new THREE.Vector2()
+const mousePosition = new THREE.Vector3()
 
 let navName = document.querySelector('.nav--name')
 let nameSpanContainer = document.querySelector('.spanName--container')
@@ -72,7 +73,11 @@ let posX = 0
 let posY = 0
 let posXNormalize = 0
 let posYNormalize = 0
+let planeX = 0
+let planeY = 0
 
+
+// --------------------------------------- Init THREE.js features ---------------------------------------
 // Scene
 const scene = new THREE.Scene()
 // scene.background = new THREE.Color('#E9EFEF')
@@ -130,13 +135,8 @@ const spotLightHelperUp = new THREE.SpotLightHelper(spotLightUp, 0.1)
 const spotLightHelperDown = new THREE.SpotLightHelper(spotLightDown, 0.1)
 // scene.add(spotLightHelperDown)
 
-// Textures
+// Texture Loader
 const textureLoader = new THREE.TextureLoader()
-
-// const gradientTexture = textureLoader.load('/textures/gradients/3.jpg')
-// gradientTexture.minFilter = THREE.NearestFilter
-// gradientTexture.magFilter = THREE.NearestFilter
-// gradientTexture.generateMipmaps = false
 
 // Materials
 const toonMaterial = new THREE.MeshToonMaterial()
@@ -144,24 +144,7 @@ const toonMaterial = new THREE.MeshToonMaterial()
 toonMaterial.color = THREElightBlue
 toonMaterial.aoMapIntensity = 1
 
-
-// const materialShader = new THREE.ShaderMaterial({
-//     vertexShader : 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.);}',
-//     fragmentShader: '#define USE_TRANSLUCENCY#ifdef USE_TRANSLUCENCY uniform sampler2D thicknessMap; uniform float thicknessPower; uniform float thicknessScale; uniform float thicknessDistortion; uniform float thicknessAmbient; uniform vec2 thicknessRepeat;#endif#define PHYSICALuniform vec3 diffuse;uniform vec3 emissive;uniform float roughness;uniform float metalness;uniform float opacity;#ifndef STANDARD uniform float clearCoat; uniform float clearCoatRoughness;#endifuniform float envMapIntensity; // temporaryvarying vec3 vViewPosition;#ifndef FLAT_SHADED varying vec3 vNormal;#endif#include <common>#include <packing>#include <color_pars_fragment>#include <uv_pars_fragment>#include <uv2_pars_fragment>#include <map_pars_fragment>#include <alphamap_pars_fragment>#include <aomap_pars_fragment>#include <lightmap_pars_fragment>#include <emissivemap_pars_fragment>#include <envmap_pars_fragment>#include <fog_pars_fragment>#include <bsdfs>#include <cube_uv_reflection_fragment>#include <lights_pars>#include <lights_physical_pars_fragment>#include <shadowmap_pars_fragment>#include <bumpmap_pars_fragment>#include <normalmap_pars_fragment>#include <roughnessmap_pars_fragment>#include <metalnessmap_pars_fragment>#include <logdepthbuf_pars_fragment>#include <clipping_planes_pars_fragment>void main() { #include <clipping_planes_fragment> vec4 diffuseColor = vec4( diffuse, opacity ); ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) ); vec3 totalEmissiveRadiance = emissive; #include <logdepthbuf_fragment> #include <map_fragment> #include <color_fragment> #include <alphamap_fragment> #include <alphatest_fragment> #include <specularmap_fragment> #include <roughnessmap_fragment> #include <metalnessmap_fragment> #include <normal_flip> #include <normal_fragment> #include <emissivemap_fragment> // accumulation #include <lights_physical_fragment> #include <lights_template> #ifdef USE_TRANSLUCENCY vec3 thicknessColor = vec3(1.0, 1.0, 1.0); vec3 thickness = thicknessColor * texture2D(thicknessMap, vUv * thicknessRepeat).r; vec3 N = geometry.normal; vec3 V = normalize(geometry.viewDir); float thicknessCutoff = 0.75; float thicknessDecay = 1.0; #if ( NUM_POINT_LIGHTS > 0 ) && defined( RE_Direct ) for ( int i = 0; i < NUM_POINT_LIGHTS; i ++ ) { pointLight = pointLights[ i ]; vec3 vLightDir = pointLight.position - geometry.position; vec3 L = normalize(vLightDir); float lightDist = length(vLightDir); float lightAtten = punctualLightIntensityToIrradianceFactor(lightDist, pointLight.distance, pointLight.decay); vec3 LTLight = normalize(L + (N * thicknessDistortion)); float LTDot = pow(saturate(dot(V, -LTLight)), thicknessPower) * thicknessScale; vec3 LT = lightAtten * (LTDot + thicknessAmbient) * thickness; reflectedLight.directDiffuse += material.diffuseColor * pointLight.color * LT; } #endif #if ( NUM_RECT_AREA_LIGHTS > 0 ) && defined( RE_Direct_RectArea ) for ( int i = 0; i < NUM_RECT_AREA_LIGHTS; i ++ ) { rectAreaLight = rectAreaLights[ i ]; vec3 vLightDir = rectAreaLight.position - geometry.position; vec3 L = normalize(vLightDir); float lightDist = length(vLightDir); float lightAtten = punctualLightIntensityToIrradianceFactor(lightDist, thicknessCutoff, thicknessDecay); vec3 LTLight = normalize(L + (N * thicknessDistortion)); float LTDot = pow(saturate(dot(V, -LTLight)), thicknessPower) * thicknessScale; vec3 LT = lightAtten * (LTDot + thicknessAmbient) * thickness; reflectedLight.directDiffuse += material.diffuseColor * rectAreaLight.color * LT; } #endif #endif // modulation #include <aomap_fragment> vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance; gl_FragColor = vec4( outgoingLight, diffuseColor.a ); #include <premultiplied_alpha_fragment> #include <tonemapping_fragment> #include <encodings_fragment> #include <fog_fragment>}',
-//     uniforms: {
-//         time: { type: 'f', value: 0 },
-//         thicknessMap: { type: 't', value: new THREE.Texture() },
-//         thicknessRepeat: { type: 'v3', value: new THREE.Vector2() },
-//         thicknessPower: { type: 'f', value: 20 },
-//         thicknessScale: { type: 'f', value: 4 },
-//         thicknessDistortion: { type: 'f', value: 0.185 },
-//         thicknessAmbient: { type: 'f', value: 0.0 },
-//     },
-//     transparent: true,
-//     opacity: 1.0
-// })
-
-// ------------------------------------------------------------------------------- Init Iceberg -------------------------------------------------------------------------------
+// --------------------------------------- Init Iceberg ---------------------------------------
 const gltfLoader = new GLTFLoader()
 let icebergModel
 
@@ -228,6 +211,174 @@ function test() {
     }, 1000);
 }
 
+
+// --------------------------------------- Planes ---------------------------------------
+const texture_id2021 = textureLoader.load('/img/projects/id_2021.png')
+const texture_folio2020 = textureLoader.load('/img/projects/folio_2020.png')
+const texture_foliocms = textureLoader.load('/img/projects/folio_cms.png')
+const texture_morpion = textureLoader.load('/img/projects/morpion.png')
+const texture_gamovore = textureLoader.load('/img/projects/gamovore.png')
+const texture_retrowave = textureLoader.load('/img/projects/retrowave.png')
+
+const texture_jamcloud = textureLoader.load('/img/projects/jam_cloud.png')
+const texture_terredebois = textureLoader.load('/img/projects/terre_de_bois.png')
+const texture_charamushroom = textureLoader.load('/img/projects/chara_mushroom.png')
+const texture_lettermask = textureLoader.load('/img/projects/letter_mask.png')
+
+const texture_mmitv = textureLoader.load('/img/projects/mmi_tv.png')
+const texture_inside = textureLoader.load('/img/projects/inside.png')
+const texture_1984analysis = textureLoader.load('/img/projects/1984_analysis.png')
+
+const texture_numeric = textureLoader.load('/img/projects/numeric.png')
+const texture_argentic = textureLoader.load('/img/projects/argentic.png')
+
+const planeRectGeometry = new THREE.PlaneGeometry(16*.3, 9*.3, 32, 32)
+const planeSquareGeometry = new THREE.PlaneGeometry(9*.3, 9*.3, 32, 32)
+
+const planeRectMaterial = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms: {
+        uTexture : { value: null },
+        uOffset : { value: new THREE.Vector2(0.0, 0.0) },
+        uAlpha : { value: 0 },
+    }, 
+    transparent: true
+})
+
+const planeSquareMaterial = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms: {
+        uTexture : { value: null },
+        uOffset : { value: new THREE.Vector2(0.0, 0.0) },
+        uAlpha : { value: 0 },
+    }, 
+    transparent: true
+})
+
+const planeRectMesh = new THREE.Mesh(
+    planeRectGeometry,
+    planeRectMaterial
+)
+
+const planeSquareMesh = new THREE.Mesh(
+    planeSquareGeometry,
+    planeSquareMaterial
+)
+
+planeRectMesh.position.z = 4
+planeSquareMesh.position.z = 4
+scene.add(planeRectMesh)
+scene.add(planeSquareMesh)
+
+document.addEventListener("mousemove", e => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1
+    mouse.y = - (e.clientY / window.innerWidth) * 2 + 1
+})
+
+const images = document.querySelectorAll('.hoverPlane')
+images.forEach(image => {
+    image.addEventListener('mouseenter', (e) => {
+        if (e.target.attributes[1].value == 'lettermask')
+            TweenLite.to(planeSquareMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
+        else 
+            TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
+
+        switch (e.target.attributes[1].value) {
+            case 'id2021' :
+                planeRectMaterial.uniforms.uTexture.value = texture_id2021
+                break
+            case 'folio2020' :
+                planeRectMaterial.uniforms.uTexture.value = texture_folio2020
+                break
+            case 'foliocms' :
+                planeRectMaterial.uniforms.uTexture.value = texture_foliocms
+                break
+            case 'morpion' :
+                planeRectMaterial.uniforms.uTexture.value = texture_morpion
+                break
+            case 'gamovore' :
+                planeRectMaterial.uniforms.uTexture.value = texture_gamovore
+                break
+            case 'retrowave' :
+                planeRectMaterial.uniforms.uTexture.value = texture_retrowave
+                break
+
+            case 'jamcloud' :
+                planeRectMaterial.uniforms.uTexture.value = texture_jamcloud
+                break
+            case 'terredebois' :
+                planeRectMaterial.uniforms.uTexture.value = texture_terredebois
+                break
+            case 'charamushroom' :
+                planeRectMaterial.uniforms.uTexture.value = texture_charamushroom
+                break
+            case 'lettermask' :
+                planeSquareMaterial.uniforms.uTexture.value = texture_lettermask
+                break
+
+            case 'mmitv' :
+                planeRectMaterial.uniforms.uTexture.value = texture_mmitv
+                break
+            case 'inside' :
+                planeRectMaterial.uniforms.uTexture.value = texture_inside
+                break
+            case '1984analysis' :
+                planeRectMaterial.uniforms.uTexture.value = texture_1984analysis
+                break
+
+            case 'numeric' :
+                planeRectMaterial.uniforms.uTexture.value = texture_numeric
+                break
+            case 'argentic' :
+                planeRectMaterial.uniforms.uTexture.value = texture_argentic
+                break
+        }
+    })
+
+    image.addEventListener('mouseleave', () => {
+        TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 0, ease: Power4.easeOut })
+        TweenLite.to(planeSquareMaterial.uniforms.uAlpha, .5, { value: 0, ease: Power4.easeOut })
+    })
+
+    image.addEventListener('mousemove', () => {
+        planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2 )
+        planeY = mapCursorYPlane(0, 1, -viewSize().height / 2, viewSize().height / 2 )
+
+        mousePosition.x = planeX
+        mousePosition.y = planeY
+        mousePosition.z = 0
+    })
+})
+
+function viewSize() {
+    let cameraZ = camera.position.z;
+    let planeZ = planeRectMesh.position.z;
+    let distance = cameraZ - planeZ;
+    let aspect = camera.aspect;
+    let vFov = camera.fov * Math.PI / 180;
+    let height = 2 * Math.tan(vFov / 2) * distance;
+    let width = height * aspect;
+    return { width, height, vFov }
+}
+
+function hoverPositionUpdate() {
+    let offset = planeRectMesh.position
+        .clone()
+        .sub(mousePosition)
+        .multiplyScalar(-.7)
+    planeRectMaterial.uniforms.uOffset.value = offset
+    planeSquareMaterial.uniforms.uOffset.value = offset
+}
+
+function mapCursorXPlane(in_min, in_max, out_min, out_max) {
+    return ((mouse.x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+}
+function mapCursorYPlane(in_min, in_max, out_min, out_max) {
+    return ((mouse.y - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+}
+
 // Cursor
 // document.addEventListener('mousemove', e => {
 //     cursor.style.top = e.pageY + "px"
@@ -245,7 +396,7 @@ function test() {
 // })
 
 
-// ------------------------------------------------------------------------------- Home Page -------------------------------------------------------------------------------
+// --------------------------------------- Home Page ---------------------------------------
 navName.addEventListener('mouseenter', () => {
     TweenMax.to(navNameSpan, .4, { y: -20, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
     TweenMax.to(navPseudoSpan, .4, { y: -30, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
@@ -257,7 +408,7 @@ navName.addEventListener('mouseleave', () => {
 
 let icebergRotY = 0
 let icebergPosX = 0
-// ------------------------------------------------------------------------------- Contact -------------------------------------------------------------------------------
+// --------------------------------------- Contact ---------------------------------------
 buttonContact.addEventListener('click', () => {
     icebergRotY = icebergModel.rotation.y
     icebergPosX = icebergModel.position.x
@@ -266,15 +417,17 @@ buttonContact.addEventListener('click', () => {
     
     TweenMax.to(contactContainer, .75, { opacity: 1, pointerEvents: 'all', ease: Power4.easeInOut, delay: .75 })
     
-    gsap.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 1.25 })
+    gsap.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 3.5 })
 
     isIcebergRotating = true
     setTimeout(() => {
-        icebergModel.scale.set(.30, .35, .30)
-        icebergModel.position.x = 25
         isContactActive = true
         canvasContainer.style.zIndex = 7
-    }, 1000);
+        setTimeout(() => {
+            icebergModel.scale.set(.30, .35, .30)
+            icebergModel.position.x = 25
+        }, 2250);
+    }, 1200);
 })
 
 crossClose.addEventListener('click', () => {
@@ -308,7 +461,7 @@ crossClose.addEventListener('mouseleave', () => {
 })
 
 
-// ------------------------------------------------------------------------------- Mouse move interaction -------------------------------------------------------------------------------
+// --------------------------------------- Mouse move interaction ---------------------------------------
 // Cursor Custom
 TweenMax.to({}, 0.01, {
     repeat: -1,
@@ -332,10 +485,10 @@ TweenMax.to({}, 0.01, {
                 gsap.to(icebergModel.rotation, { y: rotationYOnTheLeft + posXNormalize / 10 })
             }
         }
-        TweenMax.set(hudContainerTop, { x: posXNormalize * -5 })
-        TweenMax.set(hudContainerTop, { y: posYNormalize * 5 })
-        TweenMax.set(hudContainerBottom, { x: posXNormalize * -5 })
-        TweenMax.set(hudContainerBottom, { y: posYNormalize * 5 })
+        TweenMax.set(hudContainerTop, { x: posXNormalize * -3 })
+        TweenMax.set(hudContainerTop, { y: posYNormalize * 3 })
+        TweenMax.set(hudContainerBottom, { x: posXNormalize * -3 })
+        TweenMax.set(hudContainerBottom, { y: posYNormalize * 3 })
     }
 })
 
@@ -485,7 +638,7 @@ paper.view.onFrame = event => {
     polygon.smooth()
 }
 
-// ------------------------------------------------------------------------------- Audio -------------------------------------------------------------------------------
+// --------------------------------------- Audio ---------------------------------------
 const deg = (a) => a * Math.PI / 180 
 
 class AudioSwitcher {
@@ -587,7 +740,7 @@ const audioSwitcher = new AudioSwitcher({
 })
 
 
-// ------------------------------------------------------------------------------- Scroll Smooth -------------------------------------------------------------------------------
+// --------------------------------------- Scroll Smooth ---------------------------------------
 const locoScroll = new LocomotiveScroll({
     el: scrollContainer,
     direction: 'vertical',
@@ -641,7 +794,6 @@ ScrollTrigger.create({
             }, 1700)
             gsap.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
             gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheCenter , ease: Power2.easeOut })
-            // gsap.to(icebergModel.scale, 1, { x: 0.22, y: 0.22, z: 0.22, ease: Elastic.easeOut })
         } else {
             icebergPosition = 'default'
             isIcebergRotating = true
@@ -650,7 +802,6 @@ ScrollTrigger.create({
             }, 1700)
             gsap.to(icebergModel.position, 3.5, { x: 4, ease: Elastic.easeOut })
             gsap.to(icebergModel.rotation, 1.5, { y: rotationYDefault , ease: Power2.easeOut })
-            // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
         }
     },
 })
@@ -669,7 +820,7 @@ ScrollTrigger.create({
             }, 1700)
             gsap.to(hemisphereLightUp, .5, { intensity: 0 })
             gsap.to(hemisphereLightDown, .5, { intensity: .9 })
-            gsap.to(icebergModel.position, 3.5, { x: -6, ease: Elastic.easeOut })
+            gsap.to(icebergModel.position, 3.5, { x: -8, ease: Elastic.easeOut })
             gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheLeft, ease: Power2.easeOut })
             // gsap.to(audioSwitcher, .5, { color: lightBlue })
             // gsap.to(polygon, .5, { strokeColor: lightBlue })
@@ -738,6 +889,32 @@ ScrollTrigger.create({
     }
 })
 
+// --------------------------------------- Gsap Timeline ---------------------------------------
+// let icebergMoving = gsap.timeline({ smoothChildTiming: true })
+
+// document.onkeydown = function (e) {
+//     switch (e.keyCode) {
+//         case 65:
+//             tl = gsap.timeline()
+//                 .to(icebergModel.position, { duration: 5, x: 0, ease: Elastic.easeOut })
+//             break;
+//         case 90:
+//             tl.pause()
+//             break;
+//         case 69:
+//             tl.resume()
+//             break;
+//         case 82:
+//             tl.seek(2.5)
+//             break;
+//         case 84:
+//             tl.restart()
+//             break;
+//     }
+// }
+// gsap.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
+// gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheCenter , ease: Power2.easeOut })
+
 const clock = new THREE.Clock()
 const tick = () => {
     const elapsedTime = clock.getElapsedTime()
@@ -755,6 +932,12 @@ const tick = () => {
     if (audioSwitcher) {
         audioSwitcher.animate(time)
     }
+
+    if (mouse) {
+        TweenLite.to(planeRectMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
+        TweenLite.to(planeSquareMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
+    }
+    hoverPositionUpdate()
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)

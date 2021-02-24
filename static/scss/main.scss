@@ -304,6 +304,7 @@ body {
             .lastname {
                 // margin-left: .3vw;
                 margin: -2px;
+                color: $darkBlue;
             }
             .invisible-space {
                 padding: 5px;
@@ -448,12 +449,18 @@ body {
                 .projects {
                     margin-bottom: 5vh;
                 }
-                span {
+                .hoverPlane {
                     font-size: 2vw;
                     opacity: .7;
+                    transition: opacity .75 ease-in-out;
                     margin: 0;
                     padding: 10px 10px 10px 0;
                     font-family: Subtitle;
+
+                    &:hover {
+                        opacity: 1;
+                        transition: opacity .75 ease-in-out;
+                    }
                 }
                 .project--container {
                     text-align: left;

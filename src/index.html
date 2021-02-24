@@ -12,10 +12,12 @@
     <meta name="publisher" content="Alexandre Gattefossé" />
     <title>Alex Gattefossé | Dakumisu</title>
     <!-- <link rel="icon" href="favicon.png" /> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.0/paper-core.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js" defer></script>
 </head>
 
 <body>
-    
     <div class="cursor cursor--small"></div>
     <canvas class="cursor cursor--canvas" resize></canvas>
 
@@ -153,22 +155,22 @@
                                 <h3>Web Development</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
-                                <span class="inner--link">ID 2021</span>
+                                <span class="inner--link hoverPlane" data-id_texture="id2021">ID 2021</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
-                                <span class="inner--link">Portfolio 2020</span>
+                                <span class="inner--link hoverPlane" data-id_texture="folio2020">Portfolio 2020</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
-                                <span class="inner--link">CMS Portolio</span>
+                                <span class="inner--link hoverPlane" data-id_texture="foliocms">CMS Portolio</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
-                                <span class="inner--link">E-Morpion</span>
+                                <span class="inner--link hoverPlane" data-id_texture="morpion">E-Morpion</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
-                                <span class="inner--link">Gamovore</span>
+                                <span class="inner--link hoverPlane" data-id_texture="gamovore">Gamovore</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".1">
-                                <span class="inner--link">Retrowave Trending</span>
+                                <span class="inner--link hoverPlane" data-id_texture="retrowave">Retrowave Trending</span>
                             </div>
                         </div>
                         <div class="projects projects--design">
@@ -177,16 +179,16 @@
                                 <h3>Design</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".13">
-                                <span class="inner--link">Jam Cloud</span>
+                                <span class="inner--link hoverPlane" data-id_texture="jamcloud">Jam Cloud</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".13">
-                                <span class="inner--link">Terre de Bois</span>
+                                <span class="inner--link hoverPlane" data-id_texture="terredebois">Terre de Bois</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".13">
-                                <span class="inner--link">Chara-Mushroom</span>
+                                <span class="inner--link hoverPlane" data-id_texture="charamushroom">Chara-Mushroom</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".13">
-                                <span class="inner--link">Letter Mask</span>
+                                <span class="inner--link hoverPlane" data-id_texture="lettermask">Letter Mask</span>
                             </div>
                         </div>
                         <div class="projects projects--video">
@@ -195,13 +197,13 @@
                                 <h3>Video</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".16">
-                                <span class="inner--link">MMI TV</span>
+                                <span class="inner--link hoverPlane" data-id_texture="mmitv">MMI TV</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".16">
-                                <span class="inner--link">Inside</span>
+                                <span class="inner--link hoverPlane" data-id_texture="inside">Inside</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".16">
-                                <span class="inner--link">1984 Analysis</span>
+                                <span class="inner--link hoverPlane" data-id_texture="1984analysis">1984 Analysis</span>
                             </div>
                         </div>
                         <div class="projects projects--photo">
@@ -210,10 +212,10 @@
                                 <h3>Photographs</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".19">
-                                <span class="inner--link">Numeric</span>
+                                <span class="inner--link hoverPlane" data-id_texture="numeric">Numeric</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="2" data-scroll-delay=".19">
-                                <span class="inner--link">Argentic</span>
+                                <span class="inner--link hoverPlane" data-id_texture="argentic">Argentic</span>
                             </div>
                         </div>
                     </div>
@@ -231,10 +233,6 @@
     <audio id="audio" controls preload loop>
         <source type="audio/mpeg">
     </audio>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.0/paper-core.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
 </body>
 
 </html>
