@@ -84,6 +84,21 @@ module.exports = {
                 ]
             }, 
 
+            // Sound/Music
+            {
+                test: /\.(mp3)$/,
+                use:
+                [
+                    {
+                        loader: 'url-loader',
+                        options:
+                        {
+                            outputPath: 'assets/sound/'
+                        }
+                    }
+                ]
+            }, 
+
             // Shaders
             {
                 test: /\.(glsl|vs|fs|vert|frag)$/,

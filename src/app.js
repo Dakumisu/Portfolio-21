@@ -1,71 +1,116 @@
 import './style.css'
 import './locomotiveBase.css'
-// import '../static/js/audio.js'
-// import '../static/js/cursor.js'
+
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { Interaction } from 'three.interaction'
+import { BloomEffect, EffectComposer, ShaderPass, EffectPass, RenderPass } from "postprocessing"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 import LocomotiveScroll from 'locomotive-scroll'
-import gsap from 'gsap/gsap-core'
+import howlerjs from 'howler'
 
-import vertexShader from './glsl/vertexShader.glsl'
-import fragmentShader from './glsl/fragmentShader.glsl'
+import vertexShader from '../static/glsl/vertexShader.glsl'
+import fragmentShader from '../static/glsl/fragmentShader.glsl'
 
-const lerp = (a, b, n) => {
-    return (1 - n) * a + n * b
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // true for mobile device
+    console.log("mobile device")
+} else {
+    // false for not mobile device
+    console.log("not mobile device")
 }
 
-const map = (value, in_min, in_max, out_min, out_max) => {
-    return (
-        ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
-    )
-}
+console.log(window.navigator.userAgent)
 
 const backgroundContainer = document.querySelector('.background--container')
 const hudContainer = document.querySelector('.hud--container')
 const hudContainerTop = document.querySelector('.hud--container .hud--nav__top')
 const hudContainerBottom = document.querySelector('.hud--container .hud--nav__bottom')
-const scrollContainer = document.querySelector('[data-scroll-container]')
+const scrollContainer = document.querySelector('.scroll--container')
+
+const heroContainer = document.querySelector('.hero--container')
 const aboutContainer = document.querySelector('.about--container')
 const projectsContainer = document.querySelector('.projects--container')
+const endContainer = document.querySelector('.end--container')
 const contactContainer = document.querySelector('.contact--container')
-const canvasContainer = document.querySelector('.canvas--container')
+const projectCanvasContainer = document.querySelector('.projectCanvas--container')
+const projectCanvasContentContainer = document.querySelector('.projectCanvas--container .content--container')
 
+const canvasContainer = document.querySelector('.canvas--container')
+const mainCanvas = document.querySelector('.webgl')
+const projectCanvas = document.querySelector('.canvasProject')
+
+const navAbout = document.querySelector('.about')
+const navProjects = document.querySelector('.projects')
 const navNameSpan = document.querySelectorAll('.spanName--container span')
 const navPseudoSpan = document.querySelectorAll('.spanPseudo--container span')
 
 const titleCat = document.querySelectorAll('.title--cat')
 const outerLinkItems = document.querySelectorAll(".outer--link")
 const innerLinkItems = document.querySelectorAll(".inner--link")
+const noLinkItems = document.querySelectorAll(".no--link")
 const buttonContact = document.querySelector(".btn--contact")
-const crossClose = document.querySelector(".close")
+const crossCloseContact = document.querySelector(".close__contact")
+const crossCloseProject = document.querySelector(".close__project")
+const crossClose = document.querySelectorAll(".close")
 
-const cursor = document.querySelector('.cursor')
+const projectTitle = document.querySelector(".projectCanvas--container .title--container h3")
+const projectText = document.querySelector(".projectCanvas--container .text--container p")
+const projectIndicatorContainer = document.querySelector(".project__indicator--container")
+const btnViewProject = document.querySelector(".project__view")
+const btnVisitProject = document.querySelector(".project__visit")
+const projectIndicator = document.querySelectorAll(".project__indicator")
+
+const icon = {
+    html: document.querySelector("#icon__html"),
+    sass: document.querySelector("#icon__sass"),
+    js: document.querySelector("#icon__js"),
+    gsap: document.querySelector("#icon__gsap"),
+    threejs: document.querySelector("#icon__threejs"),
+    php: document.querySelector("#icon__php"),
+    sql: document.querySelector("#icon__sql"),
+    ae: document.querySelector("#icon__ae"),
+    ai: document.querySelector("#icon__ai"),
+    lr: document.querySelector("#icon__lr"),
+    pp: document.querySelector("#icon__pp"),
+    xd: document.querySelector("#icon__xd")
+}
+
+const cursor = document.querySelectorAll('.cursor')
+const cursorCanvas = document.querySelector(".cursor--canvas")
 const innerCursor = document.querySelector(".cursor--small")
 const mouse = new THREE.Vector2()
 const mousePosition = new THREE.Vector3()
 
-let navName = document.querySelector('.nav--name')
-let nameSpanContainer = document.querySelector('.spanName--container')
-let pseudoSpanContainer = document.querySelector('.spanPseudo--container')
+const navName = document.querySelector('.nav--name')
 
-let THREElightBlue = new THREE.Color("#E9EFEF")
-let THREEnormalBlue = new THREE.Color("#48717F")
-let THREEdarkBlue = new THREE.Color("#29363C")
-let THREEdarkerBlue = new THREE.Color("#171f22")
+// const music = new Howl({
+//     src: ['/sound/music.mp3'],
+//     autoplay: false,
+//     loop: true,
+//     volume: 1
+// })
+
+// console.log(music)
 
 const lightBlue = "#E9EFEF"
 const normalBlue = "#48717F"
 const darkBlue = "#29363C"
 const darkerBlue = "#171f22"
 
+let THREElightBlue = new THREE.Color("#E9EFEF")
+let THREEnormalBlue = new THREE.Color("#48717F")
+let THREEdarkBlue = new THREE.Color("#29363C")
+let THREEdarkerBlue = new THREE.Color("#171f22")
+
 let onMouseDown = false
-let icebergPosition = 'default'
+let icebergPosition = 'home'
 let isIcebergRotating = false
 let isContactActive = false
+let enterProject = false
+let currentProject
 
 let mouseX = 0
 let mouseY = 0
@@ -76,11 +121,23 @@ let posYNormalize = 0
 let planeX = 0
 let planeY = 0
 
+let icebergRotY = 0
+let icebergPosX = 0
+
+
+const lerp = (a, b, n) => {
+    return (1 - n) * a + n * b
+}
+const map = (value, in_min, in_max, out_min, out_max) => {
+    return (
+        ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+    )
+}
 
 // --------------------------------------- Init THREE.js features ---------------------------------------
 // Scene
-const scene = new THREE.Scene()
-// scene.background = new THREE.Color('#E9EFEF')
+const mainScene = new THREE.Scene()
+const projectScene = new THREE.Scene()
 
 // Sizes
 const sizes = {
@@ -91,49 +148,60 @@ const sizes = {
 // Camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
 camera.position.z = 10
-scene.add(camera)
+mainScene.add(camera)
+projectScene.add(camera)
 
 // Renderer
-const mainCanvas = document.querySelector('canvas.webgl')
 const renderer = new THREE.WebGLRenderer({
     canvas: mainCanvas,
     antialias: true,
     alpha: true
 })
+const rendererProject = new THREE.WebGLRenderer({
+    canvas: projectCanvas,
+    antialias: true,
+    alpha: true
+})
 renderer.setSize(sizes.width, sizes.height)
+rendererProject.setSize(sizes.width, sizes.height)
+
+// Post Processing
+const composer = new EffectComposer(rendererProject)
+const renderPass = new RenderPass(projectScene, camera)
+composer.addPass(renderPass)
+
+const customPass = new ShaderPass({ vertexShader, fragmentShader })
+customPass.renderToScreen = true
+composer.addPass(customPass)
 
 // Interaction
-const interaction = new Interaction(renderer, scene, camera)
-
-// Controls
-// const controls = new OrbitControls(camera, canvas)
-// controls.target.set(0, 0.75, 0)
-// controls.enableDamping = true
+const mainInteraction = new Interaction(renderer, mainScene, camera)
+const projectInteraction = new Interaction(rendererProject, projectScene, camera)
 
 // Lights
 // const light = new THREE.AmbientLight('#ffff00', 0.5)
 const pointLight = new THREE.PointLight(THREEdarkerBlue, .8)
 pointLight.position.set(4, -20, 0)
-// scene.add(pointLight)
+// mainScene.add(pointLight)
 const hemisphereLightUp = new THREE.HemisphereLight( THREElightBlue, THREEdarkBlue, 1.3)
-scene.add(hemisphereLightUp)
+mainScene.add(hemisphereLightUp)
 const hemisphereLightDown = new THREE.HemisphereLight( THREEdarkBlue, THREEnormalBlue, 0)
-scene.add(hemisphereLightDown)
+mainScene.add(hemisphereLightDown)
 
 const pointLightHelper = new THREE.PointLightHelper( pointLight, 1 )
-// scene.add( pointLightHelper )
+// mainScene.add( pointLightHelper )
 
 const spotLightUp = new THREE.SpotLight( THREElightBlue, 0.15 )
 spotLightUp.position.set( 0, 8, 0 )
-// scene.add( spotLightUp )
+// mainScene.add( spotLightUp )
 const spotLightDown = new THREE.SpotLight( THREEdarkerBlue, 1 )
 spotLightDown.position.set( 4, -10, 0 )
-// scene.add( spotLightDown )
+// mainScene.add( spotLightDown )
 
 const spotLightHelperUp = new THREE.SpotLightHelper(spotLightUp, 0.1)
-// scene.add(spotLightHelperUp)
+// mainScene.add(spotLightHelperUp)
 const spotLightHelperDown = new THREE.SpotLightHelper(spotLightDown, 0.1)
-// scene.add(spotLightHelperDown)
+// mainScene.add(spotLightHelperDown)
 
 // Texture Loader
 const textureLoader = new THREE.TextureLoader()
@@ -148,10 +216,11 @@ toonMaterial.aoMapIntensity = 1
 const gltfLoader = new GLTFLoader()
 let icebergModel
 
-let rotationValue
-let rotationYDefault = Math.PI * 1.7
-let rotationYOnTheCenter = Math.PI * .9
-let rotationYOnTheLeft = Math.PI * .3
+let rotationYHome = Math.PI * 1.7
+let rotationYAbout = Math.PI * 1.1
+let rotationYProjects = Math.PI * .3
+let rotationYEnd = Math.PI * -.5
+let rotationValue = rotationYHome
 
 gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         icebergModel = addIcebergModel.scene
@@ -159,11 +228,11 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
             if (e.isMesh) e.material = toonMaterial
         })
         icebergModel.scale.set(.28, .28, .28)
-        icebergModel.rotation.y = rotationYDefault
+        icebergModel.rotation.y = rotationValue
         icebergModel.position.set(4, 1, 0)
         // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
         // gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
-        scene.add(icebergModel)
+        mainScene.add(icebergModel)
 
         // icebergModel.on('click', () => {
         //     canvasContainer.style.zIndex = -1
@@ -177,6 +246,16 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         //     //     gsap.to(icebergModel.position, 1, { x: 0, ease: Expo.easeInOut })
         //     // }
         // })
+
+        icebergModel.on('click', () => {
+            if (!navScrollActive) {
+                locoScroll.scrollTo(heroContainer)
+                navScrollActive = true
+                setTimeout(() => {
+                    navScrollActive = false
+                }, 1200)
+            }
+        })
 
         // icebergModel.on('mousedown', () => {
         //     if (icebergModel.scale.x == 0.28) {
@@ -208,7 +287,7 @@ function test() {
     gsap.to(icebergModel.scale, 1, { x: .28, y: .28, z: .28, ease: Power4.easeOut})
     setTimeout(() => {
         onMouseDown = false
-    }, 1000);
+    }, 1000)
 }
 
 
@@ -223,7 +302,6 @@ const texture_retrowave = textureLoader.load('/img/projects/retrowave.png')
 const texture_jamcloud = textureLoader.load('/img/projects/jam_cloud.png')
 const texture_terredebois = textureLoader.load('/img/projects/terre_de_bois.png')
 const texture_charamushroom = textureLoader.load('/img/projects/chara_mushroom.png')
-const texture_lettermask = textureLoader.load('/img/projects/letter_mask.png')
 
 const texture_mmitv = textureLoader.load('/img/projects/mmi_tv.png')
 const texture_inside = textureLoader.load('/img/projects/inside.png')
@@ -233,28 +311,22 @@ const texture_numeric = textureLoader.load('/img/projects/numeric.png')
 const texture_argentic = textureLoader.load('/img/projects/argentic.png')
 
 const planeRectGeometry = new THREE.PlaneGeometry(16*.3, 9*.3, 32, 32)
-const planeSquareGeometry = new THREE.PlaneGeometry(9*.3, 9*.3, 32, 32)
 
 const planeRectMaterial = new THREE.ShaderMaterial({
     vertexShader,
     fragmentShader,
     uniforms: {
-        uTexture : { value: null },
-        uOffset : { value: new THREE.Vector2(0.0, 0.0) },
-        uAlpha : { value: 0 },
+        uTexture1: { value: texture_id2021 },
+        uTexture2: { value: texture_id2021 },
+        uOffset: { value: new THREE.Vector2(0, 0) },
+        uAlpha: { value: 0 },
+        uProgress: { value: 0 },
+        uFrequency: { value: new THREE.Vector2(0, 0) },
+        uDisp: { value: textureLoader.load('/img/displacement/disp.jpg') },
+        uDispFactor: { value: 0.0 }
     }, 
-    transparent: true
-})
-
-const planeSquareMaterial = new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms: {
-        uTexture : { value: null },
-        uOffset : { value: new THREE.Vector2(0.0, 0.0) },
-        uAlpha : { value: 0 },
-    }, 
-    transparent: true
+    transparent: true, 
+    side: THREE.DoubleSide
 })
 
 const planeRectMesh = new THREE.Mesh(
@@ -262,104 +334,477 @@ const planeRectMesh = new THREE.Mesh(
     planeRectMaterial
 )
 
-const planeSquareMesh = new THREE.Mesh(
-    planeSquareGeometry,
-    planeSquareMaterial
-)
-
 planeRectMesh.position.z = 4
-planeSquareMesh.position.z = 4
-scene.add(planeRectMesh)
-scene.add(planeSquareMesh)
+projectScene.add(planeRectMesh)
 
 document.addEventListener("mousemove", e => {
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1
-    mouse.y = - (e.clientY / window.innerWidth) * 2 + 1
+    mouse.y = - (e.clientY / window.innerHeight) * 2 + 1
 })
 
 const images = document.querySelectorAll('.hoverPlane')
 images.forEach(image => {
     image.addEventListener('mouseenter', (e) => {
-        if (e.target.attributes[1].value == 'lettermask')
-            TweenLite.to(planeSquareMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
-        else 
-            TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
-
-        switch (e.target.attributes[1].value) {
-            case 'id2021' :
-                planeRectMaterial.uniforms.uTexture.value = texture_id2021
-                break
-            case 'folio2020' :
-                planeRectMaterial.uniforms.uTexture.value = texture_folio2020
-                break
-            case 'foliocms' :
-                planeRectMaterial.uniforms.uTexture.value = texture_foliocms
-                break
-            case 'morpion' :
-                planeRectMaterial.uniforms.uTexture.value = texture_morpion
-                break
-            case 'gamovore' :
-                planeRectMaterial.uniforms.uTexture.value = texture_gamovore
-                break
-            case 'retrowave' :
-                planeRectMaterial.uniforms.uTexture.value = texture_retrowave
-                break
-
-            case 'jamcloud' :
-                planeRectMaterial.uniforms.uTexture.value = texture_jamcloud
-                break
-            case 'terredebois' :
-                planeRectMaterial.uniforms.uTexture.value = texture_terredebois
-                break
-            case 'charamushroom' :
-                planeRectMaterial.uniforms.uTexture.value = texture_charamushroom
-                break
-            case 'lettermask' :
-                planeSquareMaterial.uniforms.uTexture.value = texture_lettermask
-                break
-
-            case 'mmitv' :
-                planeRectMaterial.uniforms.uTexture.value = texture_mmitv
-                break
-            case 'inside' :
-                planeRectMaterial.uniforms.uTexture.value = texture_inside
-                break
-            case '1984analysis' :
-                planeRectMaterial.uniforms.uTexture.value = texture_1984analysis
-                break
-
-            case 'numeric' :
-                planeRectMaterial.uniforms.uTexture.value = texture_numeric
-                break
-            case 'argentic' :
-                planeRectMaterial.uniforms.uTexture.value = texture_argentic
-                break
+        if (!enterProject) {
+            TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power2.easeInOut })
+            switch (e.target.attributes[1].value) {
+                case 'id2021' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_id2021
+                        planeRectMaterial.uniforms.uTexture1.value = texture_id2021
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_id2021
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_id2021
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'folio2020' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_folio2020
+                        planeRectMaterial.uniforms.uTexture1.value = texture_folio2020
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_folio2020
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_folio2020
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'foliocms' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_foliocms
+                        planeRectMaterial.uniforms.uTexture1.value = texture_foliocms
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_foliocms
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_foliocms
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'morpion' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_morpion
+                        planeRectMaterial.uniforms.uTexture1.value = texture_morpion
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_morpion
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_morpion
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'gamovore' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_gamovore
+                        planeRectMaterial.uniforms.uTexture1.value = texture_gamovore
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_gamovore
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_gamovore
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'retrowave' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_retrowave
+                        planeRectMaterial.uniforms.uTexture1.value = texture_retrowave
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_retrowave
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_retrowave
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+    
+                case 'jamcloud' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_jamcloud
+                        planeRectMaterial.uniforms.uTexture1.value = texture_jamcloud
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_jamcloud
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_jamcloud
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'terredebois' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_terredebois
+                        planeRectMaterial.uniforms.uTexture1.value = texture_terredebois
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_terredebois
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_terredebois
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'charamushroom' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_charamushroom
+                        planeRectMaterial.uniforms.uTexture1.value = texture_charamushroom
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_charamushroom
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_charamushroom
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+    
+                case 'mmitv' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_mmitv
+                        planeRectMaterial.uniforms.uTexture1.value = texture_mmitv
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_mmitv
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_mmitv
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'inside' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_inside
+                        planeRectMaterial.uniforms.uTexture1.value = texture_inside
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_inside
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_inside
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case '1984analysis' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_1984analysis
+                        planeRectMaterial.uniforms.uTexture1.value = texture_1984analysis
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_1984analysis
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_1984analysis
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+    
+                case 'numeric' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_numeric
+                        planeRectMaterial.uniforms.uTexture1.value = texture_numeric
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_numeric
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_numeric
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+                case 'argentic' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_argentic
+                        planeRectMaterial.uniforms.uTexture1.value = texture_argentic
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_argentic
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_argentic
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
+            }
         }
     })
 
     image.addEventListener('mouseleave', () => {
-        TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 0, ease: Power4.easeOut })
-        TweenLite.to(planeSquareMaterial.uniforms.uAlpha, .5, { value: 0, ease: Power4.easeOut })
+        if (!enterProject) {
+            TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 0, ease: Power4.easeOut })
+        }
     })
 
-    image.addEventListener('mousemove', () => {
-        planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2 )
-        planeY = mapCursorYPlane(0, 1, -viewSize().height / 2, viewSize().height / 2 )
+    image.addEventListener('click', (e) => {
+        enterProject = true
+        currentProject = e.target.attributes[1].value
 
-        mousePosition.x = planeX
-        mousePosition.y = planeY
-        mousePosition.z = 0
+        switch (e.target.attributes[1].value) {
+            case 'id2021' :
+                projectTitle.innerHTML = projectContent.id2021.title
+                projectText.innerHTML = projectContent.id2021.text
+                btnVisitProject.style.display = "block"
+                icon.html.style.display = "inline-block"
+                icon.sass.style.display = "inline-block"
+                icon.js.style.display = "inline-block"
+                icon.gsap.style.display = "inline-block"
+                icon.threejs.style.display = "inline-block"
+                break
+            case 'folio2020' :
+                projectTitle.innerHTML = projectContent.folio2020.title
+                projectText.innerHTML = projectContent.folio2020.text
+                btnVisitProject.style.display = "block"
+                btnVisitProject.style.display = "block"
+                icon.html.style.display = "inline-block"
+                icon.sass.style.display = "inline-block"
+                icon.js.style.display = "inline-block"
+                icon.php.style.display = "inline-block"
+                break
+            case 'foliocms' :
+                projectTitle.innerHTML = projectContent.foliocms.title
+                projectText.innerHTML = projectContent.foliocms.text
+                btnVisitProject.style.display = "block"
+                btnVisitProject.style.display = "block"
+                icon.html.style.display = "inline-block"
+                icon.sass.style.display = "inline-block"
+                icon.php.style.display = "inline-block"
+                icon.sql.style.display = "inline-block"
+                break
+            case 'morpion' :
+                projectTitle.innerHTML = projectContent.morpion.title
+                projectText.innerHTML = projectContent.morpion.text
+                btnVisitProject.style.display = "block"
+                icon.html.style.display = "inline-block"
+                icon.sass.style.display = "inline-block"
+                icon.php.style.display = "inline-block"
+                break
+            case 'gamovore' :
+                projectTitle.innerHTML = projectContent.gamovore.title
+                projectText.innerHTML = projectContent.gamovore.text
+                btnVisitProject.style.display = "block"
+                icon.html.style.display = "inline-block"
+                icon.sass.style.display = "inline-block"
+                icon.php.style.display = "inline-block"
+                break
+            case 'retrowave' :
+                projectTitle.innerHTML = projectContent.retrowave.title
+                projectText.innerHTML = projectContent.retrowave.text
+                btnVisitProject.style.display = "block"
+                icon.html.style.display = "inline-block"
+                icon.sass.style.display = "inline-block"
+                icon.js.style.display = "inline-block"
+                break
+
+            case 'jamcloud' :
+                projectTitle.innerHTML = projectContent.jamcloud.title
+                projectText.innerHTML = projectContent.jamcloud.text
+                btnViewProject.style.display = "block"
+                icon.xd.style.display = "inline-block"
+                break
+            case 'terredebois' :
+                projectTitle.innerHTML = projectContent.terredebois.title
+                projectText.innerHTML = projectContent.terredebois.text
+                btnViewProject.style.display = "block"
+                icon.ai.style.display = "inline-block"
+                break
+            case 'charamushroom' :
+                projectTitle.innerHTML = projectContent.charamushroom.title
+                projectText.innerHTML = projectContent.charamushroom.text
+                btnViewProject.style.display = "block"
+                icon.ai.style.display = "inline-block"
+                break
+
+            case 'mmitv' :
+                projectTitle.innerHTML = projectContent.mmitv.title
+                projectText.innerHTML = projectContent.mmitv.text
+                btnViewProject.style.display = "block"
+                icon.ae.style.display = "inline-block"
+                break
+            case 'inside' :
+                projectTitle.innerHTML = projectContent.inside.title
+                projectText.innerHTML = projectContent.inside.text
+                btnViewProject.style.display = "block"
+                icon.pp.style.display = "inline-block"
+                break
+            case '1984analysis' :
+                projectTitle.innerHTML = projectContent.analysis1984.title
+                projectText.innerHTML = projectContent.analysis1984.text
+                btnViewProject.style.display = "block"
+                icon.pp.style.display = "inline-block"
+                break
+
+            case 'numeric' :
+                projectTitle.innerHTML = projectContent.numeric.title
+                projectText.innerHTML = projectContent.numeric.text
+                btnViewProject.style.display = "block"
+                icon.lr.style.display = "inline-block"
+                break
+            case 'argentic' :
+                projectTitle.innerHTML = projectContent.argentic.title
+                projectText.innerHTML = projectContent.argentic.text
+                btnViewProject.style.display = "block"
+                break
+        }
+
+        TweenMax.to(projectCanvasContainer, 1.5, { backgroundColor: 'rgba(72, 113, 127, 1)', ease: Power4.easeInOut })
+        TweenMax.to(projectCanvasContentContainer, 2.5, { opacity: 1, ease: Power4.easeInOut })
+        TweenMax.to(crossCloseProject, 2.5, { opacity: 1, ease: Power4.easeInOut })
+
+        projectCanvasContainer.style.position = 'absolute'
+        setTimeout(() => {            
+            projectCanvasContainer.style.pointerEvents = 'all'
+            projectCanvasContainer.style.zIndex = 5
+            cursor.forEach(e => {
+                e.style.mixBlendMode = 'normal'
+            })
+        }, 500)
+
+        TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
+        
+        TweenLite.to(planeRectMaterial.uniforms.uOffset.value, .5, { x: 0, y: 0, ease: Power4.easeOut })
+
+        TweenLite.to(planeRectMaterial.uniforms.uFrequency.value, 4, { x: 5, y: 5, ease: Expo.easeOut })
+        TweenLite.to(planeRectMaterial.uniforms.uFrequency.value, 3, { x: 1, y: 1, ease: Power4.easeOut, delay: 1 })
+
+        TweenLite.to(planeRectMesh.position, 2, { x: -3, y: 0, z: 6, ease: Expo.easeInOut })
+
+        // TweenLite.to(planeRectMaterial.uniforms.uProgress.value, 2, { z: 1, ease: Expo.easeInOut })
+        // TweenLite.to(planeRectMaterial.uniforms.uProgress.value, 2, { z: 0, ease: Expo.easeInOut })
     })
 })
 
+crossCloseProject.addEventListener('click', () => {
+    TweenMax.to(projectCanvasContainer, 2.5, { backgroundColor: 'rgba(72, 113, 127, 0)', ease: Power4.easeInOut })
+    TweenMax.to(projectCanvasContentContainer, 1.5, { opacity: 0, ease: Power4.easeInOut })
+    TweenMax.to(crossCloseProject, 1.5, { opacity: 0, ease: Power4.easeInOut })
+
+    projectCanvasContainer.style.pointerEvents = 'none'
+    setTimeout(() => {            
+        projectCanvasContainer.style.zIndex = -1
+        projectCanvasContainer.style.position = 'fixed'
+        btnVisitProject.style.display = "none"
+        btnViewProject.style.display = "none"
+        icon.html.style.display = "none"
+        icon.sass.style.display = "none"
+        icon.js.style.display = "none"
+        icon.gsap.style.display = "none"
+        icon.threejs.style.display = "none"
+        icon.php.style.display = "none"
+        icon.sql.style.display = "none"
+        icon.ae.style.display = "none"
+        icon.ai.style.display = "none"
+        icon.lr.style.display = "none"
+        icon.pp.style.display = "none"
+        icon.xd.style.display = "none"
+        cursor.forEach(e => {
+            e.style.mixBlendMode = 'difference'
+        })
+    }, 2000)
+
+    TweenLite.to(planeRectMaterial.uniforms.uFrequency.value, 3, { x: 5, y: 5, ease: Expo.easeOut })
+    TweenLite.to(planeRectMaterial.uniforms.uFrequency.value, 2, { x: 0, y: 0, ease: Expo.easeOut, delay: 1 })
+
+    TweenLite.to(planeRectMaterial.uniforms.uAlpha, 1.5, { value: 0, ease: Power4.easeOut })
+    
+    TweenLite.to(planeRectMesh.position, { z: 4, delay: 1 })
+
+    setTimeout(() => {
+        enterProject = false
+    }, 1500)
+})
+
+planeRectMesh.on('click', () => {
+    switch (currentProject) {
+        case 'id2021':
+            window.open('https://www.immersions-digitales.fr/')
+            break
+        case 'folio2020':
+            window.open('https://www.dakumisu.fr/')
+            break
+        case 'foliocms':
+            window.open('')
+            break
+        case 'morpion':
+            window.open('')
+            break
+        case 'gamovore':
+            window.open('')
+            break
+        case 'retrowave':
+            window.open('http://retrowave.dakumisu.fr/')
+            break
+
+        case 'jamcloud':
+            window.open('https://www.behance.net/gallery/114356105/Jam-Cloud-Maquette-Web-Design')
+            break
+        case 'terredebois':
+            window.open('https://www.behance.net/gallery/114355661/Terre-de-Bois-Charte-Graphique')
+            break
+        case 'charamushroom':
+            window.open('https://www.behance.net/gallery/114351103/Chara-Mushroom')
+            break
+
+        case 'mmitv':
+            window.open('https://vimeo.com/517251095')
+            break
+        case 'inside':
+            window.open('https://vimeo.com/517253872')
+            break
+        case '1984analysis':
+            window.open('https://vimeo.com/517256420')
+            break
+
+        case 'numeric':
+            window.open('https://www.behance.net/gallery/114356673/Packaging-Photography')
+            break
+        case 'argentic':
+            window.open('https://www.behance.net/gallery/114359139/Movement-Photography-Argentic')
+            break
+    }
+})
+
+planeRectMesh.on('mouseover', () => {
+    TweenMax.to(innerCursor, 1, { padding: 50, backgroundColor: 'rgba(233, 239, 239, 1)', mixBlendMode: 'difference', ease: Power4.easeOut })
+    gsap.to(polygon.strokeColor, 1, { alpha: 0, ease: Power4.easeOut })
+    TweenMax.to(projectIndicator, .75, { scale: 1, ease: Power4.easeOut, delay: .25 })
+})
+planeRectMesh.on('mouseout', () => {
+    TweenMax.to(innerCursor, 1, { padding: 5, backgroundColor: 'rgba(233, 239, 239, 0)', ease: Power4.easeOut })
+    TweenMax.to(innerCursor, { mixBlendMode: 'normal', delay: .5 })
+    gsap.to(polygon.strokeColor, 1, { alpha: 1, ease: Power4.easeOut })
+    TweenMax.to(projectIndicator, 1, { scale: 0, ease: Power4.easeOut })
+})
+
 function viewSize() {
-    let cameraZ = camera.position.z;
-    let planeZ = planeRectMesh.position.z;
-    let distance = cameraZ - planeZ;
-    let aspect = camera.aspect;
-    let vFov = camera.fov * Math.PI / 180;
-    let height = 2 * Math.tan(vFov / 2) * distance;
-    let width = height * aspect;
+    let cameraZ = camera.position.z
+    let planeZ = planeRectMesh.position.z
+    let distance = cameraZ - planeZ
+    let aspect = camera.aspect
+    let vFov = camera.fov * Math.PI / 180
+    let height = 2 * Math.tan(vFov / 2) * distance
+    let width = height * aspect
     return { width, height, vFov }
 }
 
@@ -369,7 +814,6 @@ function hoverPositionUpdate() {
         .sub(mousePosition)
         .multiplyScalar(-.7)
     planeRectMaterial.uniforms.uOffset.value = offset
-    planeSquareMaterial.uniforms.uOffset.value = offset
 }
 
 function mapCursorXPlane(in_min, in_max, out_min, out_max) {
@@ -379,21 +823,97 @@ function mapCursorYPlane(in_min, in_max, out_min, out_max) {
     return ((mouse.y - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
 }
 
-// Cursor
-// document.addEventListener('mousemove', e => {
-//     cursor.style.top = e.pageY + "px"
-//     cursor.style.left = e.pageX + "px"
-// })
 
-// window.addEventListener('mousedown', () => {
-//     // gsap.to(cursor, 1, { padding: 50, ease: Power4.easeOut })
-//     cursor.classList.add('onMouseDown')
-// })
+// --------------------------------------- Projects content ---------------------------------------
+const projectContent = {
+    id2021: {
+        title: 'Immersions Digitales 2021',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    folio2020: {
+        title: 'Portfolio 2020',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    foliocms: {
+        title: 'CMS Portfolio',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    morpion: {
+        title: 'E-Morpion',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    gamovore: {
+        title: 'Gamovore',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    retrowave: {
+        title: 'Retrowave\'s Trending',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
 
-// window.addEventListener('mouseup', () => {
-//     // gsap.to(cursor, 1, { padding: 0, ease: Power4.easeOut })
-//     cursor.classList.remove('onMouseDown')
-// })
+    jamcloud: {
+        title: 'Jam Cloud',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    terredebois: {
+        title: 'Terre de Bois',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    charamushroom: {
+        title: 'Chara-Mushroom',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+
+    mmitv: {
+        title: 'MMI TV',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    inside: {
+        title: 'Inside',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    analysis1984: {
+        title: '1984 Analysis',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+
+    numeric: {
+        title: 'Numeric photography',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
+    argentic: {
+        title: 'Argentic photography',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    }
+}
 
 
 // --------------------------------------- Home Page ---------------------------------------
@@ -406,8 +926,7 @@ navName.addEventListener('mouseleave', () => {
     TweenMax.to(navPseudoSpan, .4, { y: -10, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
 })
 
-let icebergRotY = 0
-let icebergPosX = 0
+
 // --------------------------------------- Contact ---------------------------------------
 buttonContact.addEventListener('click', () => {
     icebergRotY = icebergModel.rotation.y
@@ -426,11 +945,11 @@ buttonContact.addEventListener('click', () => {
         setTimeout(() => {
             icebergModel.scale.set(.30, .35, .30)
             icebergModel.position.x = 25
-        }, 2250);
-    }, 1200);
+        }, 2250)
+    }, 1200)
 })
 
-crossClose.addEventListener('click', () => {
+crossCloseContact.addEventListener('click', () => {
     gsap.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
     TweenMax.to(contactContainer, .75, { opacity: 0, pointerEvents: 'none', ease: Power4.easeInOut, delay: .5 })
     gsap.to(icebergModel.rotation, 1.25, { y: icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
@@ -441,49 +960,53 @@ crossClose.addEventListener('click', () => {
         icebergModel.position.x = icebergPosX
         isContactActive = false
         canvasContainer.style.zIndex = -1
+        icebergModel.rotation.y = rotationValue + Math.PI * 1.2
         setTimeout(() => {
-            icebergModel.rotation.y = icebergRotY - Math.PI * .75
-        }, 100);
+            icebergModel.rotation.y = rotationValue
+        }, 100)
         setTimeout(() => {
             isIcebergRotating = false
-        }, 1500);
-    }, 1000);
+        }, 1500)
+    }, 1000)
 })
 
-
-crossClose.addEventListener('mouseenter', () => {
-    TweenMax.to('.line-1', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
-    TweenMax.to('.line-2', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
+crossClose.forEach(e => {
+    e.addEventListener('mouseenter', () => {
+        TweenMax.to('.line-1', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
+        TweenMax.to('.line-2', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
+    })
+    e.addEventListener('mouseleave', () => {
+        TweenMax.to('.line-1', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
+        TweenMax.to('.line-2', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
+    })
 })
-crossClose.addEventListener('mouseleave', () => {
-    TweenMax.to('.line-1', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
-    TweenMax.to('.line-2', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
-})
 
+// --------------------------------------- Link ---------------------------------------
+navName.addEventListener('click', () => {
+    window.location.replace('https://www.dakumisu.fr/')
+})
 
 // --------------------------------------- Mouse move interaction ---------------------------------------
-// Cursor Custom
 TweenMax.to({}, 0.01, {
     repeat: -1,
     onRepeat: function () {
-        posX += (mouseX - posX) / 4;
-        posY += (mouseY - posY) / 4;
+        posX += (mouseX - posX) / 4
+        posY += (mouseY - posY) / 4
 
         TweenMax.set(innerCursor, {
             x: posX,
             y: posY
         })
 
+        TweenMax.set(projectIndicatorContainer, {
+            x: posX,
+            y: posY,
+            delay: .01
+        })
+
         if (icebergModel && !isIcebergRotating && !isContactActive) {
-            rotationValue = icebergModel.rotation.y
-            gsap.to(icebergModel.rotation, 1, { z: posYNormalize / 30 })
-            if (icebergPosition == 'default') {
-                gsap.to(icebergModel.rotation, { y: rotationYDefault + posXNormalize / 10 })
-            } else if (icebergPosition == 'center') {
-                gsap.to(icebergModel.rotation, { y: rotationYOnTheCenter + posXNormalize / 10 })
-            } else if (icebergPosition == 'left') {
-                gsap.to(icebergModel.rotation, { y: rotationYOnTheLeft + posXNormalize / 10 })
-            }
+            TweenLite.to(icebergModel.rotation, 1, { z: posYNormalize / 30 })
+            TweenLite.to(icebergModel.rotation, { y: rotationValue + posXNormalize / 10 })
         }
         TweenMax.set(hudContainerTop, { x: posXNormalize * -3 })
         TweenMax.set(hudContainerTop, { y: posYNormalize * 3 })
@@ -500,13 +1023,13 @@ document.addEventListener("mousemove", e => {
     posYNormalize = - (posY / window.innerWidth) * 2 + 1
 })
 
+// --------------------------------------- Cursor Custom ---------------------------------------
 let lastX = 0
 let lastY = 0
 let isStuck = false
 let showCursor = false
 let group, stuckX, stuckY, fillOuterCursor
 
-const cursorCanvas = document.querySelector(".cursor--canvas")
 const shapeBounds = {
     width: 75,
     height: 75
@@ -528,10 +1051,7 @@ const polygon = new paper.Path.RegularPolygon(
     radius
 )
 polygon.scale(1)
-// polygon.fillColor = fillColor
-// polygon.fillColor.alpha = 1
 polygon.strokeColor = strokeColor
-// polygon.strokeColor.alpha = 0
 polygon.strokeWidth = strokeWidth
 polygon.smooth()
 group = new paper.Group([polygon])
@@ -546,21 +1066,34 @@ paper.view.onFrame = event => {
     group.position = new paper.Point(lastX, lastY)
 }
 
-outerLinkItems.forEach(item => {
-    item.addEventListener("mouseenter", outerHandleMouseEnter)
-    item.addEventListener("mouseleave", outerHandleMouseLeave)
+noLinkItems.forEach(e => {
+    e.addEventListener("mouseenter", noHandleMouseEnter)
+    e.addEventListener("mouseleave", noHandleMouseLeave)
 })
 
-innerLinkItems.forEach(item => {
-    item.addEventListener("mouseenter", innerHandleMouseEnter)
-    item.addEventListener("mouseleave", innerHandleMouseLeave)
+innerLinkItems.forEach(e => {
+    e.addEventListener("mouseenter", innerHandleMouseEnter)
+    e.addEventListener("mouseleave", innerHandleMouseLeave)
 })
+
+outerLinkItems.forEach(e => {
+    e.addEventListener("mouseenter", outerHandleMouseEnter)
+    e.addEventListener("mouseleave", outerHandleMouseLeave)
+})
+
+function noHandleMouseEnter() {
+    TweenMax.to(innerCursor, .75, { opacity: 0, ease: Expo.easeOut })
+    gsap.to(polygon.strokeColor, .75, { alpha: 0, ease: Expo.easeOut })
+}
+function noHandleMouseLeave() {
+    TweenMax.to(innerCursor, .75, { opacity: 1, ease: Expo.easeOut })
+    gsap.to(polygon.strokeColor, .75, { alpha: 1, ease: Expo.easeOut })
+}
 
 function innerHandleMouseEnter() {
     TweenMax.to(innerCursor, .75, { padding: 25, backgroundColor: lightBlue, ease: Expo.easeOut })
     gsap.to(polygon.strokeColor, .75, { alpha: 0, ease: Expo.easeOut })
 }
-
 function innerHandleMouseLeave() {
     TweenMax.to(innerCursor, .75, { padding: 5, backgroundColor: 'transparent', ease: Expo.easeOut })
     gsap.to(polygon.strokeColor, .75, { alpha: 1, ease: Expo.easeOut })
@@ -576,7 +1109,6 @@ function outerHandleMouseEnter(e) {
     // gsap.to(polygon.strokeColor, .5, { alpha: 1 })
     // gsap.to(polygon.fillColor, .5, { alpha: 0 })
 }
-
 function outerHandleMouseLeave() {
     isStuck = false
     TweenMax.to(innerCursor, .75, { padding: 5, opacity: 1, ease: Expo.easeOut })
@@ -642,101 +1174,111 @@ paper.view.onFrame = event => {
 const deg = (a) => a * Math.PI / 180 
 
 class AudioSwitcher {
-  constructor(opt) {
-    Object.assign(this, opt)
+    constructor(opt) {
+        Object.assign(this, opt)
 
-    this.active = false
-    this.hover = false
-    this.volume = 0
-    this.settings = {
-      width: 60,
-      height: 7,
-      amplitude: -0.18,
-      hoverHeight: 1.5,
-      hoverAmplitude: -0.1,
-      speed: 3.5
+        this.active = false
+        this.hover = false
+        this.volume = 0
+        this.settings = {
+            width: 60,
+            height: 4.5,
+            amplitude: -0.18,
+            hoverHeight: 1.2,
+            hoverAmplitude: -0.1,
+            speed: 3
+        }
+
+        this.init()
     }
 
-    this.init()
-  }
+    init() {
+        this.button.addEventListener('click', () => {
+            this.active = !this.active
+            this.button.classList.toggle('active')
+            const toggle = this.active ? 'play' : 'pause'
+            this.audio[toggle]()
+            // if (this.audio.volume == 0)
+            //     this.audio.fade(0, 1, 1000)
+            // else 
+            //     this.audio.fade(1, 0, 1000)
+            this.hover = false
+        })
 
-  init() {
-    this.button.addEventListener('click', () => {
-      this.active = !this.active
-      this.button.classList.toggle('active')
-      const toggle = this.active ? 'play' : 'pause'
-      this.audio[toggle]()
-      this.hover = false
-    })
+        this.button.addEventListener('mouseenter', () => {
+            this.hover = true
+        })
+        this.button.addEventListener('mouseleave', () => {
+            this.hover = false
+        })
 
-    this.button.addEventListener('mouseenter', () => {
-      this.hover = true
-    })
-    this.button.addEventListener('mouseleave', () => {
-      this.hover = false
-    })
+        window.addEventListener('blur', () => {
+            this.audio.muted = true
+            // this.audio.fade(0, 1, 1000)
+        })
+        window.addEventListener('focus', () => {
+            this.audio.muted = false
+            // this.audio.fade(0, .25, 1000)
+        })
 
-    window.addEventListener('blur', () => {
-      this.audio.muted = true
-    })
-    window.addEventListener('focus', () => {
-      this.audio.muted = false
-    })
-
-    this.ctx = this.soundCanvas.getContext('2d')
-    this.width = this.soundCanvas.clientWidth
-    this.height = this.soundCanvas.clientHeight
-    this.amp = 0
-    this.h = 0
-    this.devicePixelRatio = window.devicePixelRatio || 1
-    this.soundCanvas.width = this.width * this.devicePixelRatio
-    this.soundCanvas.height = this.height * this.devicePixelRatio
-    this.soundCanvas.style.width = `${this.width}px`
-    this.soundCanvas.style.height = `${this.height}px`
-    this.ctx.scale(this.devicePixelRatio, this.devicePixelRatio)
-  }
-
-  clear() {
-    this.ctx.clearRect(0, 0, this.soundCanvas.width, this.soundCanvas.height)
-  }
-
-  draw(time) {
-    this.ctx.fillStyle = this.color
-
-    for (let i = 0; i < this.settings.width; i++) {
-      this.ctx.beginPath()
-      const x = (this.width / 2) - (this.settings.width / 2 * 0.5) + i * .6
-      const t = (time * this.settings.speed) + (i * this.amp)
-      const y = (this.height / 2) + (-Math.cos(t) * this.h)
-      this.ctx.ellipse(x, y, .5, .5, deg(360), 0, deg(360))
-      this.ctx.closePath()
-      this.ctx.fill()
+        this.ctx = this.soundCanvas.getContext('2d')
+        this.width = this.soundCanvas.clientWidth
+        this.height = this.soundCanvas.clientHeight
+        this.amp = 0
+        this.h = 0
+        this.devicePixelRatio = window.devicePixelRatio || 1
+        this.soundCanvas.width = this.width * this.devicePixelRatio
+        this.soundCanvas.height = this.height * this.devicePixelRatio
+        this.soundCanvas.style.width = `${this.width}px`
+        this.soundCanvas.style.height = `${this.height}px`
+        this.ctx.scale(this.devicePixelRatio, this.devicePixelRatio)
     }
-  }
 
-  animate(time) {
-    let height = this.hover ? this.settings.hoverHeight : 0
-    height = this.active ? this.settings.height : height
-    this.h = lerp(this.h, height, 0.04)
+    clear() {
+        this.ctx.clearRect(0, 0, this.soundCanvas.width, this.soundCanvas.height)
+    }
 
-    let amplitude = this.hover ? this.settings.hoverAmplitude : 0
-    amplitude = this.active ? this.settings.amplitude : amplitude
-    this.amp = lerp(this.amp, amplitude, 0.04)
+    draw(time) {
+        this.ctx.fillStyle = this.color
 
-    const volume = this.active ? 1 : 0
-    this.volume = lerp(this.volume, volume, 0.04)
-    this.audio.volume = this.volume
+        for (let i = 0; i < this.settings.width; i++) {
+            this.ctx.beginPath()
+            const x = (this.width / 2) - (this.settings.width / 2 * 0.5) + i * .6
+            const t = (time * this.settings.speed) + (i * this.amp)
+            const y = (this.height / 2) + (-Math.cos(t) * this.h)
+            this.ctx.ellipse(x, y, .5, .5, deg(360), 0, deg(360))
+            this.ctx.closePath()
+            this.ctx.fill()
+        }
+    }
 
-    this.clear()
-    this.draw(time)
-  }
+    animate(time) {
+        let height = this.hover ? this.settings.hoverHeight : 0
+        height = this.active ? this.settings.height : height
+        this.h = lerp(this.h, height, 0.04)
+
+        let amplitude = this.hover ? this.settings.hoverAmplitude : 0
+        amplitude = this.active ? this.settings.amplitude : amplitude
+        this.amp = lerp(this.amp, amplitude, 0.04)
+
+        const volume = this.active ? 1 : 0
+        this.volume = lerp(this.volume, volume, 0.04)
+        this.audio.volume = this.volume
+
+        // this.audio.play();
+        // this.audio.fade(0, 1, 1000)
+
+        this.clear()
+        this.draw(time)
+    }
 }
 
 const audioSwitcher = new AudioSwitcher({
-  button: document.querySelector('.hud--sound--btn'),
-  soundCanvas: document.querySelector('#canvas-audio'),
-  audio: document.querySelector('#audio'),
-  color: lightBlue,
+    button: document.querySelector('.hud--sound--btn'),
+    soundCanvas: document.querySelector('#canvas-audio'),
+    //   audio: music,
+    audio: document.querySelector('#audio'),
+    color: lightBlue
 })
 
 
@@ -747,15 +1289,36 @@ const locoScroll = new LocomotiveScroll({
     smooth: true,
     getDirection: true,
     smoothMobile: true,
-    scrollFromAnywhere: true,
+    scrollFromAnywhere: false,
     multiplier: 0.5,
     lerp: 0.08,
     // reloadOnContextChange: true,
     draggingClass: true
 })
 
+let navScrollActive = false
+navAbout.addEventListener('click', () => {
+    if (!navScrollActive) {
+        locoScroll.scrollTo(aboutContainer)
+        navScrollActive = true
+        setTimeout(() => {
+            navScrollActive = false
+        }, 1200)
+    }
+})
+navProjects.addEventListener('click', () => {
+    if (!navScrollActive) {
+        locoScroll.scrollTo(projectsContainer)
+        navScrollActive = true
+        setTimeout(() => {
+            navScrollActive = false
+        }, 1200)
+    }
+})
+
 /* ADD LOCOSCROLL */
 locoScroll.on("scroll", ScrollTrigger.update)
+// projectLocoScroll.on("scroll", ScrollTrigger.update)
 
 ScrollTrigger.scrollerProxy(scrollContainer, {
     scrollTop(value) {
@@ -785,23 +1348,24 @@ ScrollTrigger.create({
     //     icebergModel.position.x = 4 + self.progress * -4
     // },
     onToggle: toggleOnAbout => {
-        // console.log("toggled, isActive:", toggleOnAbout.isActive)
         if (toggleOnAbout.isActive) {
-            icebergPosition = 'center'
+            icebergPosition = 'about'
             isIcebergRotating = true
             setTimeout(() => {
                 isIcebergRotating = false
             }, 1700)
+            rotationValue = rotationYAbout
             gsap.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-            gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheCenter , ease: Power2.easeOut })
+            gsap.to(icebergModel.rotation, 1.5, { y: rotationValue , ease: Power2.easeOut })
         } else {
-            icebergPosition = 'default'
+            icebergPosition = 'home'
             isIcebergRotating = true
             setTimeout(() => {
                 isIcebergRotating = false
             }, 1700)
+            rotationValue = rotationYHome
             gsap.to(icebergModel.position, 3.5, { x: 4, ease: Elastic.easeOut })
-            gsap.to(icebergModel.rotation, 1.5, { y: rotationYDefault , ease: Power2.easeOut })
+            gsap.to(icebergModel.rotation, 1.5, { y: rotationValue , ease: Power2.easeOut })
         }
     },
 })
@@ -809,22 +1373,22 @@ ScrollTrigger.create({
 ScrollTrigger.create({
     trigger: projectsContainer,
     scroller: scrollContainer,
-    start: "30% bottom", 
+    start: "30% bottom",
+    endTrigger: "html",
     scrub: true,
     onToggle: toggleOnProjects => {
         if (toggleOnProjects.isActive) {
-            icebergPosition = 'left'
+            icebergPosition = 'projects'
             isIcebergRotating = true
             setTimeout(() => {
                 isIcebergRotating = false
             }, 1700)
+            rotationValue = rotationYProjects
             gsap.to(hemisphereLightUp, .5, { intensity: 0 })
             gsap.to(hemisphereLightDown, .5, { intensity: .9 })
             gsap.to(icebergModel.position, 3.5, { x: -8, ease: Elastic.easeOut })
-            gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheLeft, ease: Power2.easeOut })
-            // gsap.to(audioSwitcher, .5, { color: lightBlue })
-            // gsap.to(polygon, .5, { strokeColor: lightBlue })
-            // TweenMax.to(innerCursor, .5, { borderColor: lightBlue })
+            gsap.to(icebergModel.rotation, 1.5, { y: rotationValue, ease: Power2.easeOut })
+
             TweenMax.to(backgroundContainer, .5, { backgroundColor: darkerBlue })
             TweenMax.to(aboutContainer, .5, { color: lightBlue })
             TweenMax.to(projectsContainer, .5, { color: lightBlue })
@@ -832,24 +1396,22 @@ ScrollTrigger.create({
             TweenMax.to('.line-1', .5, { backgroundColor: lightBlue })
             TweenMax.to('.line-2', .5, { backgroundColor: lightBlue })
             TweenMax.to(titleCat, .5, { webkitTextStrokeColor: lightBlue })
-            // hudContainerTop.style.color = lightBlue
-            // hudContainerBottom.style.color = lightBlue
+
             titleCat.forEach(e => {
                 e.style.webkitTextStrokeWidth = ".06vw "
             })
         } else {
-            icebergPosition = 'center'
+            icebergPosition = 'about'
             isIcebergRotating = true
             setTimeout(() => {
                 isIcebergRotating = false
             }, 1700)
+            rotationValue = rotationYAbout
             gsap.to(hemisphereLightUp, .5, { intensity: 1.3 })
             gsap.to(hemisphereLightDown, .5, { intensity: 0 })
             gsap.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-            gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheCenter, ease: Power2.easeOut })
-            // gsap.to(audioSwitcher, .5, { color: darkerBlue })
-            // gsap.to(polygon, .5, { strokeColor: darkerBlue })
-            // TweenMax.to(innerCursor, .5, { borderColor: darkerBlue })
+            gsap.to(icebergModel.rotation, 1.5, { y: rotationValue, ease: Power2.easeOut })
+
             TweenMax.to(backgroundContainer, .5, { backgroundColor: lightBlue })
             TweenMax.to(aboutContainer, .5, { color: darkerBlue })
             TweenMax.to(projectsContainer, .5, { color: darkerBlue })
@@ -857,11 +1419,53 @@ ScrollTrigger.create({
             TweenMax.to('.line-1', .5, { backgroundColor: darkerBlue })
             TweenMax.to('.line-2', .5, { backgroundColor: darkerBlue })
             TweenMax.to(titleCat, .5, { webkitTextStrokeColor: darkerBlue })
-            // hudContainerTop.style.color = darkerBlue
-            // hudContainerBottom.style.color = darkerBlue
+
             titleCat.forEach(e => {
                 e.style.webkitTextStrokeWidth = ".08vw "
             })
+        }
+    },
+})
+
+ScrollTrigger.create({
+    trigger: endContainer,
+    scroller: scrollContainer,
+    start: "30% bottom",
+    end: "99% bottom",
+    scrub: true,
+    onUpdate: self => {
+        console.log("progress:", self.progress.toFixed(3))
+        // icebergModel.position.y = -1 + self.progress * 11
+        // rotationValue = rotationYEnd
+        icebergModel.position.x = -8 + self.progress * 8
+        icebergModel.rotation.y = rotationYProjects + self.progress * rotationValue
+        rotationValue = rotationYProjects + self.progress * rotationYEnd
+        // TweenLite.to(icebergModel.position, .01, { x: -8 + self.progress * 8, ease: Power4.easeInOut })
+        // icebergModel.scale.set(.28 + self.progress * .40, .28 + self.progress * .40, .28 + self.progress * .40)
+    },
+    onToggle: toggleOnProjects => {
+        if (toggleOnProjects.isActive) {
+            canvasContainer.style.zIndex = 1
+            canvasContainer.style.pointerEvents = 'all'
+            // isIcebergRotating = true
+            // icebergPosition = 'end'
+            // setTimeout(() => {
+                //     isIcebergRotating = false
+                // }, 1700)
+                // TweenLite.to(icebergModel.scale, 2.5, { x: .40, y: .40, z: .40, ease: Elastic.easeOut })
+                // TweenLite.to(icebergModel.position, 4.5, { x: 0, ease: Elastic.easeOut })
+                // TweenLite.to(icebergModel.rotation, 2.5, { y: rotationYEnd, ease: Power2.easeOut })
+        } else {
+            canvasContainer.style.zIndex = -1
+            canvasContainer.style.pointerEvents = 'none'
+            // isIcebergRotating = true
+            // icebergPosition = 'projects'
+            // setTimeout(() => {
+            //     isIcebergRotating = false
+            // }, 1700)
+            // TweenLite.to(icebergModel.scale, 2.5, { x: .28, y: .28, z: .28, ease: Elastic.easeOut })
+            // TweenLite.to(icebergModel.position, 4.5, { x: -8, ease: Elastic.easeOut })
+            // TweenLite.to(icebergModel.rotation, 2.5, { y: rotationYProjects, ease: Power2.easeOut })
         }
     },
 })
@@ -897,53 +1501,85 @@ ScrollTrigger.create({
 //         case 65:
 //             tl = gsap.timeline()
 //                 .to(icebergModel.position, { duration: 5, x: 0, ease: Elastic.easeOut })
-//             break;
+//             break
 //         case 90:
 //             tl.pause()
-//             break;
+//             break
 //         case 69:
 //             tl.resume()
-//             break;
+//             break
 //         case 82:
 //             tl.seek(2.5)
-//             break;
+//             break
 //         case 84:
 //             tl.restart()
-//             break;
+//             break
 //     }
 // }
 // gsap.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-// gsap.to(icebergModel.rotation, 1.5, { y: rotationYOnTheCenter , ease: Power2.easeOut })
+// gsap.to(icebergModel.rotation, 1.5, { y: rotationYAbout , ease: Power2.easeOut })
+
+window.addEventListener('resize', () => {
+    // Update sizes
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+
+    // Update camera
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    // Update renderer
+    renderer.setSize(sizes.width, sizes.height)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    rendererProject.setSize(sizes.width, sizes.height)
+    rendererProject.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
 
 const clock = new THREE.Clock()
-const tick = () => {
+const raf = () => {
     const elapsedTime = clock.getElapsedTime()
     if (icebergModel && isContactActive) {
         icebergModel.rotation.y = elapsedTime * Math.PI * -0.03
     }
+    // if (icebergModel)
+    //     console.log(icebergModel.position.y)
 
-    // // Update controls
-    // controls.update()
+    if (icebergModel) {
+        icebergModel.position.y = Math.sin(elapsedTime) * .15 + .85
+    }
 
     // Render
-    renderer.render(scene, camera)
+    renderer.render(mainScene, camera)
+    rendererProject.render(projectScene, camera)
+    composer.render()
+
 
     const time = performance.now() / 1000
     if (audioSwitcher) {
         audioSwitcher.animate(time)
     }
 
-    if (mouse) {
-        TweenLite.to(planeRectMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
-        TweenLite.to(planeSquareMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
-    }
-    hoverPositionUpdate()
+    if (enterProject)
+        planeRectMaterial.uniforms.uProgress.value = elapsedTime * .5
 
-    // Call tick again on the next frame
-    window.requestAnimationFrame(tick)
+    if (mouse && !enterProject) {
+        TweenLite.to(planeRectMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
+
+        hoverPositionUpdate()
+    
+        planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+        planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+    
+        mousePosition.x = planeX
+        mousePosition.y = planeY
+        mousePosition.z = 0
+    }
+
+    // Call raf again on the next frame
+    window.requestAnimationFrame(raf)
 }
 
-tick()
+raf()
 
 ScrollTrigger.addEventListener("refresh", () => locoScroll.update())
 ScrollTrigger.refresh()
