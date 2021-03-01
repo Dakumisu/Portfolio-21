@@ -150,7 +150,7 @@ body {
         justify-content: space-between;
         flex-direction: row;
         align-items: center;
-        position: absolute;
+        position: fixed;
         z-index: 5;
         left: 50%;
         transform: translateX(-50%);
@@ -523,19 +523,23 @@ body {
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        pointer-events: none;
     }
     &--content {
-        height: 100%;
+        position: absolute;
+        height: fit-content;
         width: 60%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-end;
         text-align: center;
+        z-index: 10;
+        bottom: 5%;
         .container {
             display: flex;
             flex-direction: column;
-            margin-bottom: 10%;
+            // margin-bottom: 10%;
         }
         span {
             font-family: Text;
@@ -625,67 +629,78 @@ body {
     left: 0;
     z-index: -1;
     pointer-events: none;
-    background-color: rgba($normalBlue, 0);
     .close {
         position: absolute;
         top: 5%;
         z-index: 1;
         opacity: 0;
     }
-    .content--container {
+    .container {
         position: absolute;
-        width: 40%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-content: flex-start;
-        right: 5%;
-        top: 50%;
-        color: $lightBlue;
-        transform: translate(0, -50%);
-        opacity: 0;
-        .title--container {
-            position: relative;
-            width: fit-content;
-            margin-bottom: 10px;
-            text-align: center;
-            .container {
-                h3 {
-                    font-size: 2.5vw;
-                    color: $lightBlue;
-                    letter-spacing: 2px;
-                    font-family: Subtitle;
-                    margin: 0;
-                }
-            }
-        }
-        .text--container {
-            width: 80%;
-            margin-bottom: 10px;
-            p {
-                margin: 0;
-                opacity: .8;
-            }
-        }
-        .icon--container {
-            margin-top: 20px;
-            span {
-                font-family: Subtitle;
-                font-size: 13px;
-                color: $normalBlue;
-                background-color: $lightBlue;
-                padding: 5px 10px;
-                border-radius: 100px;
-                margin-right: 10px;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba($normalBlue, 0);
+        transform: translateY(100%);
+        .content--container {
+            position: absolute;
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-content: flex-start;
+            right: 5%;
+            top: 50%;
+            color: $lightBlue;
+            transform: translate(0, -50%);
+            .title--container {
+                position: relative;
+                width: fit-content;
                 margin-bottom: 10px;
-                opacity: .7;
-                transition: opacity .5s ease-in-out;
-                display: none;
-                &:hover {
-                    opacity: 1;
+                text-align: center;
+                opacity: 0;
+                .title--container--content {
+                    h3 {
+                        font-size: 2.5vw;
+                        color: $lightBlue;
+                        letter-spacing: 2px;
+                        font-family: Subtitle;
+                        margin: 0;
+                    }
+                }
+            }
+            .text--container {
+                width: 80%;
+                margin-bottom: 10px;
+                opacity: 0;
+                p {
+                    margin: 0;
+                    opacity: .8;
+                }
+            }
+            .icon--container {
+                margin-top: 20px;
+                opacity: 0;
+                span {
+                    font-family: Subtitle;
+                    font-size: 13px;
+                    color: $normalBlue;
+                    background-color: $lightBlue;
+                    padding: 5px 10px;
+                    border-radius: 100px;
+                    margin-right: 10px;
+                    margin-bottom: 10px;
+                    opacity: .7;
                     transition: opacity .5s ease-in-out;
+                    display: none;
+                    &:hover {
+                        opacity: 1;
+                        transition: opacity .5s ease-in-out;
+                    }
                 }
             }
         }
+    }
+    .canvasProject {
+        
     }
 }
