@@ -641,61 +641,78 @@ body {
         height: 100vh;
         background-color: rgba($normalBlue, 0);
         transform: translateY(100%);
-        .content--container {
-            position: absolute;
-            width: 40%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-content: flex-start;
-            right: 5%;
-            top: 50%;
-            color: $lightBlue;
-            transform: translate(0, -50%);
-            .title--container {
-                position: relative;
-                width: fit-content;
-                margin-bottom: 10px;
-                text-align: center;
-                opacity: 0;
-                .title--container--content {
-                    h3 {
-                        font-size: 2.5vw;
-                        color: $lightBlue;
-                        letter-spacing: 2px;
-                        font-family: Subtitle;
-                        margin: 0;
-                    }
-                }
-            }
-            .text--container {
-                width: 80%;
-                margin-bottom: 10px;
-                opacity: 0;
-                p {
-                    margin: 0;
-                    opacity: .8;
-                }
-            }
-            .icon--container {
-                margin-top: 20px;
-                opacity: 0;
-                span {
+    }
+    .content--container {
+        position: absolute;
+        width: 40%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: flex-start;
+        right: 5%;
+        top: 50%;
+        color: $lightBlue;
+        transform: translate(0, -50%);
+        .title--container {
+            position: relative;
+            width: fit-content;
+            margin-bottom: 10px;
+            text-align: center;
+            opacity: 0;
+            .title--container--content {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                h3 {
+                    font-size: 2.5vw;
+                    color: $lightBlue;
+                    letter-spacing: 2px;
                     font-family: Subtitle;
+                    margin: 0;
+                }
+                span {
+                    font-family: Title;
                     font-size: 13px;
-                    color: $normalBlue;
-                    background-color: $lightBlue;
+                    color: $lightBlue;
+                    background-color: $darkBlue;
                     padding: 5px 10px;
                     border-radius: 100px;
-                    margin-right: 10px;
-                    margin-bottom: 10px;
                     opacity: .7;
                     transition: opacity .5s ease-in-out;
-                    display: none;
                     &:hover {
                         opacity: 1;
                         transition: opacity .5s ease-in-out;
                     }
+                }
+            }
+        }
+        .text--container {
+            width: 80%;
+            margin-bottom: 10px;
+            opacity: 0;
+            p {
+                margin: 0;
+                opacity: .8;
+            }
+        }
+        .icon--container {
+            margin-top: 20px;
+            opacity: 0;
+            span {
+                font-family: Subtitle;
+                font-size: 13px;
+                color: $normalBlue;
+                background-color: $lightBlue;
+                padding: 5px 10px;
+                border-radius: 100px;
+                margin-right: 10px;
+                margin-bottom: 10px;
+                opacity: .7;
+                transition: opacity .5s ease-in-out;
+                display: none;
+                &:hover {
+                    opacity: 1;
+                    transition: opacity .5s ease-in-out;
                 }
             }
         }

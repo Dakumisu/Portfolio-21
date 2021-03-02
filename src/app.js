@@ -15,16 +15,6 @@ import howlerjs from 'howler'
 import vertexShader from '../static/glsl/vertexShader.glsl'
 import fragmentShader from '../static/glsl/fragmentShader.glsl'
 
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    // true for mobile device
-    console.log("mobile device")
-} else {
-    // false for not mobile device
-    console.log("not mobile device")
-}
-
-console.log(window.navigator.userAgent)
-
 const backgroundContainer = document.querySelector('.background--container')
 const hudContainer = document.querySelector('.hud--container')
 const hudContainerTop = document.querySelector('.hud--container .hud--nav__top')
@@ -95,10 +85,6 @@ const music = new Howl({
     volume: 1
 })
 
-const timelineIcebergPosHome = new gsap.timeline()
-const timelineIcebergPosAbout = new gsap.timeline()
-const timelineIcebergPosProjects = new gsap.timeline()
-
 const lightBlue = "#E9EFEF"
 const normalBlue = "#48717F"
 const darkBlue = "#29363C"
@@ -118,6 +104,7 @@ let currentProject
 let musicPlayed = false
 let musicMuted = true
 let navScrollActive = false
+let isOnMobile = false
 
 let mouseX = 0
 let mouseY = 0
@@ -140,6 +127,21 @@ const map = (value, in_min, in_max, out_min, out_max) => {
         ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
     )
 }
+
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // true for mobile device
+    console.log("mobile device")
+    isOnMobile = true
+    cursor.forEach(e => {
+        e.style.display = 'none'
+    })
+    projectIndicatorContainer.style.display = 'none'
+} else {
+    // false for not mobile device
+    console.log("not mobile device")
+}
+
+console.log(window.navigator.userAgent)
 
 // --------------------------------------- Init THREE.js features ---------------------------------------
 // Scene
@@ -195,27 +197,11 @@ mainScene.add(hemisphereLightUp)
 const hemisphereLightDown = new THREE.HemisphereLight( THREEdarkBlue, THREEnormalBlue, 0)
 mainScene.add(hemisphereLightDown)
 
-const pointLightHelper = new THREE.PointLightHelper( pointLight, 1 )
-// mainScene.add( pointLightHelper )
-
-const spotLightUp = new THREE.SpotLight( THREElightBlue, 0.15 )
-spotLightUp.position.set( 0, 8, 0 )
-// mainScene.add( spotLightUp )
-const spotLightDown = new THREE.SpotLight( THREEdarkerBlue, 1 )
-spotLightDown.position.set( 4, -10, 0 )
-// mainScene.add( spotLightDown )
-
-const spotLightHelperUp = new THREE.SpotLightHelper(spotLightUp, 0.1)
-// mainScene.add(spotLightHelperUp)
-const spotLightHelperDown = new THREE.SpotLightHelper(spotLightDown, 0.1)
-// mainScene.add(spotLightHelperDown)
-
 // Texture Loader
 const textureLoader = new THREE.TextureLoader()
 
 // Materials
 const toonMaterial = new THREE.MeshToonMaterial()
-// toonMaterial.map = gradientTexture
 toonMaterial.color = THREElightBlue
 toonMaterial.aoMapIntensity = 1
 
@@ -224,10 +210,9 @@ const gltfLoader = new GLTFLoader()
 let icebergModel
 
 let rotationYHome = Math.PI * 1.7
-let rotationYAbout = Math.PI * 1.1
-let rotationYProjects = Math.PI * .3
-let rotationYEnd = Math.PI * -.5
-let rotationValue = rotationYHome
+let rotationValue = 0
+let rotationOnMouseValue = 0
+let rotationOnScrollValue = rotationYHome
 
 gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         icebergModel = addIcebergModel.scene
@@ -235,28 +220,40 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
             if (e.isMesh) e.material = toonMaterial
         })
         icebergModel.scale.set(.28, .28, .28)
-        icebergModel.rotation.y = rotationValue
+        icebergModel.rotation.y = rotationYHome
         icebergModel.position.set(4, 1, 0)
         // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
         // gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
         mainScene.add(icebergModel)
+        
+        // timelineIcebergPosHome
+        //     .to(icebergModel.position, 3.5, { x: 4, ease: Elastic.easeOut })
+        //     .to(icebergModel.rotation, 3.5, { y: rotationYHome, ease: Power2.easeOut }, 0)
+        //     .progress(1)
+            
+        // timelineIcebergPosAbout
+        //     .to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
+        //     .to(icebergModel.rotation, 3.5, { y: rotationYAbout, ease: Power2.easeOut }, 0)
+        //     .progress(1)
+            
+        // timelineIcebergPosProjects
+        //     .to(icebergModel.position, 3.5, { x: -8, ease: Elastic.easeOut })
+        //     .to(icebergModel.rotation, 3.5, { y: rotationYProjects, ease: Power2.easeOut }, 0)
+        //     .progress(1)
+        
 
-        timelineIcebergPosAbout.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-        timelineIcebergPosAbout.pause()
-        timelineIcebergPosProjects.to(icebergModel.position, 3.5, { x: -8, ease: Elastic.easeOut })
-        timelineIcebergPosProjects.pause()
 
         // icebergModel.on('click', () => {
-        //     canvasContainer.style.zIndex = -1
-        //     if (icebergModel.scale.x == 0.02) {
-                // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
-                // gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
-        //         // gsap.to(icebergModel.rotation, .5, { y: icebergModel.rotation.y += Math.PI * .25, ease: Power4.easeInOut })
-        //     } 
-        //     // else if (icebergModel.scale.x == 0.28) {
-        //     //     gsap.to(icebergModel.scale, 1, { x: 0.02, y: 0.02, z: 0.02, ease: Expo.easeInOut })
-        //     //     gsap.to(icebergModel.position, 1, { x: 0, ease: Expo.easeInOut })
-        //     // }
+        //canvasContainer.style.zIndex = -1
+        //if (icebergModel.scale.x == 0.02) {
+            // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
+            // gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
+            // gsap.to(icebergModel.rotation, .5, { y: icebergModel.rotation.y += Math.PI * .25, ease: Power4.easeInOut })
+        //} 
+        // else if (icebergModel.scale.x == 0.28) {
+        //     gsap.to(icebergModel.scale, 1, { x: 0.02, y: 0.02, z: 0.02, ease: Expo.easeInOut })
+        //     gsap.to(icebergModel.position, 1, { x: 0, ease: Expo.easeInOut })
+        // }
         // })
 
         icebergModel.on('click', () => {
@@ -681,11 +678,11 @@ images.forEach(image => {
                 break
         }
 
-        TweenMax.to('.projectCanvas--container .container', 1.5, { backgroundColor: 'rgba(72, 113, 127, 1)', ease: Power4.easeInOut })
-        TweenMax.to('.projectCanvas--container .container', 1.5, { yPercent: -100, ease: Expo.easeInOut })
-        TweenMax.to('.title--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .75 })
-        TweenMax.to('.text--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
-        TweenMax.to('.icon--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1.25 })
+        // TweenMax.to('.projectCanvas--container .container', 1.5, { backgroundColor: 'rgba(72, 113, 127, 1)', ease: Power4.easeInOut })
+        // TweenMax.to('.projectCanvas--container .container', 1.5, { yPercent: -100, ease: Expo.easeInOut })
+        TweenMax.to('.content--container .title--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .75 })
+        TweenMax.to('.content--container .text--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
+        TweenMax.to('.content--container .icon--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1.25 })
         TweenMax.to(crossCloseProject, 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1.25 })
 
         projectCanvasContainer.style.position = 'absolute'
@@ -709,11 +706,11 @@ images.forEach(image => {
 })
 
 crossCloseProject.addEventListener('click', () => {
-    TweenMax.to('.projectCanvas--container .container', 2.5, { backgroundColor: 'rgba(72, 113, 127, 0)', ease: Power4.easeInOut, delay: 1.5 })
-    TweenMax.to('.projectCanvas--container .container', 1.5, { yPercent: 0, ease: Expo.easeInOut, delay: 1.5 })
-    TweenMax.to('.title--container', 2.5, { opacity: 1, ease: Power4.easeInOut })
-    TweenMax.to('.text--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .25 })
-    TweenMax.to('.icon--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .5 })
+    // TweenMax.to('.projectCanvas--container .container', 2.5, { backgroundColor: 'rgba(72, 113, 127, 0)', ease: Power4.easeInOut, delay: 1.5 })
+    // TweenMax.to('.projectCanvas--container .container', 1.5, { yPercent: 0, ease: Expo.easeInOut, delay: 1.5 })
+    TweenMax.to('.content--container .title--container', 2, { opacity: 0, ease: Power4.easeOut })
+    TweenMax.to('.content--container .text--container', 2, { opacity: 0, ease: Power4.easeOut, delay: .25 })
+    TweenMax.to('.content--container .icon--container', 2, { opacity: 0, ease: Power4.easeOut, delay: .5 })
     TweenMax.to(crossCloseProject, 1.5, { opacity: 0, ease: Power4.easeInOut })
 
     projectCanvasContainer.style.pointerEvents = 'none'
@@ -949,43 +946,35 @@ buttonContact.addEventListener('click', () => {
     locoScroll.stop()
     icebergRotY = icebergModel.rotation.y
     icebergPosX = icebergModel.position.x
-    gsap.to(icebergModel.scale, .75, { x: 0, y: 0, z: 0, ease: Back.easeIn })
-    gsap.to(icebergModel.rotation, .75, { y: rotationValue - Math.PI * .75,  ease: Power2.easeIn })
+    TweenLite.to(icebergModel.scale, .75, { x: 0, y: 0, z: 0, ease: Back.easeIn })
+    TweenLite.to(icebergModel.rotation, .75, { y: icebergRotY - Math.PI * .75,  ease: Power2.easeIn })
     
     TweenMax.to(contactContainer, .75, { opacity: 1, pointerEvents: 'all', ease: Power4.easeInOut, delay: .75 })
     
-    gsap.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 3.5 })
+    TweenLite.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 1.5 })
 
     isIcebergRotating = true
     setTimeout(() => {
         isContactActive = true
         canvasContainer.style.zIndex = 7
-        setTimeout(() => {
-            icebergModel.scale.set(.30, .35, .30)
-            icebergModel.position.x = 25
-        }, 2250)
-    }, 1200)
+        icebergModel.scale.set(.30, .35, .30)
+        icebergModel.position.x = 25
+    }, 1000)
 })
 
 crossCloseContact.addEventListener('click', () => {
-    gsap.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
+    TweenLite.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
     TweenMax.to(contactContainer, .75, { opacity: 0, pointerEvents: 'none', ease: Power4.easeInOut, delay: .5 })
-    gsap.to(icebergModel.rotation, 1.25, { y: icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
-    gsap.to(icebergModel.scale, 1.5, { x: .28, y: .28, z: .28, ease: Elastic.easeOut, delay: 1.1 })
+    // TweenLite.to(icebergModel.rotation, 1.25, { y: icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
+    TweenLite.to(icebergModel.scale, 2, { x: .28, y: .28, z: .28, ease: Elastic.easeOut, delay: 1.1 })
     
     setTimeout(() => {
+        locoScroll.start()
         icebergModel.scale.set(0.00001, 0.00001, 0.00001)
         icebergModel.position.x = icebergPosX
-        isContactActive = false
-        locoScroll.start()
         canvasContainer.style.zIndex = -1
-        icebergModel.rotation.y = rotationValue + Math.PI * 1.2
-        setTimeout(() => {
-            icebergModel.rotation.y = rotationValue
-        }, 100)
-        setTimeout(() => {
-            isIcebergRotating = false
-        }, 1500)
+        isContactActive = false
+        isIcebergRotating = false
     }, 1000)
 })
 
@@ -1006,33 +995,36 @@ navName.addEventListener('click', () => {
 })
 
 // --------------------------------------- Mouse move interaction ---------------------------------------
-TweenMax.to({}, 0.01, {
-    repeat: -1,
-    onRepeat: function () {
-        posX += (mouseX - posX) / 4
-        posY += (mouseY - posY) / 4
-
-        TweenMax.set(innerCursor, {
-            x: posX,
-            y: posY
-        })
-
-        TweenMax.set(projectIndicatorContainer, {
-            x: posX,
-            y: posY,
-            delay: .01
-        })
-
-        if (icebergModel && !isIcebergRotating && !isContactActive) {
-            TweenLite.to(icebergModel.rotation, 1, { z: posYNormalize / 30 })
-            TweenLite.to(icebergModel.rotation, { y: rotationValue + posXNormalize / 10 })
+if (!isOnMobile) {
+    TweenMax.to({}, 0.01, {
+        repeat: -1,
+        onRepeat: function () {
+            posX += (mouseX - posX) / 4
+            posY += (mouseY - posY) / 4
+    
+            TweenMax.set(innerCursor, {
+                x: posX,
+                y: posY
+            })
+    
+            TweenMax.set(projectIndicatorContainer, {
+                x: posX,
+                y: posY,
+                delay: .01
+            })
+    
+            if (icebergModel && !isIcebergRotating && !isContactActive) {
+                TweenLite.to(icebergModel.rotation, 1, { z: posYNormalize / 30 })
+                rotationOnMouseValue = posXNormalize / 10
+                // icebergModel.rotation.y = rotationValue
+            }
+            TweenMax.set(hudContainerTop, { x: posXNormalize * -3 })
+            TweenMax.set(hudContainerTop, { y: posYNormalize * 3 })
+            TweenMax.set(hudContainerBottom, { x: posXNormalize * -3 })
+            TweenMax.set(hudContainerBottom, { y: posYNormalize * 3 })
         }
-        TweenMax.set(hudContainerTop, { x: posXNormalize * -3 })
-        TweenMax.set(hudContainerTop, { y: posYNormalize * 3 })
-        TweenMax.set(hudContainerBottom, { x: posXNormalize * -3 })
-        TweenMax.set(hudContainerBottom, { y: posYNormalize * 3 })
-    }
-})
+    })
+}
 
 document.addEventListener("mousemove", e => {
     mouseX = e.clientX
@@ -1351,6 +1343,7 @@ navProjects.addEventListener('click', () => {
     }
 })
 
+// --------------------------------------- Scroll Trigger ---------------------------------------
 /* ADD LOCOSCROLL */
 locoScroll.on("scroll", ScrollTrigger.update)
 
@@ -1372,54 +1365,52 @@ ScrollTrigger.scrollerProxy(scrollContainer, {
 ScrollTrigger.create({
     trigger: aboutContainer,
     scroller: scrollContainer,
-    start: "50% bottom", 
-    endTrigger: "html",
+    start: "25% bottom", 
+    // endTrigger: "html",
+    end: "68% bottom",
     scrub: true,
-    onToggle: toggleOnAbout => {
-        if (toggleOnAbout.isActive) {
-            icebergPosition = 'about'
-            isIcebergRotating = true
-            setTimeout(() => {
-                isIcebergRotating = false
-            }, 1700)
-            rotationValue = rotationYAbout
-            TweenLite.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-            TweenLite.to(icebergModel.rotation, 1.5, { y: rotationValue , ease: Power2.easeOut })
-
-            // timelineIcebergPosAbout.pause()
-        } else {
-            icebergPosition = 'home'
-            isIcebergRotating = true
-            setTimeout(() => {
-                isIcebergRotating = false
-            }, 1700)
-            rotationValue = rotationYHome
-            // timelineIcebergPosAbout.restart()
-            TweenLite.to(icebergModel.position, 3.5, { x: 4, ease: Elastic.easeOut })
-            TweenLite.to(icebergModel.rotation, 1.5, { y: rotationValue , ease: Power2.easeOut })
-        }
+    onUpdate: selfAbout => {
+        icebergModel.position.x = 4 + selfAbout.progress * -4
+        // icebergModel.rotation.y = rotationYHome + selfAbout.progress * rotationValue
+        // rotationValue = rotationYHome + selfAbout.progress * rotationYAbout
     }
 })
 
 ScrollTrigger.create({
     trigger: projectsContainer,
     scroller: scrollContainer,
-    start: "30% bottom",
-    endTrigger: "html",
+    start: "25% bottom",
+    // endTrigger: "html",
+    end: "50% bottom",
     scrub: true,
+    onUpdate: selfProjects => {
+        icebergModel.position.x = 0 + selfProjects.progress * -7
+        // icebergModel.rotation.y = rotationYAbout + selfProjects.progress * rotationValue
+        // rotationValue = rotationYAbout + selfProjects.progress * rotationYProjects
+    }
+})
+
+ScrollTrigger.create({
+    trigger: projectsContainer,
+    scroller: scrollContainer,
+    start: "35% bottom", 
+    endTrigger: "html",
     onToggle: toggleOnProjects => {
         if (toggleOnProjects.isActive) {
+            // isDarkMode = toggleOnProjects.isActive
+            // darkMode(isDarkMode)
+
             icebergPosition = 'projects'
-            isIcebergRotating = true
-            setTimeout(() => {
-                isIcebergRotating = false
-            }, 1700)
-            rotationValue = rotationYProjects
+            // isIcebergRotating = true
+            // setTimeout(() => {
+            //     isIcebergRotating = false
+            // }, 1700)
+            // rotationValue = rotationYProjects
             TweenLite.to(hemisphereLightUp, .5, { intensity: 0 })
             TweenLite.to(hemisphereLightDown, .5, { intensity: .9 })
             // timelineIcebergPosProjects.restart()
-            TweenLite.to(icebergModel.position, 3.5, { x: -8, ease: Elastic.easeOut })
-            TweenLite.to(icebergModel.rotation, 1.5, { y: rotationValue, ease: Power2.easeOut })
+            // TweenLite.to(icebergModel.position, 3.5, { x: -8, ease: Elastic.easeOut })
+            // TweenLite.to(icebergModel.rotation, 1.5, { y: rotationValue, ease: Power2.easeOut })
 
             TweenMax.to(backgroundContainer, .5, { backgroundColor: darkerBlue })
             TweenMax.to(aboutContainer, .5, { color: lightBlue })
@@ -1435,17 +1426,20 @@ ScrollTrigger.create({
 
             // timelineIcebergPosAbout.pause()
         } else {
+            // isDarkMode = true
+            // darkMode(isDarkMode)
+
             icebergPosition = 'about'
-            isIcebergRotating = true
-            setTimeout(() => {
-                isIcebergRotating = false
-            }, 1700)
-            rotationValue = rotationYAbout
+            // isIcebergRotating = true
+            // setTimeout(() => {
+            //     isIcebergRotating = false
+            // }, 1700)
+            // rotationValue = rotationYAbout
             TweenLite.to(hemisphereLightUp, .5, { intensity: 1.3 })
             TweenLite.to(hemisphereLightDown, .5, { intensity: 0 })
             // timelineIcebergPosAbout.restart()
-            TweenLite.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-            TweenLite.to(icebergModel.rotation, 1.5, { y: rotationValue, ease: Power2.easeOut })
+            // TweenLite.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
+            // TweenLite.to(icebergModel.rotation, 1.5, { y: rotationValue, ease: Power2.easeOut })
 
             TweenMax.to(backgroundContainer, .5, { backgroundColor: lightBlue })
             TweenMax.to(aboutContainer, .5, { color: darkerBlue })
@@ -1471,9 +1465,10 @@ ScrollTrigger.create({
     end: "bottom bottom",
     scrub: true,
     onUpdate: self => {
-        icebergModel.position.x = -8 + self.progress * 8
-        icebergModel.rotation.y = rotationYProjects + self.progress * rotationValue
-        rotationValue = rotationYProjects + self.progress * rotationYEnd
+        icebergModel.position.x = -7 + self.progress * 7
+        rotationOnScrollValue += (self.getVelocity() * -.00003) * Math.PI
+        // icebergModel.rotation.y = rotationYProjects + self.progress * rotationValue
+        // rotationValue = rotationYProjects + self.progress * rotationYEnd
         if (self.progress >= .3) {
             canvasContainer.style.zIndex = 1
             canvasContainer.style.pointerEvents = 'all'
@@ -1481,9 +1476,6 @@ ScrollTrigger.create({
             canvasContainer.style.zIndex = -1
             canvasContainer.style.pointerEvents = 'none'
         }
-    },
-    onEnter: () => {
-        timelineIcebergPosProjects.pause()
     }
 })
 
@@ -1507,6 +1499,7 @@ ScrollTrigger.create({
                 onUpdate: () => skewSetter(proxy.skew)
             })
         }
+        rotationOnScrollValue += (self.getVelocity() * -.00001) * Math.PI
     }
 })
 
@@ -1552,17 +1545,22 @@ window.addEventListener('resize', () => {
     rendererProject.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
+let testRotate = 0
 const clock = new THREE.Clock()
 const raf = () => {
     const elapsedTime = clock.getElapsedTime()
-    if (icebergModel && isContactActive) {
-        icebergModel.rotation.y = elapsedTime * Math.PI * -0.03
-    }
-    // if (icebergModel)
-    //     console.log(icebergModel.rotation.y)
 
     if (icebergModel) {
         icebergModel.position.y = Math.sin(elapsedTime) * .15 + .85
+        if (isContactActive) {
+            testRotate += .03 * Math.PI * -0.03
+            if (testRotate < -Math.PI * 2) {
+                testRotate += Math.PI * 2
+            }
+            icebergModel.rotation.y = testRotate
+        } else {
+            TweenLite.to(icebergModel.rotation, { y: rotationOnScrollValue + rotationOnMouseValue })
+        }
     }
 
     // Render
@@ -1600,3 +1598,10 @@ raf()
 
 ScrollTrigger.addEventListener("refresh", () => locoScroll.update())
 ScrollTrigger.refresh()
+
+console.log(`%c ${'there\'s nothing here go away 👀'}`, `background: ${lightBlue}; color: ${normalBlue}; font-weight: bold; font-size: 1.5rem; border-radius: 100px; padding: 10% 5%`)
+
+console.log(
+    "%c ",
+    "background-image: url('http://dakumisu.fr/Ressources/moi.jpg'); background-size: cover ; padding: 50%;"
+)
