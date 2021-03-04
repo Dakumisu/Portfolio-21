@@ -18,6 +18,11 @@
 </head>
 
 <body>
+    <div class="mobileNotAvailable">
+        <span>Mobile version come soon ... :) </span>
+    </div>
+
+
     <div class="cursor cursor--small"></div>
     <canvas class="cursor cursor--canvas" resize></canvas>
     <div class="project__indicator--container">
@@ -85,9 +90,10 @@
                 <a class="inner--link" href="https://www.linkedin.com/in/alex-gattefosse/" target="_blank"><span>Linkedin</span></a>
                 <a class="inner--link" href="https://github.com/Dakumisu" target="_blank"><span>GitHub</span></a>
                 <a class="inner--link" href="https://www.awwwards.com/Dakumisu/" target="_blank"><span>Awwwards</span></a>
-                <a class="inner--link" href="mailto:dakumisu.psd@gmail.com"><span>Mail</span></a>
+                <a class="inner--link mail" href="mailto:dakumisu.psd@gmail.com"><span>Mail</span></a>
             </div>
         </div>
+        <div class="transition--container"></div>
     </section>
 
     <section class="projectCanvas--container">
@@ -99,7 +105,7 @@
             <div class="title--container">
                 <div class="title--container--content">
                     <h3></h3>
-                    <span>Honorable Mention</span>
+                    <span class="inner--link">Honorable Mention</span>
                 </div>
             </div>
             <div class="text--container">
@@ -121,6 +127,7 @@
             </div>
         </div>
         <canvas class="canvasProject"></canvas>
+        <div class="transition--container"></div>
     </section>
     
     <div class="scroll--container skewElem" data-scroll-container>
@@ -128,7 +135,7 @@
             <div class="hero--main">
                 <div class="hero--content">
                     <h1 data-scroll data-scroll-speed="1">Hello</h1>
-                    <h2 data-scroll data-scroll-speed="1.7">I'm Alex, I do websites and more</h2>
+                    <h2 data-scroll data-scroll-speed="1.7">I'm Alex, I do websites <span class="more">and more</span> <span class="smile">:)</span></h2>
                 </div>
             </div>
         </section>
@@ -192,22 +199,22 @@
                                 <h3>Web Development</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
-                                <span class="no--link hoverPlane" data-id_texture="id2021">ID 2021</span>
+                                <span class="no--link hoverPlane" data-id_project="id2021">ID 2021</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
-                                <span class="no--link hoverPlane" data-id_texture="folio2020">Portfolio 2020</span>
+                                <span class="no--link hoverPlane" data-id_project="folio2020">Portfolio 2020</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
-                                <span class="no--link hoverPlane" data-id_texture="foliocms">CMS Portfolio</span>
+                                <span class="no--link hoverPlane" data-id_project="foliocms">CMS Portfolio</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
-                                <span class="no--link hoverPlane" data-id_texture="morpion">E-Morpion</span>
+                                <span class="no--link hoverPlane" data-id_project="morpion">E-Morpion</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
-                                <span class="no--link hoverPlane" data-id_texture="gamovore">Gamovore</span>
+                                <span class="no--link hoverPlane" data-id_project="gamovore">Gamovore</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
-                                <span class="no--link hoverPlane" data-id_texture="retrowave">Retrowave's Trending</span>
+                                <span class="no--link hoverPlane" data-id_project="retrowave">Retrowave's Trending</span>
                             </div>
                         </div>
                         <div class="projects projects--design">
@@ -216,13 +223,13 @@
                                 <h3>Design</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".13">
-                                <span class="no--link hoverPlane" data-id_texture="jamcloud">Jam Cloud</span>
+                                <span class="no--link hoverPlane" data-id_project="jamcloud">Jam Cloud</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".13">
-                                <span class="no--link hoverPlane" data-id_texture="terredebois">Terre de Bois</span>
+                                <span class="no--link hoverPlane" data-id_project="terredebois">Terre de Bois</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".13">
-                                <span class="no--link hoverPlane" data-id_texture="charamushroom">Chara-Mushroom</span>
+                                <span class="no--link hoverPlane" data-id_project="charamushroom">Chara-Mushroom</span>
                             </div>
                         </div>
                         <div class="projects projects--video">
@@ -231,13 +238,16 @@
                                 <h3>Video</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
-                                <span class="no--link hoverPlane" data-id_texture="mmitv">MMI TV</span>
+                                <span class="no--link hoverPlane" data-id_project="depression_achro">Dépression Achromatique</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
-                                <span class="no--link hoverPlane" data-id_texture="inside">Inside</span>
+                                <span class="no--link hoverPlane" data-id_project="mmitv">MMI TV</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
-                                <span class="no--link hoverPlane" data-id_texture="1984analysis">1984 Analysis</span>
+                                <span class="no--link hoverPlane" data-id_project="inside">Inside</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
+                                <span class="no--link hoverPlane" data-id_project="1984analysis">1984 Analysis</span>
                             </div>
                         </div>
                         <div class="projects projects--photo">
@@ -246,10 +256,10 @@
                                 <h3>Photographs</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".19">
-                                <span class="no--link hoverPlane" data-id_texture="numeric">Numeric</span>
+                                <span class="no--link hoverPlane" data-id_project="numeric">Numeric</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".19">
-                                <span class="no--link hoverPlane" data-id_texture="argentic">Argentic</span>
+                                <span class="no--link hoverPlane" data-id_project="argentic">Argentic</span>
                             </div>
                         </div>
                     </div>

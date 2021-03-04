@@ -31,7 +31,7 @@ p {
 a {
     text-decoration: none;
     color: $lightBlue;
-    mix-blend-mode: difference;
+    // mix-blend-mode: difference;
 }
 
 #audio {
@@ -64,9 +64,18 @@ body {
     background-color: $lightBlue;
 }
 
+.transition--container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+}
+
 .project__indicator--container {
     position: absolute;
-    z-index: 10;
+    z-index: 101;
     padding: 0;
     margin: 0;
     color: $lightBlue;
@@ -79,7 +88,6 @@ body {
 .project__indicator {
     position: absolute;
     transform: translate(-50%, -52.5%) scale(0);
-    z-index: 10;
     display: none;
 }
 
@@ -112,21 +120,23 @@ body {
 }
 
 .close {
-    position: relative;
+    position: absolute;
     width: 20px;
     height: 20px;
     left: 50%;
-    top: -5%;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, -100%);
     display: flex;
     justify-content: center;
     align-items: center;
+    top: 0%;
+    z-index: 1;
+    opacity: 1;
 
     span {
         position: absolute;
         width: 100%;
         height: 1px;
-        background-color: $darkBlue;
+        background-color: $lightBlue;
 
         &:nth-child(1) {
             transform: rotate(45deg);
@@ -269,19 +279,25 @@ body {
             font-size: 6vw;
             margin: 0;
         }
-        h2:nth-child(2) {
+        h2 {
             position: absolute;
             top: 50vh;
             font-size: 1.45vw;
             margin: 0;
             opacity: .7;
+            &:hover {
+                .more, .smile {
+                    opacity: 1;
+                    transition: opacity .5s ease-in-out;
+                }
+                .smile {
+                    transition-delay: 1.25s;
+                }
+            }
         }
-        h2:nth-child(3) {
-            position: absolute;
-            top: 53vh;
-            font-size: 1vw;
-            margin: 0;
-            opacity: .7;
+        .more, .smile {
+            opacity: 0;
+            transition: opacity .5s ease-in-out;
         }
     }
 }
@@ -559,9 +575,7 @@ body {
         width: 100vw;
         height: 100vh;
         color: $darkBlue;
-        background-color: $lightBlue;
         z-index: 6;
-        opacity: 0;
         pointer-events: none;
         
         .content--container {
@@ -572,21 +586,19 @@ body {
             flex-direction: column;
             align-items: flex-start;
             justify-content: center;
+            opacity: 0;
     
             h2 {
                 text-align: left;
                 position: relative;
-                // top: 80px;
-                // left: 50%;
-                // transform: translate(-50%, 0);
                 font-size: 5vw;
                 margin: 0;
+                -webkit-text-stroke: .06vw $lightBlue !important;
             }
     
             .content {
                 width: 50%;
                 height: 60%;
-                // background-color: red;
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
@@ -603,8 +615,12 @@ body {
                 }
             }
         }
+        .transition--container {
+            z-index: -1;
+            background-color: $darkBlue;
+            transform: translateY(100%);
+        }
     }
-
 }
 
 .canvas--container {
@@ -629,12 +645,9 @@ body {
     left: 0;
     z-index: -1;
     pointer-events: none;
-    .close {
-        position: absolute;
-        top: 5%;
-        z-index: 1;
-        opacity: 0;
-    }
+    // .close {
+    //     transform: translateY(-100%);
+    // }
     .container {
         position: absolute;
         width: 100vw;
@@ -671,10 +684,11 @@ body {
                     margin: 0;
                 }
                 span {
+                    display: none;
                     font-family: Title;
                     font-size: 13px;
                     color: $lightBlue;
-                    background-color: $darkBlue;
+                    background-color: $darkerBlue;
                     padding: 5px 10px;
                     border-radius: 100px;
                     opacity: .7;
@@ -701,7 +715,7 @@ body {
             span {
                 font-family: Subtitle;
                 font-size: 13px;
-                color: $normalBlue;
+                color: $darkBlue;
                 background-color: $lightBlue;
                 padding: 5px 10px;
                 border-radius: 100px;
@@ -717,7 +731,26 @@ body {
             }
         }
     }
-    .canvasProject {
-        
+    .transition--container {
+        z-index: -1;
+        background-color: $darkBlue;
+        transform: translateY(-100%);
     }
+}
+
+
+.mobileNotAvailable {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: $darkerBlue;
+    color: $lightBlue;
+    font-family: Title;
+    font-size: 5vw;
+    z-index: 500;
 }

@@ -23,7 +23,6 @@ const contactContainer = document.querySelector('.contact--container')
 const projectCanvasContainer = document.querySelector('.projectCanvas--container')
 const projectCanvasContentContainer = document.querySelector('.projectCanvas--container .content--container')
 const scrollContainer = document.querySelector('.scroll--container')
-
 const heroContainer = document.querySelector('.hero--container')
 const aboutContainer = document.querySelector('.about--container')
 const projectsContainer = document.querySelector('.projects--container')
@@ -47,6 +46,9 @@ const buttonContact = document.querySelector(".btn--contact")
 const crossCloseContact = document.querySelector(".close__contact")
 const crossCloseProject = document.querySelector(".close__project")
 const crossClose = document.querySelectorAll(".close")
+const transitionContainerProject = document.querySelector(".projectCanvas--container .transition--container")
+const transitionContainerContact = document.querySelector(".contact--container .transition--container")
+const contentContactContainer = document.querySelector('.contact--container .content--container')
 
 const projectTitle = document.querySelector(".projectCanvas--container .title--container h3")
 const projectText = document.querySelector(".projectCanvas--container .text--container p")
@@ -82,7 +84,8 @@ const music = new Howl({
     src: ['/sound/music.mp3'],
     autoplay: false,
     loop: true,
-    volume: 1
+    stereo : 0,
+    volume: .7
 })
 
 const lightBlue = "#E9EFEF"
@@ -96,7 +99,6 @@ let THREEdarkBlue = new THREE.Color("#29363C")
 let THREEdarkerBlue = new THREE.Color("#171f22")
 
 let onMouseDown = false
-let icebergPosition = 'home'
 let isIcebergRotating = false
 let isContactActive = false
 let enterProject = false
@@ -117,6 +119,7 @@ let planeY = 0
 
 let icebergRotY = 0
 let icebergPosX = 0
+let currentRotate = 0
 
 
 const lerp = (a, b, n) => {
@@ -136,6 +139,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
         e.style.display = 'none'
     })
     projectIndicatorContainer.style.display = 'none'
+    document.querySelector('.mobileNotAvailable').style.display = "flex"
 } else {
     // false for not mobile device
     console.log("not mobile device")
@@ -312,6 +316,7 @@ const texture_jamcloud = textureLoader.load('/img/projects/jam_cloud.png')
 const texture_terredebois = textureLoader.load('/img/projects/terre_de_bois.png')
 const texture_charamushroom = textureLoader.load('/img/projects/chara_mushroom.png')
 
+const texture_depression = textureLoader.load('/img/projects/depression_achro.png')
 const texture_mmitv = textureLoader.load('/img/projects/mmi_tv.png')
 const texture_inside = textureLoader.load('/img/projects/inside.png')
 const texture_1984analysis = textureLoader.load('/img/projects/1984_analysis.png')
@@ -485,6 +490,20 @@ images.forEach(image => {
                     }
                     break
     
+                case 'depression_achro' :
+                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+                        planeRectMaterial.uniforms.uTexture2.value = texture_depression
+                        planeRectMaterial.uniforms.uTexture1.value = texture_depression
+                    } else {
+                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+                            planeRectMaterial.uniforms.uTexture2.value = texture_depression
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+                        } else {
+                            planeRectMaterial.uniforms.uTexture1.value = texture_depression
+                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+                        }
+                    }
+                    break
                 case 'mmitv' :
                     if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
                         planeRectMaterial.uniforms.uTexture2.value = texture_mmitv
@@ -581,6 +600,7 @@ images.forEach(image => {
                 icon.js.style.display = "inline-block"
                 icon.gsap.style.display = "inline-block"
                 icon.threejs.style.display = "inline-block"
+                document.querySelector('.title--container--content span').style.display = 'block'
                 break
             case 'folio2020' :
                 projectTitle.innerHTML = projectContent.folio2020.title
@@ -646,6 +666,12 @@ images.forEach(image => {
                 icon.ai.style.display = "inline-block"
                 break
 
+            case 'depression_achro' :
+                projectTitle.innerHTML = projectContent.depression_achro.title
+                projectText.innerHTML = projectContent.depression_achro.text
+                btnViewProject.style.display = "block"
+                icon.pp.style.display = "inline-block"
+                break
             case 'mmitv' :
                 projectTitle.innerHTML = projectContent.mmitv.title
                 projectText.innerHTML = projectContent.mmitv.text
@@ -678,20 +704,24 @@ images.forEach(image => {
                 break
         }
 
+        TweenMax.to(projectsContainer, 1, { opacity: 0, pointerEvents: 'none', ease: Power4.easeOut })
+        TweenMax.to(transitionContainerProject, 1.5, { yPercent: 100, ease: Expo.easeInOut })
+
         // TweenMax.to('.projectCanvas--container .container', 1.5, { backgroundColor: 'rgba(72, 113, 127, 1)', ease: Power4.easeInOut })
         // TweenMax.to('.projectCanvas--container .container', 1.5, { yPercent: -100, ease: Expo.easeInOut })
-        TweenMax.to('.content--container .title--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .75 })
-        TweenMax.to('.content--container .text--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
-        TweenMax.to('.content--container .icon--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1.25 })
-        TweenMax.to(crossCloseProject, 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1.25 })
+        TweenMax.to('.content--container .title--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .50 })
+        TweenMax.to('.content--container .text--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .75 })
+        TweenMax.to('.content--container .icon--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
+        TweenMax.to(crossCloseProject, 1.5, { yPercent: 500, ease: Power4.easeInOut, delay: .75 })
 
         projectCanvasContainer.style.position = 'absolute'
         setTimeout(() => {            
             projectCanvasContainer.style.pointerEvents = 'all'
             projectCanvasContainer.style.zIndex = 5
             cursor.forEach(e => {
-                e.style.mixBlendMode = 'normal'
+                e.style.mixBlendMode = 'hard-light'
             })
+            // cursorCanvas.style.mixBlendMode = 'normal'
         }, 500)
 
         TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
@@ -706,17 +736,22 @@ images.forEach(image => {
 })
 
 crossCloseProject.addEventListener('click', () => {
-    // TweenMax.to('.projectCanvas--container .container', 2.5, { backgroundColor: 'rgba(72, 113, 127, 0)', ease: Power4.easeInOut, delay: 1.5 })
-    // TweenMax.to('.projectCanvas--container .container', 1.5, { yPercent: 0, ease: Expo.easeInOut, delay: 1.5 })
-    TweenMax.to('.content--container .title--container', 2, { opacity: 0, ease: Power4.easeOut })
-    TweenMax.to('.content--container .text--container', 2, { opacity: 0, ease: Power4.easeOut, delay: .25 })
-    TweenMax.to('.content--container .icon--container', 2, { opacity: 0, ease: Power4.easeOut, delay: .5 })
-    TweenMax.to(crossCloseProject, 1.5, { opacity: 0, ease: Power4.easeInOut })
+    TweenMax.to(projectsContainer, 0, { opacity: 1 })
+    TweenMax.to(projectsContainer, 0, { pointerEvents: 'all', delay: 2 })
+
+    TweenMax.to(transitionContainerProject, 1.25, { yPercent: 200, ease: Expo.easeInOut, delay: .75 })
+    TweenMax.to(transitionContainerProject, 0, { yPercent: 0, delay: 2 })
+
+    TweenMax.to('.content--container .title--container', 1.5, { opacity: 0, ease: Power4.easeOut })
+    TweenMax.to('.content--container .text--container', 1.5, { opacity: 0, ease: Power4.easeOut, delay: .25 })
+    TweenMax.to('.content--container .icon--container', 1.5, { opacity: 0, ease: Power4.easeOut, delay: .5 })
+    TweenMax.to(crossCloseProject, 1.5, {yPercent: -500, ease: Power4.easeInOut })
 
     projectCanvasContainer.style.pointerEvents = 'none'
     setTimeout(() => {
         locoScroll.start()
-        projectCanvasContainer.style.zIndex = -1
+    }, 1500);
+    setTimeout(() => {
         projectCanvasContainer.style.position = 'fixed'
         btnVisitProject.style.display = "none"
         btnViewProject.style.display = "none"
@@ -732,6 +767,7 @@ crossCloseProject.addEventListener('click', () => {
         icon.lr.style.display = "none"
         icon.pp.style.display = "none"
         icon.xd.style.display = "none"
+        document.querySelector('.title--container--content span').style.display = 'none'
         cursor.forEach(e => {
             e.style.mixBlendMode = 'difference'
         })
@@ -745,6 +781,7 @@ crossCloseProject.addEventListener('click', () => {
     TweenLite.to(planeRectMesh.position, { z: 4, delay: 1 })
 
     setTimeout(() => {
+        projectCanvasContainer.style.zIndex = -1
         enterProject = false
     }, 1500)
 })
@@ -758,13 +795,13 @@ planeRectMesh.on('click', () => {
             window.open('https://www.dakumisu.fr/')
             break
         case 'foliocms':
-            window.open('')
+            window.open('http://cmsfolio.dakumisu.fr/')
             break
         case 'morpion':
-            window.open('')
+            window.open('http://morpion.dakumisu.fr/')
             break
         case 'gamovore':
-            window.open('')
+            window.open('http://gamovore.dakumisu.fr/')
             break
         case 'retrowave':
             window.open('http://retrowave.dakumisu.fr/')
@@ -780,6 +817,9 @@ planeRectMesh.on('click', () => {
             window.open('https://www.behance.net/gallery/114351103/Chara-Mushroom')
             break
 
+        case 'depression_achro':
+            window.open('https://vimeo.com/518747577')
+            break
         case 'mmitv':
             window.open('https://vimeo.com/517251095')
             break
@@ -799,14 +839,18 @@ planeRectMesh.on('click', () => {
     }
 })
 
+document.querySelector('.title--container--content span').addEventListener('click', () => {
+    window.open('https://www.awwwards.com/sites/immersions-digitales-2021')
+})
+
 planeRectMesh.on('mouseover', () => {
-    TweenMax.to(innerCursor, 1, { padding: 50, backgroundColor: 'rgba(233, 239, 239, 1)', mixBlendMode: 'difference', ease: Power4.easeOut })
+    TweenMax.to(innerCursor, 1, { padding: 50, backgroundColor: 'rgba(233, 239, 239, 1)', ease: Power4.easeOut })
     gsap.to(polygon.strokeColor, 1, { alpha: 0, ease: Power4.easeOut })
     TweenMax.to(projectIndicator, .75, { scale: 1, ease: Power4.easeOut, delay: .25 })
 })
 planeRectMesh.on('mouseout', () => {
     TweenMax.to(innerCursor, 1, { padding: 5, backgroundColor: 'rgba(233, 239, 239, 0)', ease: Power4.easeOut })
-    TweenMax.to(innerCursor, { mixBlendMode: 'normal', delay: .5 })
+    // TweenMax.to(innerCursor, { mixBlendMode: 'normal', delay: .5 })
     gsap.to(polygon.strokeColor, 1, { alpha: 1, ease: Power4.easeOut })
     TweenMax.to(projectIndicator, 1, { scale: 0, ease: Power4.easeOut })
 })
@@ -896,6 +940,12 @@ const projectContent = {
                     exercitationem harum.`
     },
 
+    depression_achro: {
+        title: 'Dépression Achromatique',
+        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
+                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
+                    exercitationem harum.`
+    },
     mmitv: {
         title: 'MMI TV',
         text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
@@ -929,7 +979,6 @@ const projectContent = {
     }
 }
 
-
 // --------------------------------------- Home Page ---------------------------------------
 navName.addEventListener('mouseenter', () => {
     TweenMax.to(navNameSpan, .4, { y: -20, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
@@ -940,7 +989,6 @@ navName.addEventListener('mouseleave', () => {
     TweenMax.to(navPseudoSpan, .4, { y: -10, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
 })
 
-
 // --------------------------------------- Contact ---------------------------------------
 buttonContact.addEventListener('click', () => {
     locoScroll.stop()
@@ -949,7 +997,10 @@ buttonContact.addEventListener('click', () => {
     TweenLite.to(icebergModel.scale, .75, { x: 0, y: 0, z: 0, ease: Back.easeIn })
     TweenLite.to(icebergModel.rotation, .75, { y: icebergRotY - Math.PI * .75,  ease: Power2.easeIn })
     
-    TweenMax.to(contactContainer, .75, { opacity: 1, pointerEvents: 'all', ease: Power4.easeInOut, delay: .75 })
+    TweenMax.to(contactContainer, 0, { pointerEvents: 'all', delay: .75 })
+    TweenMax.to(crossCloseContact, 1.5, { yPercent: 500, ease: Power4.easeInOut, delay: .75 })
+    TweenMax.to(transitionContainerContact, 1.5, { yPercent: -100, ease: Expo.easeInOut, delay: .25 })
+    TweenMax.to(contentContactContainer, 1.25, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
     
     TweenLite.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 1.5 })
 
@@ -964,8 +1015,14 @@ buttonContact.addEventListener('click', () => {
 
 crossCloseContact.addEventListener('click', () => {
     TweenLite.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
-    TweenMax.to(contactContainer, .75, { opacity: 0, pointerEvents: 'none', ease: Power4.easeInOut, delay: .5 })
-    // TweenLite.to(icebergModel.rotation, 1.25, { y: icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
+
+    TweenMax.to(transitionContainerContact, 1.25, { yPercent: -200, ease: Expo.easeInOut, delay: .5 })
+    TweenMax.to(transitionContainerContact, 0, { yPercent: 0, delay: 1.75 })
+    TweenMax.to(contactContainer, 0, { pointerEvents: 'none', delay: .5 })
+    TweenMax.to(contentContactContainer, 1.25, { opacity: 0, ease: Power4.easeInOut, delay: .25 })
+    TweenMax.to(crossCloseContact, 1.5, {yPercent: -500, ease: Power4.easeInOut })
+
+    TweenLite.to(icebergModel.rotation, 1.5, { y: icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
     TweenLite.to(icebergModel.scale, 2, { x: .28, y: .28, z: .28, ease: Elastic.easeOut, delay: 1.1 })
     
     setTimeout(() => {
@@ -974,7 +1031,9 @@ crossCloseContact.addEventListener('click', () => {
         icebergModel.position.x = icebergPosX
         canvasContainer.style.zIndex = -1
         isContactActive = false
-        isIcebergRotating = false
+        setTimeout(() => {
+            isIcebergRotating = false
+        }, 1000);
     }, 1000)
 })
 
@@ -987,6 +1046,10 @@ crossClose.forEach(e => {
         TweenMax.to('.line-1', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
         TweenMax.to('.line-2', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
     })
+})
+
+document.querySelector('.mail', () => {
+    document.style.cursor = 'default'
 })
 
 // --------------------------------------- Link ---------------------------------------
@@ -1117,14 +1180,10 @@ function outerHandleMouseEnter(e) {
     stuckY = Math.round(navItemBox.top + navItemBox.height / 2)
     isStuck = true
     TweenMax.to(innerCursor, .75, { padding: 0, opacity: 0, ease: Expo.easeOut })
-    // gsap.to(polygon.strokeColor, .5, { alpha: 1 })
-    // gsap.to(polygon.fillColor, .5, { alpha: 0 })
 }
 function outerHandleMouseLeave() {
     isStuck = false
     TweenMax.to(innerCursor, .75, { padding: 5, opacity: 1, ease: Expo.easeOut })
-    // gsap.to(polygon.strokeColor, .5, { alpha: 0 })
-    // gsap.to(polygon.fillColor, .5, { alpha: 1 })
 }
 
 paper.view.onFrame = event => {
@@ -1268,7 +1327,6 @@ const audioSwitcher = new AudioSwitcher({
     color: lightBlue
 })
 
-let musicVolumeValue
 soundButton.addEventListener('click', () => {
     if (!musicPlayed) {
         musicPlayed = true
@@ -1291,12 +1349,10 @@ const locoScroll = new LocomotiveScroll({
     direction: 'vertical',
     smooth: true,
     getDirection: true,
-    smoothMobile: true,
     scrollFromAnywhere: true,
     multiplier: 0.5,
     lerp: 0.08,
-    // reloadOnContextChange: true,
-    draggingClass: true, 
+    reloadOnContextChange: true,
     smartphone: {
         smooth: true
     },
@@ -1305,29 +1361,13 @@ const locoScroll = new LocomotiveScroll({
     }
 })
 
-// const projectsLocoScroll = new LocomotiveScroll({
-//     el: projectCanvasContainer,
-//     direction: 'vertical',
-//     smooth: true,
-//     getDirection: true,
-//     smoothMobile: true,
-//     scrollFromAnywhere: false,
-//     multiplier: 0.5,
-//     lerp: 0.08,
-//     // reloadOnContextChange: true,
-//     draggingClass: true, 
-//     smartphone: {
-//         smooth: true
-//     },
-//     tablet: {
-//         smooth: true
-//     }
-// })
-
 navAbout.addEventListener('click', () => {
     if (!navScrollActive) {
         locoScroll.scrollTo(aboutContainer)
         navScrollActive = true
+        // gsap.to(music, 1.5, { stereo: 1, ease: Power4.easeInOut})
+        // gsap.to(music, 1.5, { stereo: -.5, delay: 1.5, ease: Power4.easeInOut})
+        // gsap.to(music, 1, { stereo: 0, delay: 3, ease: Power4.easeInOut})
         setTimeout(() => {
             navScrollActive = false
         }, 1200)
@@ -1400,7 +1440,6 @@ ScrollTrigger.create({
             // isDarkMode = toggleOnProjects.isActive
             // darkMode(isDarkMode)
 
-            icebergPosition = 'projects'
             // isIcebergRotating = true
             // setTimeout(() => {
             //     isIcebergRotating = false
@@ -1415,9 +1454,10 @@ ScrollTrigger.create({
             TweenMax.to(backgroundContainer, .5, { backgroundColor: darkerBlue })
             TweenMax.to(aboutContainer, .5, { color: lightBlue })
             TweenMax.to(projectsContainer, .5, { color: lightBlue })
-            TweenMax.to(contactContainer, .5, { color: lightBlue, backgroundColor: darkerBlue })
-            TweenMax.to('.line-1', .5, { backgroundColor: lightBlue })
-            TweenMax.to('.line-2', .5, { backgroundColor: lightBlue })
+            // TweenMax.to(contactContainer, .5, { color: lightBlue })
+            // TweenMax.to(transitionContainerContact, .5, { backgroundColor: lightBlue })
+            // TweenMax.to('.line-1', .5, { backgroundColor: lightBlue })
+            // TweenMax.to('.line-2', .5, { backgroundColor: lightBlue })
             TweenMax.to(titleCat, .5, { webkitTextStrokeColor: lightBlue })
 
             titleCat.forEach(e => {
@@ -1429,7 +1469,6 @@ ScrollTrigger.create({
             // isDarkMode = true
             // darkMode(isDarkMode)
 
-            icebergPosition = 'about'
             // isIcebergRotating = true
             // setTimeout(() => {
             //     isIcebergRotating = false
@@ -1444,9 +1483,10 @@ ScrollTrigger.create({
             TweenMax.to(backgroundContainer, .5, { backgroundColor: lightBlue })
             TweenMax.to(aboutContainer, .5, { color: darkerBlue })
             TweenMax.to(projectsContainer, .5, { color: darkerBlue })
-            TweenMax.to(contactContainer, .5, { color: darkerBlue, backgroundColor: lightBlue })
-            TweenMax.to('.line-1', .5, { backgroundColor: darkerBlue })
-            TweenMax.to('.line-2', .5, { backgroundColor: darkerBlue })
+            // TweenMax.to(contactContainer, .5, { color: darkerBlue })
+            // TweenMax.to(transitionContainerContact, .5, { backgroundColor: darkerBlue })
+            // TweenMax.to('.line-1', .5, { backgroundColor: darkerBlue })
+            // TweenMax.to('.line-2', .5, { backgroundColor: darkerBlue })
             TweenMax.to(titleCat, .5, { webkitTextStrokeColor: darkerBlue })
 
             titleCat.forEach(e => {
@@ -1545,7 +1585,6 @@ window.addEventListener('resize', () => {
     rendererProject.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-let testRotate = 0
 const clock = new THREE.Clock()
 const raf = () => {
     const elapsedTime = clock.getElapsedTime()
@@ -1553,14 +1592,20 @@ const raf = () => {
     if (icebergModel) {
         icebergModel.position.y = Math.sin(elapsedTime) * .15 + .85
         if (isContactActive) {
-            testRotate += .03 * Math.PI * -0.03
-            if (testRotate < -Math.PI * 2) {
-                testRotate += Math.PI * 2
+            currentRotate += .03 * Math.PI * -0.03
+            if (currentRotate < -Math.PI * 2) {
+                currentRotate += Math.PI * 2
             }
-            icebergModel.rotation.y = testRotate
+            icebergModel.rotation.y = currentRotate
         } else {
-            TweenLite.to(icebergModel.rotation, { y: rotationOnScrollValue + rotationOnMouseValue })
+            if (!isIcebergRotating) {
+                TweenLite.to(icebergModel.rotation, { y: rotationOnScrollValue + rotationOnMouseValue })
+            }
         }
+    }
+
+    if (music) {
+        gsap.to(music, 0, { stereo: Math.sin(elapsedTime) * .4 })
     }
 
     // Render
@@ -1599,9 +1644,9 @@ raf()
 ScrollTrigger.addEventListener("refresh", () => locoScroll.update())
 ScrollTrigger.refresh()
 
-console.log(`%c ${'there\'s nothing here go away 👀'}`, `background: ${lightBlue}; color: ${normalBlue}; font-weight: bold; font-size: 1.5rem; border-radius: 100px; padding: 10% 5%`)
+console.log(`%c ${'there\'s nothing here go away 👀'}`, `background: ${lightBlue}; color: ${normalBlue}; font-weight: bold; font-size: 1.2rem; border-radius: 100px; padding: 1%`)
 
-console.log(
-    "%c ",
-    "background-image: url('http://dakumisu.fr/Ressources/moi.jpg'); background-size: cover ; padding: 50%;"
-)
+// console.log(
+//     "%c ",
+//     "background-image: url('http://dakumisu.fr/Ressources/moi.jpg'); background-size: cover; padding: 25%;"
+// )
