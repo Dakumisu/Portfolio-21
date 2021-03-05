@@ -155,17 +155,17 @@ body {
         color: $lightBlue;
         font-size: 13px;
         font-family: SubTitle;
-        width: 100% - 7%;
+        width: 93%;
         display: flex;
+        left: 3.5%;
         justify-content: space-between;
         flex-direction: row;
         align-items: center;
         position: fixed;
         z-index: 5;
-        left: 50%;
-        transform: translateX(-50%);
         mix-blend-mode: difference;
         pointer-events: none;
+        background-color: red;
     }
     &--nav__top {
         top: 5%;

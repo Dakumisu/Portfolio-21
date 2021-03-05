@@ -83,9 +83,9 @@ const navName = document.querySelector('.nav--name')
 const music = new Howl({
     src: ['/sound/music.mp3'],
     autoplay: false,
-    loop: true,
-    stereo : 0,
-    volume: .7
+    loop: true, 
+    stereo: 0,
+    volume: .7,
 })
 
 const lightBlue = "#E9EFEF"
@@ -93,10 +93,10 @@ const normalBlue = "#48717F"
 const darkBlue = "#29363C"
 const darkerBlue = "#171f22"
 
-let THREElightBlue = new THREE.Color("#E9EFEF")
-let THREEnormalBlue = new THREE.Color("#48717F")
-let THREEdarkBlue = new THREE.Color("#29363C")
-let THREEdarkerBlue = new THREE.Color("#171f22")
+const THREElightBlue = new THREE.Color("#E9EFEF")
+const THREEnormalBlue = new THREE.Color("#48717F")
+const THREEdarkBlue = new THREE.Color("#29363C")
+const THREEdarkerBlue = new THREE.Color("#171f22")
 
 let onMouseDown = false
 let isIcebergRotating = false
@@ -132,7 +132,6 @@ const map = (value, in_min, in_max, out_min, out_max) => {
 }
 
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    // true for mobile device
     console.log("mobile device")
     isOnMobile = true
     cursor.forEach(e => {
@@ -141,7 +140,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     projectIndicatorContainer.style.display = 'none'
     document.querySelector('.mobileNotAvailable').style.display = "flex"
 } else {
-    // false for not mobile device
     console.log("not mobile device")
 }
 
@@ -193,9 +191,9 @@ const projectInteraction = new Interaction(rendererProject, projectScene, camera
 
 // Lights
 // const light = new THREE.AmbientLight('#ffff00', 0.5)
-const pointLight = new THREE.PointLight(THREEdarkerBlue, .8)
-pointLight.position.set(4, -20, 0)
-// mainScene.add(pointLight)
+const pointLight = new THREE.PointLight(THREEdarkerBlue, .3)
+pointLight.position.set(0, 0, 5)
+mainScene.add(pointLight)
 const hemisphereLightUp = new THREE.HemisphereLight( THREElightBlue, THREEdarkBlue, 1.3)
 mainScene.add(hemisphereLightUp)
 const hemisphereLightDown = new THREE.HemisphereLight( THREEdarkBlue, THREEnormalBlue, 0)
@@ -736,6 +734,7 @@ images.forEach(image => {
 })
 
 crossCloseProject.addEventListener('click', () => {
+    outerHandleMouseLeave()
     TweenMax.to(projectsContainer, 0, { opacity: 1 })
     TweenMax.to(projectsContainer, 0, { pointerEvents: 'all', delay: 2 })
 
@@ -991,6 +990,7 @@ navName.addEventListener('mouseleave', () => {
 
 // --------------------------------------- Contact ---------------------------------------
 buttonContact.addEventListener('click', () => {
+    outerHandleMouseLeave()
     locoScroll.stop()
     icebergRotY = icebergModel.rotation.y
     icebergPosX = icebergModel.position.x
@@ -1014,6 +1014,7 @@ buttonContact.addEventListener('click', () => {
 })
 
 crossCloseContact.addEventListener('click', () => {
+    outerHandleMouseLeave()
     TweenLite.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
 
     TweenMax.to(transitionContainerContact, 1.25, { yPercent: -200, ease: Expo.easeInOut, delay: .5 })
@@ -1046,10 +1047,6 @@ crossClose.forEach(e => {
         TweenMax.to('.line-1', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
         TweenMax.to('.line-2', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
     })
-})
-
-document.querySelector('.mail', () => {
-    document.style.cursor = 'default'
 })
 
 // --------------------------------------- Link ---------------------------------------
@@ -1623,19 +1620,31 @@ const raf = () => {
         planeRectMaterial.uniforms.uProgress.value = elapsedTime * .5
 
     if (mouse && !enterProject) {
-        TweenLite.to(planeRectMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
-
-        hoverPositionUpdate()
-    
-        planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
-        planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
-    
-        mousePosition.x = planeX
-        mousePosition.y = planeY
-        mousePosition.z = 0
+        if (!enterProject) {
+            TweenLite.to(pointLight.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
+            TweenLite.to(planeRectMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
+            
+            hoverPositionUpdate()
+            
+            planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+            planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+            
+            mousePosition.x = planeX
+            mousePosition.y = planeY
+            mousePosition.z = 0
+        } else {
+            TweenLite.to(pointLight.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
+            hoverPositionUpdate()
+            
+            planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+            planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+            
+            mousePosition.x = planeX
+            mousePosition.y = planeY
+            mousePosition.z = 0
+        }
     }
 
-    // Call raf again on the next frame
     window.requestAnimationFrame(raf)
 }
 
@@ -1644,9 +1653,4 @@ raf()
 ScrollTrigger.addEventListener("refresh", () => locoScroll.update())
 ScrollTrigger.refresh()
 
-console.log(`%c ${'there\'s nothing here go away 👀'}`, `background: ${lightBlue}; color: ${normalBlue}; font-weight: bold; font-size: 1.2rem; border-radius: 100px; padding: 1%`)
-
-// console.log(
-//     "%c ",
-//     "background-image: url('http://dakumisu.fr/Ressources/moi.jpg'); background-size: cover; padding: 25%;"
-// )
+console.log(`%c ${'there\'s nothing here go away 👀'}`, `background: ${lightBlue}; color: ${normalBlue}; font-weight: bold; font-size: 1rem; border-radius: 100px; padding: .5%`)
