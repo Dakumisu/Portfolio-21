@@ -5,13 +5,13 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="---------------------------[Portofolio's description]---------------------------" />
-    <meta name="keywords" content="front-end, dev, web, webgl, js, mmi, portfolio, Alex, Gattefossé, Alexandre, Dakumisu" />
+    <meta name="description" content="Alex Gattefossé's portfolio 2021 - French weird student in multimedia, future Creative Dev" />
+    <meta name="keywords" content="front-end, dev, web, webgl, js, portfolio, Alex, Gattefossé, Alexandre, Dakumisu, creative" />
     <meta name="viewport" content="user-scalable=no, width=device-width" />
-    <meta name="author" content="Alexandre Gattefossé" />
-    <meta name="publisher" content="Alexandre Gattefossé" />
-    <title>Alex Gattefossé | Dakumisu</title>
-    <!-- <link rel="icon" href="favicon.png" /> -->
+    <meta name="author" content="Alex Gattefossé" />
+    <meta name="publisher" content="Alex Gattefossé" />
+    <title>Alex Gattefossé - 21'</title>
+    <link rel="icon" href="/img/icon/favicon.png" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.0/paper-core.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js" defer></script>
@@ -22,12 +22,24 @@
         <span>Mobile version come soon ... :) </span>
     </div>
 
-
     <div class="cursor cursor--small"></div>
     <canvas class="cursor cursor--canvas" resize></canvas>
     <div class="project__indicator--container">
         <span class="project__indicator project__visit">visit project</span>
         <span class="project__indicator project__view">view project</span>
+    </div>
+
+    <div class="loader--container">
+        <div class="loader--content">
+            <div class="name">
+                <span>Alex</span>
+                <span>Gattefossé</span>
+            </div>
+            <div class="loader">
+                <span>loaded</span>
+                <span class="loadValue">/000%</span>
+            </div>
+        </div>
     </div>
 
     <section class="hud--container">
@@ -117,6 +129,7 @@
                 <span id="icon__js">javascript</span>
                 <span id="icon__gsap">gsap</span>
                 <span id="icon__threejs">three.js</span>
+                <span id="icon__glsl">glsl</span>
                 <span id="icon__php">php</span>
                 <span id="icon__sql">sql</span>
                 <span id="icon__ai">illustrator</span>
@@ -177,12 +190,27 @@
                 <div class="container">
                     <h2 class="title--cat" data-scroll data-scroll-speed="1.5">About me</h2>
                     <div class="text--container" data-scroll data-scroll-speed="3">
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore dolore porro quod veniam commodi
-                            voluptatum, maiores similique architecto, animi adipisci sequi voluptate quos corporis sit
-                            repudiandae rem harum perspiciatis aut.</p>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore dolore porro quod veniam commodi
-                            voluptatum, maiores similique architecto, animi adipisci sequi voluptate quos corporis sit
-                            repudiandae rem harum perspiciatis aut.</p>
+                        <p>I’m a 19 yo french weird student in multimedia with colored hair, some nice tattoos and a
+                            little ring in the nose. Passionate about web development and creative design, I do
+                            websites, essentially in the domain of creative web development, and more cool stuff.
+                        </p>
+                        <p>Since years, I did some design stuff in my free time and as time goes by I hesitated to
+                            study design but I thought it wasn't really for me.
+                            Some time after that, being a fan of technology and computers, I discover the joys of coding
+                            with a few high school's projects.
+                            At this time I knew that I wanted to code in the future but not in which domain.
+                        </p>
+                        <p>Then I went to university, and boom. Big bang. I started to do websites, first in simple HTML
+                            / CSS then with some Javascript, some PHP, etc...
+                            Even if I've some facility in back-end development, I fell in love with front-end
+                            development and started to learn more on it in my free time (like when I was a kid with
+                            design you know).
+                        </p>
+                        <p>Finally, I discovered the existence of creative development world and knew what I’m gonna do
+                            in my future.
+                            I like to discover and learn new stuff about web creative development, and mix my kid's
+                            passion with my current passion is something that I really love to do.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -238,16 +266,13 @@
                                 <h3>Video</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
-                                <span class="no--link hoverPlane" data-id_project="depression_achro">Dépression Achromatique</span>
+                                <span class="no--link hoverPlane" data-id_project="depression_achro">Achromatic Depression</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
                                 <span class="no--link hoverPlane" data-id_project="mmitv">MMI TV</span>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
                                 <span class="no--link hoverPlane" data-id_project="inside">Inside</span>
-                            </div>
-                            <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
-                                <span class="no--link hoverPlane" data-id_project="1984analysis">1984 Analysis</span>
                             </div>
                         </div>
                         <div class="projects projects--photo">
@@ -270,8 +295,8 @@
         <section class="end--container" data-scroll-section>
             <div class="end--content">
                 <div class="container">
-                    <span>you're too deep dude there's no more content here</span>
-                    <span>click on the iceberg to rise to the surface</span>
+                    <span>you're too deep, there's no more content here !</span>
+                    <span>click on the iceberg to rise to the surface...</span>
                 </div>
             </div>
         </section>

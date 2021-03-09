@@ -27,6 +27,7 @@
     "node-sass": "^5.0.0",
     "portfinder-sync": "0.0.2",
     "postprocessing": "^6.20.3",
+    "preloader": "^4.0.3",
     "raw-loader": "^4.0.2",
     "scroll-triggers": "^4.4.0",
     "simplex-noise": "^2.4.0",

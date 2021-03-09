@@ -11,6 +11,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 import LocomotiveScroll from 'locomotive-scroll'
 import howlerjs from 'howler'
+import preload from 'preloader'
 
 import vertexShader from '../static/glsl/vertexShader.glsl'
 import fragmentShader from '../static/glsl/fragmentShader.glsl'
@@ -49,6 +50,7 @@ const crossClose = document.querySelectorAll(".close")
 const transitionContainerProject = document.querySelector(".projectCanvas--container .transition--container")
 const transitionContainerContact = document.querySelector(".contact--container .transition--container")
 const contentContactContainer = document.querySelector('.contact--container .content--container')
+const endContainerContent = document.querySelectorAll('.end--container span')
 
 const projectTitle = document.querySelector(".projectCanvas--container .title--container h3")
 const projectText = document.querySelector(".projectCanvas--container .text--container p")
@@ -63,6 +65,7 @@ const icon = {
     js: document.querySelector("#icon__js"),
     gsap: document.querySelector("#icon__gsap"),
     threejs: document.querySelector("#icon__threejs"),
+    glsl: document.querySelector("#icon__glsl"),
     php: document.querySelector("#icon__php"),
     sql: document.querySelector("#icon__sql"),
     ae: document.querySelector("#icon__ae"),
@@ -107,6 +110,7 @@ let musicPlayed = false
 let musicMuted = true
 let navScrollActive = false
 let isOnMobile = false
+let isIcebergOnEnd = false
 
 let mouseX = 0
 let mouseY = 0
@@ -132,7 +136,6 @@ const map = (value, in_min, in_max, out_min, out_max) => {
 }
 
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    console.log("mobile device")
     isOnMobile = true
     cursor.forEach(e => {
         e.style.display = 'none'
@@ -140,10 +143,9 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     projectIndicatorContainer.style.display = 'none'
     document.querySelector('.mobileNotAvailable').style.display = "flex"
 } else {
-    console.log("not mobile device")
 }
 
-console.log(window.navigator.userAgent)
+// console.log(window.navigator.userAgent)
 
 // --------------------------------------- Init THREE.js features ---------------------------------------
 // Scene
@@ -317,7 +319,6 @@ const texture_charamushroom = textureLoader.load('/img/projects/chara_mushroom.p
 const texture_depression = textureLoader.load('/img/projects/depression_achro.png')
 const texture_mmitv = textureLoader.load('/img/projects/mmi_tv.png')
 const texture_inside = textureLoader.load('/img/projects/inside.png')
-const texture_1984analysis = textureLoader.load('/img/projects/1984_analysis.png')
 
 const texture_numeric = textureLoader.load('/img/projects/numeric.png')
 const texture_argentic = textureLoader.load('/img/projects/argentic.png')
@@ -346,6 +347,7 @@ const planeRectMesh = new THREE.Mesh(
     planeRectMaterial
 )
 
+mousePosition.z = 0
 planeRectMesh.position.z = 4
 projectScene.add(planeRectMesh)
 
@@ -361,217 +363,49 @@ images.forEach(image => {
             TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power2.easeInOut })
             switch (e.target.attributes[1].value) {
                 case 'id2021' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_id2021
-                        planeRectMaterial.uniforms.uTexture1.value = texture_id2021
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_id2021
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_id2021
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_id2021)
                     break
                 case 'folio2020' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_folio2020
-                        planeRectMaterial.uniforms.uTexture1.value = texture_folio2020
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_folio2020
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_folio2020
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_folio2020)
                     break
                 case 'foliocms' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_foliocms
-                        planeRectMaterial.uniforms.uTexture1.value = texture_foliocms
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_foliocms
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_foliocms
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_foliocms)
                     break
                 case 'morpion' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_morpion
-                        planeRectMaterial.uniforms.uTexture1.value = texture_morpion
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_morpion
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_morpion
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_morpion)
                     break
                 case 'gamovore' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_gamovore
-                        planeRectMaterial.uniforms.uTexture1.value = texture_gamovore
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_gamovore
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_gamovore
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_gamovore)
                     break
                 case 'retrowave' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_retrowave
-                        planeRectMaterial.uniforms.uTexture1.value = texture_retrowave
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_retrowave
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_retrowave
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_retrowave)
                     break
     
                 case 'jamcloud' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_jamcloud
-                        planeRectMaterial.uniforms.uTexture1.value = texture_jamcloud
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_jamcloud
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_jamcloud
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_jamcloud)
                     break
                 case 'terredebois' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_terredebois
-                        planeRectMaterial.uniforms.uTexture1.value = texture_terredebois
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_terredebois
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_terredebois
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_terredebois)
                     break
                 case 'charamushroom' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_charamushroom
-                        planeRectMaterial.uniforms.uTexture1.value = texture_charamushroom
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_charamushroom
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_charamushroom
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_charamushroom)
                     break
     
                 case 'depression_achro' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_depression
-                        planeRectMaterial.uniforms.uTexture1.value = texture_depression
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_depression
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_depression
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_depression)
                     break
                 case 'mmitv' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_mmitv
-                        planeRectMaterial.uniforms.uTexture1.value = texture_mmitv
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_mmitv
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_mmitv
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_mmitv)
                     break
                 case 'inside' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_inside
-                        planeRectMaterial.uniforms.uTexture1.value = texture_inside
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_inside
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_inside
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_inside)
                     break
-                case '1984analysis' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_1984analysis
-                        planeRectMaterial.uniforms.uTexture1.value = texture_1984analysis
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_1984analysis
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_1984analysis
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
-                    break
-    
+
                 case 'numeric' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_numeric
-                        planeRectMaterial.uniforms.uTexture1.value = texture_numeric
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_numeric
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_numeric
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_numeric)
                     break
                 case 'argentic' :
-                    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
-                        planeRectMaterial.uniforms.uTexture2.value = texture_argentic
-                        planeRectMaterial.uniforms.uTexture1.value = texture_argentic
-                    } else {
-                        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
-                            planeRectMaterial.uniforms.uTexture2.value = texture_argentic
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
-                        } else {
-                            planeRectMaterial.uniforms.uTexture1.value = texture_argentic
-                            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
-                        }
-                    }
+                    changePlaneTexture(texture_argentic)
                     break
             }
         }
@@ -598,6 +432,7 @@ images.forEach(image => {
                 icon.js.style.display = "inline-block"
                 icon.gsap.style.display = "inline-block"
                 icon.threejs.style.display = "inline-block"
+                icon.glsl.style.display = "inline-block"
                 document.querySelector('.title--container--content span').style.display = 'block'
                 break
             case 'folio2020' :
@@ -682,12 +517,6 @@ images.forEach(image => {
                 btnViewProject.style.display = "block"
                 icon.pp.style.display = "inline-block"
                 break
-            case '1984analysis' :
-                projectTitle.innerHTML = projectContent.analysis1984.title
-                projectText.innerHTML = projectContent.analysis1984.text
-                btnViewProject.style.display = "block"
-                icon.pp.style.display = "inline-block"
-                break
 
             case 'numeric' :
                 projectTitle.innerHTML = projectContent.numeric.title
@@ -705,8 +534,6 @@ images.forEach(image => {
         TweenMax.to(projectsContainer, 1, { opacity: 0, pointerEvents: 'none', ease: Power4.easeOut })
         TweenMax.to(transitionContainerProject, 1.5, { yPercent: 100, ease: Expo.easeInOut })
 
-        // TweenMax.to('.projectCanvas--container .container', 1.5, { backgroundColor: 'rgba(72, 113, 127, 1)', ease: Power4.easeInOut })
-        // TweenMax.to('.projectCanvas--container .container', 1.5, { yPercent: -100, ease: Expo.easeInOut })
         TweenMax.to('.content--container .title--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .50 })
         TweenMax.to('.content--container .text--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .75 })
         TweenMax.to('.content--container .icon--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
@@ -719,7 +546,6 @@ images.forEach(image => {
             cursor.forEach(e => {
                 e.style.mixBlendMode = 'hard-light'
             })
-            // cursorCanvas.style.mixBlendMode = 'normal'
         }, 500)
 
         TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
@@ -759,6 +585,7 @@ crossCloseProject.addEventListener('click', () => {
         icon.js.style.display = "none"
         icon.gsap.style.display = "none"
         icon.threejs.style.display = "none"
+        icon.glsl.style.display = "none"
         icon.php.style.display = "none"
         icon.sql.style.display = "none"
         icon.ae.style.display = "none"
@@ -774,9 +601,7 @@ crossCloseProject.addEventListener('click', () => {
 
     TweenLite.to(planeRectMaterial.uniforms.uFrequency.value, 3, { x: 5, y: 5, ease: Expo.easeOut })
     TweenLite.to(planeRectMaterial.uniforms.uFrequency.value, 2, { x: 0, y: 0, ease: Expo.easeOut, delay: 1 })
-
-    TweenLite.to(planeRectMaterial.uniforms.uAlpha, 1.5, { value: 0, ease: Power4.easeOut })
-    
+    TweenLite.to(planeRectMaterial.uniforms.uAlpha, 1.25, { value: 0, ease: Power4.easeOut })
     TweenLite.to(planeRectMesh.position, { z: 4, delay: 1 })
 
     setTimeout(() => {
@@ -791,7 +616,7 @@ planeRectMesh.on('click', () => {
             window.open('https://www.immersions-digitales.fr/')
             break
         case 'folio2020':
-            window.open('https://www.dakumisu.fr/')
+            window.open('http://2020.dakumisu.fr/')
             break
         case 'foliocms':
             window.open('http://cmsfolio.dakumisu.fr/')
@@ -825,9 +650,6 @@ planeRectMesh.on('click', () => {
         case 'inside':
             window.open('https://vimeo.com/517253872')
             break
-        case '1984analysis':
-            window.open('https://vimeo.com/517256420')
-            break
 
         case 'numeric':
             window.open('https://www.behance.net/gallery/114356673/Packaging-Photography')
@@ -842,6 +664,21 @@ document.querySelector('.title--container--content span').addEventListener('clic
     window.open('https://www.awwwards.com/sites/immersions-digitales-2021')
 })
 
+function changePlaneTexture(texture) {
+    if (planeRectMaterial.uniforms.uAlpha.value <= .15) {
+        planeRectMaterial.uniforms.uTexture2.value = texture
+        planeRectMaterial.uniforms.uTexture1.value = texture
+    } else {
+        if (planeRectMaterial.uniforms.uDispFactor.value >= .0 && planeRectMaterial.uniforms.uDispFactor.value <= .8) {
+            planeRectMaterial.uniforms.uTexture2.value = texture
+            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 1, ease: Power4.easeOut })
+        } else {
+            planeRectMaterial.uniforms.uTexture1.value = texture
+            TweenLite.to(planeRectMaterial.uniforms.uDispFactor, 1, { value: 0, ease: Power4.easeOut })
+        }
+    }
+}
+
 planeRectMesh.on('mouseover', () => {
     TweenMax.to(innerCursor, 1, { padding: 50, backgroundColor: 'rgba(233, 239, 239, 1)', ease: Power4.easeOut })
     gsap.to(polygon.strokeColor, 1, { alpha: 0, ease: Power4.easeOut })
@@ -849,8 +686,7 @@ planeRectMesh.on('mouseover', () => {
 })
 planeRectMesh.on('mouseout', () => {
     TweenMax.to(innerCursor, 1, { padding: 5, backgroundColor: 'rgba(233, 239, 239, 0)', ease: Power4.easeOut })
-    // TweenMax.to(innerCursor, { mixBlendMode: 'normal', delay: .5 })
-    gsap.to(polygon.strokeColor, 1, { alpha: 1, ease: Power4.easeOut })
+    gsap.to(polygon.strokeColor, 1, { alpha: 1, ease: Power4.easeInOut })
     TweenMax.to(projectIndicator, 1, { scale: 0, ease: Power4.easeOut })
 })
 
@@ -859,6 +695,7 @@ function viewSize() {
     let planeZ = planeRectMesh.position.z
     let distance = cameraZ - planeZ
     let aspect = camera.aspect
+
     let vFov = camera.fov * Math.PI / 180
     let height = 2 * Math.tan(vFov / 2) * distance
     let width = height * aspect
@@ -885,96 +722,62 @@ function mapCursorYPlane(in_min, in_max, out_min, out_max) {
 const projectContent = {
     id2021: {
         title: 'Immersions Digitales 2021',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `Website created for the 2021 technical university open days at Tarbes (France) entitled "Immersions Digitales". This project taught me a lot of knowledge and made me step-up very quickly. I’m really proud of it and gave me the confidence and motivation that I needed.`
     },
     folio2020: {
         title: 'Portfolio 2020',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `First real portfolio made in 3 weeks on my first year of university. It was my first time using Javascript and libraries for a project. I took fun to do it even if I'm not proud of it.`
     },
     foliocms: {
         title: 'CMS Portfolio',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `First website using SQL for a project in university. This one taught some stuff about back-end development but it mostly made me realize that I like front-end development more than back-end.`
     },
     morpion: {
         title: 'E-Morpion',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `Tic-tac-toe in English, little game made for a project in PHP. Have fun :)`
     },
     gamovore: {
         title: 'Gamovore',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `Website regrouping some games sorted by genre. It’s my first project using PHP and taught me a lot of stuff like the syntax and the logical of this language.`
     },
     retrowave: {
         title: 'Retrowave\'s Trending',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `This site has been created as part of a university project. After making the design, the site was developed in HTML, CSS, and JavaScript. My teammate and I tried to create as many CSS animations as possible.`
     },
 
     jamcloud: {
         title: 'Jam Cloud',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `First web design made for a fictional website to play instruments online with random people called “Jam Cloud”. As you can see, I often use minimal and simple design to get an uncluttered render.`
     },
     terredebois: {
         title: 'Terre de Bois',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `Graphical charter made for a cooperative of eco-builders called “Terre de Bois” (seems logical). I made a very minimalist design because it’s just my favorite trend. I like minimalist stuff in general. Minimalism is cool.`
     },
     charamushroom: {
         title: 'Chara-Mushroom',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `Take a mushroom from Mario’s world and any character you want and mix them… You’ll get a beautiful chara-mushroom ! This project was an exercise on my first year in my university, I took a lot of fun doing this and it also taught me how to use Adobe Illustrator.`
     },
 
     depression_achro: {
-        title: 'Dépression Achromatique',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        title: 'Achromatic Depression',
+        text: `Short film about someone who take medicine to reduce her depression (feel the joy). However, this one have several side effects like achromatopsia and a loss of emotions per example. This short film was inspired by the book “The Giver” and has been produced in one day and edited in one evening. Good session :)`
     },
     mmitv: {
         title: 'MMI TV',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `First motion design made in 4 days, for an outdated newspaper for a work in my university. This project taught me a lot about motion design and Adobe After Effects compositing.`
     },
     inside: {
         title: 'Inside',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
-    },
-    analysis1984: {
-        title: '1984 Analysis',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `Background video made for an immersion for a university project of a VR game. For this, I used the plugin Universe from Red Giant.`
     },
 
     numeric: {
         title: 'Numeric photography',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `Packaging photography with a watch and an environment in connection with the model’s color. It’s my first photography on a macro model and I’m pretty proud of the render. I like to take photographs, it’s a hobby that I’ll always enjoy I think, mostly because I’m a bit nostalgic and I like to immortalize random moments of my life.`
     },
     argentic: {
         title: 'Argentic photography',
-        text: `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsam possimus tenetur voluptatem ipsa,
-                    error similique saepe itaque quae culpa labore ullam nobis fuga doloribus iste officia, quidem quasi
-                    exercitationem harum.`
+        text: `Honestly I prefer take argentic photographs because I have a retro side, I generally prefer retro stuff that’s why I take a lot of photographs like this. I love the physical side of these and the way that they're unique. Also, I prefer to take pictures with models than landscapes.`
     }
 }
 
@@ -1008,6 +811,7 @@ buttonContact.addEventListener('click', () => {
     setTimeout(() => {
         isContactActive = true
         canvasContainer.style.zIndex = 7
+        canvasContainer.style.pointerEvents = 'none'
         icebergModel.scale.set(.30, .35, .30)
         icebergModel.position.x = 25
     }, 1000)
@@ -1030,7 +834,13 @@ crossCloseContact.addEventListener('click', () => {
         locoScroll.start()
         icebergModel.scale.set(0.00001, 0.00001, 0.00001)
         icebergModel.position.x = icebergPosX
-        canvasContainer.style.zIndex = -1
+        if (isIcebergOnEnd) {
+            canvasContainer.style.pointerEvents = 'all'
+            canvasContainer.style.zIndex = 1
+        } else {
+            canvasContainer.style.pointerEvents = 'none'
+            canvasContainer.style.zIndex = -1
+        }
         isContactActive = false
         setTimeout(() => {
             isIcebergRotating = false
@@ -1076,7 +886,6 @@ if (!isOnMobile) {
             if (icebergModel && !isIcebergRotating && !isContactActive) {
                 TweenLite.to(icebergModel.rotation, 1, { z: posYNormalize / 30 })
                 rotationOnMouseValue = posXNormalize / 10
-                // icebergModel.rotation.y = rotationValue
             }
             TweenMax.set(hudContainerTop, { x: posXNormalize * -3 })
             TweenMax.set(hudContainerTop, { y: posYNormalize * 3 })
@@ -1362,9 +1171,6 @@ navAbout.addEventListener('click', () => {
     if (!navScrollActive) {
         locoScroll.scrollTo(aboutContainer)
         navScrollActive = true
-        // gsap.to(music, 1.5, { stereo: 1, ease: Power4.easeInOut})
-        // gsap.to(music, 1.5, { stereo: -.5, delay: 1.5, ease: Power4.easeInOut})
-        // gsap.to(music, 1, { stereo: 0, delay: 3, ease: Power4.easeInOut})
         setTimeout(() => {
             navScrollActive = false
         }, 1200)
@@ -1403,13 +1209,25 @@ ScrollTrigger.create({
     trigger: aboutContainer,
     scroller: scrollContainer,
     start: "25% bottom", 
-    // endTrigger: "html",
-    end: "68% bottom",
+    end: "50% bottom",
     scrub: true,
     onUpdate: selfAbout => {
         icebergModel.position.x = 4 + selfAbout.progress * -4
-        // icebergModel.rotation.y = rotationYHome + selfAbout.progress * rotationValue
-        // rotationValue = rotationYHome + selfAbout.progress * rotationYAbout
+    }
+})
+
+ScrollTrigger.create({
+    trigger: aboutContainer,
+    scroller: scrollContainer,
+    start: "60% bottom", 
+    end: "150% bottom",
+    scrub: true,
+    onUpdate: selfAbout => {
+        if (selfAbout.progress <= .5) {
+            canvasContainer.style.opacity = 1 - selfAbout.progress
+        } else {
+            canvasContainer.style.opacity = selfAbout.progress
+        }
     }
 })
 
@@ -1417,13 +1235,10 @@ ScrollTrigger.create({
     trigger: projectsContainer,
     scroller: scrollContainer,
     start: "25% bottom",
-    // endTrigger: "html",
     end: "50% bottom",
     scrub: true,
     onUpdate: selfProjects => {
-        icebergModel.position.x = 0 + selfProjects.progress * -7
-        // icebergModel.rotation.y = rotationYAbout + selfProjects.progress * rotationValue
-        // rotationValue = rotationYAbout + selfProjects.progress * rotationYProjects
+        icebergModel.position.x = 0 + selfProjects.progress * -7.5
     }
 })
 
@@ -1434,63 +1249,29 @@ ScrollTrigger.create({
     endTrigger: "html",
     onToggle: toggleOnProjects => {
         if (toggleOnProjects.isActive) {
-            // isDarkMode = toggleOnProjects.isActive
-            // darkMode(isDarkMode)
-
-            // isIcebergRotating = true
-            // setTimeout(() => {
-            //     isIcebergRotating = false
-            // }, 1700)
-            // rotationValue = rotationYProjects
             TweenLite.to(hemisphereLightUp, .5, { intensity: 0 })
             TweenLite.to(hemisphereLightDown, .5, { intensity: .9 })
-            // timelineIcebergPosProjects.restart()
-            // TweenLite.to(icebergModel.position, 3.5, { x: -8, ease: Elastic.easeOut })
-            // TweenLite.to(icebergModel.rotation, 1.5, { y: rotationValue, ease: Power2.easeOut })
 
             TweenMax.to(backgroundContainer, .5, { backgroundColor: darkerBlue })
             TweenMax.to(aboutContainer, .5, { color: lightBlue })
             TweenMax.to(projectsContainer, .5, { color: lightBlue })
-            // TweenMax.to(contactContainer, .5, { color: lightBlue })
-            // TweenMax.to(transitionContainerContact, .5, { backgroundColor: lightBlue })
-            // TweenMax.to('.line-1', .5, { backgroundColor: lightBlue })
-            // TweenMax.to('.line-2', .5, { backgroundColor: lightBlue })
             TweenMax.to(titleCat, .5, { webkitTextStrokeColor: lightBlue })
 
             titleCat.forEach(e => {
-                e.style.webkitTextStrokeWidth = ".06vw "
+                e.style.webkitTextStrokeWidth = ".5px"
             })
-
-            // timelineIcebergPosAbout.pause()
         } else {
-            // isDarkMode = true
-            // darkMode(isDarkMode)
-
-            // isIcebergRotating = true
-            // setTimeout(() => {
-            //     isIcebergRotating = false
-            // }, 1700)
-            // rotationValue = rotationYAbout
             TweenLite.to(hemisphereLightUp, .5, { intensity: 1.3 })
             TweenLite.to(hemisphereLightDown, .5, { intensity: 0 })
-            // timelineIcebergPosAbout.restart()
-            // TweenLite.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-            // TweenLite.to(icebergModel.rotation, 1.5, { y: rotationValue, ease: Power2.easeOut })
 
             TweenMax.to(backgroundContainer, .5, { backgroundColor: lightBlue })
             TweenMax.to(aboutContainer, .5, { color: darkerBlue })
             TweenMax.to(projectsContainer, .5, { color: darkerBlue })
-            // TweenMax.to(contactContainer, .5, { color: darkerBlue })
-            // TweenMax.to(transitionContainerContact, .5, { backgroundColor: darkerBlue })
-            // TweenMax.to('.line-1', .5, { backgroundColor: darkerBlue })
-            // TweenMax.to('.line-2', .5, { backgroundColor: darkerBlue })
             TweenMax.to(titleCat, .5, { webkitTextStrokeColor: darkerBlue })
 
             titleCat.forEach(e => {
-                e.style.webkitTextStrokeWidth = ".08vw "
+                e.style.webkitTextStrokeWidth = "1.5px"
             })
-
-            // timelineIcebergPosProjects.pause()
         }
     },
 })
@@ -1501,17 +1282,32 @@ ScrollTrigger.create({
     start: "30% bottom",
     end: "bottom bottom",
     scrub: true,
-    onUpdate: self => {
-        icebergModel.position.x = -7 + self.progress * 7
-        rotationOnScrollValue += (self.getVelocity() * -.00003) * Math.PI
-        // icebergModel.rotation.y = rotationYProjects + self.progress * rotationValue
-        // rotationValue = rotationYProjects + self.progress * rotationYEnd
-        if (self.progress >= .3) {
+    onUpdate: selfEnd => {
+        icebergModel.position.x = -7.5 + selfEnd.progress * 7
+        rotationOnScrollValue += (selfEnd.getVelocity() * -.00003) * Math.PI
+        if (selfEnd.progress >= .3) {
+            isIcebergOnEnd = true
             canvasContainer.style.zIndex = 1
             canvasContainer.style.pointerEvents = 'all'
         } else {
+            isIcebergOnEnd = false
             canvasContainer.style.zIndex = -1
             canvasContainer.style.pointerEvents = 'none'
+        }
+    }
+})
+
+ScrollTrigger.create({
+    trigger: endContainer,
+    scroller: scrollContainer,
+    start: "75% bottom",
+    endTrigger: "html",
+    scrub: true,
+    onToggle: selfEnd => {
+        if (selfEnd.isActive) {
+            TweenMax.to(endContainerContent, .5, { opacity: 1, ease: Power4.easeInOut })
+        } else {
+            TweenMax.to(endContainerContent, .5, { opacity: 0, ease: Power4.easeOut })
         }
     }
 })
@@ -1621,6 +1417,7 @@ const raf = () => {
 
     if (mouse && !enterProject) {
         if (!enterProject) {
+
             TweenLite.to(pointLight.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
             TweenLite.to(planeRectMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
             
@@ -1631,7 +1428,7 @@ const raf = () => {
             
             mousePosition.x = planeX
             mousePosition.y = planeY
-            mousePosition.z = 0
+            
         } else {
             TweenLite.to(pointLight.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
             hoverPositionUpdate()
@@ -1641,7 +1438,6 @@ const raf = () => {
             
             mousePosition.x = planeX
             mousePosition.y = planeY
-            mousePosition.z = 0
         }
     }
 
@@ -1653,4 +1449,4 @@ raf()
 ScrollTrigger.addEventListener("refresh", () => locoScroll.update())
 ScrollTrigger.refresh()
 
-console.log(`%c ${'there\'s nothing here go away 👀'}`, `background: ${lightBlue}; color: ${normalBlue}; font-weight: bold; font-size: 1rem; border-radius: 100px; padding: .5%`)
+console.log(`%c ${'there\'s nothing here go away 👀'}`, `color: ${lightBlue}; font-weight: bold; font-size: 1rem;`)

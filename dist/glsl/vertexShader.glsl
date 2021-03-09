@@ -13,7 +13,7 @@ vec3 deformationCurve(vec3 position, vec2 uv, vec2 offset) {
 }
 
 void main() {
-    vUv = uv + (uOffset * .2);
+    vUv = uv + (uOffset * .1);
 
     vec4 wavePosition = modelMatrix * vec4(position, 1.);
     
