@@ -2,11 +2,10 @@ import './style.css'
 import './locomotiveBase.css'
 
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { Interaction } from 'three.interaction'
 import { BloomEffect, EffectComposer, ShaderPass, EffectPass, RenderPass } from "postprocessing"
-import { TweenLite } from 'gsap'
+import { TweenLite, TweenMax, gsap } from 'gsap'
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 import LocomotiveScroll from 'locomotive-scroll'
