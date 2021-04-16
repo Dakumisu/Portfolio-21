@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "Portfolio",
   "main": "app.js",
+  "author": "Alex Gattefossé",
+  "license": "ISC",
   "scripts": {
     "build": "webpack --config ./bundler/webpack.prod.js",
     "dev": "webpack serve --config ./bundler/webpack.dev.js",
     "sass": "sass --watch ./static/scss/main.scss:./src/style.css --style compressed"
   },
-  "author": "Alex Gattefossé",
-  "license": "ISC",
   "dependencies": {
     "@babel/core": "^7.12.10",
     "@babel/preset-env": "^7.12.11",
