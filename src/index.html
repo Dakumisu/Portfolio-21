@@ -5,13 +5,21 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="google" content="notranslate"/>
     <meta name="description" content="Hello I'm Alex Gattefossé (a.k.a. Dakumisu), a weird french student in multimedia doing websites. This is my 2021's portfolio so check it out 👀" />
-    <meta name="keywords" content="front-end, dev, web, webgl, js, portfolio, Alex, Gattefossé, Alexandre, Dakumisu, creative" />
-    <meta name="viewport" content="user-scalable=no, width=device-width" />
+    <meta name="keywords" content="web, webdeveloppement, javascript, ux, ui, experience, animation, interaction, microinteraction, html, css, scss, webpack, webgl, threejs, glsl, shaders, noise, student, motion, motiondesign, graphic, graphicdesign, illustrator, photoshop, aftereffects, xd, premierepro, digital, audiovisuel, etudessuperieures, design, immersionsdigitales, dutmmi, tarbes, multimédia, iut, dut, art, technologie, adobe, mmi, front-end, dev, webgl, js, portfolio, Alex, Gattefossé, Alexandre, Dakumisu, creative" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,shrink-to-fit=no"/>
     <meta name="author" content="Alex Gattefossé" />
     <meta name="publisher" content="Alex Gattefossé" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#171f22">
+    <meta name="msapplication-navbutton-color" content="#171f22">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#171f22">
     <title>Alex Gattefossé - 21'</title>
     <link rel="icon" href="/img/icon/favicon.png" />
+    <link rel="apple-touch-icon" href="/img/icon/favicon.png" />
+    <meta property="og:image" content="/img/icon/favicon.png" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.0/paper-core.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js" defer></script>
@@ -31,13 +39,14 @@
 
     <div class="loader--container">
         <div class="loader--content">
-            <div class="name">
-                <span>Alex</span>
-                <span>Gattefossé</span>
-            </div>
             <div class="loader">
-                <span>loaded</span>
-                <span class="loadValue">/000%</span>
+                <div class="mask-container">
+                    <span class="loading-text_1">Hey you 👋</span>
+                    <span class="loading-text_2">My portfolio is loading ...</span>
+                    <span class="loading-text_3">Here you go :)</span>
+                    <span class="loading-text_4">Have a nice day... or night 👀</span>
+                </div>
+                <span class="loadValue">000</span>
             </div>
         </div>
     </div>
@@ -192,7 +201,7 @@
                     <div class="text--container" data-scroll data-scroll-speed="3">
                         <p>I’m a 19 yo french weird student in multimedia with colored hair, some nice tattoos and a
                             little ring in the nose. Passionate about web development and creative design, I do
-                            websites, essentially in the domain of creative web development, and more cool stuff.
+                            websites, mainly in the domain of creative web development, and more cool stuff.
                         </p>
                         <p>Since years, I did some design stuff in my free time and as time goes by I hesitated to
                             study design but I thought it wasn't really for me.

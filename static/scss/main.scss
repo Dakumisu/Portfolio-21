@@ -1,5 +1,5 @@
 @import 'utils/_font';
-@import 'utils/var';
+@import 'utils/_var';
 
 * {
     user-select: none;
@@ -646,7 +646,7 @@ body {
                 position: relative;
                 font-size: 75px;
                 margin: 0;
-                -webkit-text-stroke: .06vw $lightBlue !important;
+                -webkit-text-stroke: .5px $lightBlue !important;
             }
     
             .content {
@@ -790,7 +790,6 @@ body {
 
 .loader {
     &--container {
-        display: none;
         width: 100vw;
         height: 100vh;
         position: fixed;
@@ -798,7 +797,7 @@ body {
         left: 0;
         background-color: $normalBlue;
         z-index: 10;
-        // display: flex;
+        display: flex;
         align-items: center;
         justify-content: center;
     }
@@ -806,27 +805,93 @@ body {
         position: relative;
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
         width: 80%;
-        height: 80%;
 
-        .name, .loader {
+        .loader {
             position: relative;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
+            justify-content: center;
             color: $lightBlue;
             font-family: Subtitle;
+            .mask-container {
+                z-index: 1;
+                position: absolute;
+                width: 90vw;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                span {
+                    padding: 5px 0;
+                    transform: translateY(200%);
+                }
+                .loading-text {
+                    &_1 {
+                        opacity: 1;
+                    }
+                    &_2, &_3, &_4 {
+                        opacity: 0;
+                    }
+                }
+            }
             span {
-                font-size: 13px;
+                font-size: 16px;
             }
             .loadValue {
-                font-size: 25px;
+                font-size: 150px;
+                color: $darkBlue;
+                opacity: .7;
+                transform: translateY(5%);
+                font-style: italic;
             }
         }
     }
 }
+
+// .loader {
+//     &--container {
+//         // display: none;
+//         width: 100vw;
+//         height: 100vh;
+//         position: fixed;
+//         top: 0;
+//         left: 0;
+//         background-color: $normalBlue;
+//         z-index: 10;
+//         display: flex;
+//         align-items: center;
+//         justify-content: center;
+//     }
+//     &--content {
+//         position: relative;
+//         display: flex;
+//         flex-direction: column;
+//         align-items: flex-start;
+//         justify-content: space-between;
+//         width: 80%;
+//         height: 80%;
+
+//         .name, .loader {
+//             position: relative;
+//             display: flex;
+//             flex-direction: column;
+//             align-items: flex-start;
+//             color: $lightBlue;
+//             font-family: Subtitle;
+//             span {
+//                 font-size: 13px;
+//             }
+//             .loadValue {
+//                 font-size: 25px;
+//             }
+//         }
+//     }
+// }
 
 .mobileNotAvailable {
     display: none;

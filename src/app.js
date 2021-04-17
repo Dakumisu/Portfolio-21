@@ -10,10 +10,114 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 import LocomotiveScroll from 'locomotive-scroll'
 import howlerjs from 'howler'
-import preload from 'preloader'
+import createjs from 'preload-js'
 
 import vertexShader from '../static/glsl/vertexShader.glsl'
 import fragmentShader from '../static/glsl/fragmentShader.glsl'
+
+
+// Preload
+let queue = new createjs.LoadQueue(false)
+
+// images
+queue.loadFile('/img/projects/argentic.png')
+queue.loadFile('/img/projects/chara_mushroom.png')
+queue.loadFile('/img/projects/depression_achro.png')
+queue.loadFile('/img/projects/folio_2020.png')
+queue.loadFile('/img/projects/folio_cms.png')
+queue.loadFile('/img/projects/gamovore.png')
+queue.loadFile('/img/projects/id_2021.png')
+queue.loadFile('/img/projects/inside.png')
+queue.loadFile('/img/projects/jam_cloud.png')
+queue.loadFile('/img/projects/mmi_tv.png')
+queue.loadFile('/img/projects/morpion.png')
+queue.loadFile('/img/projects/numeric.png')
+queue.loadFile('/img/projects/retrowave.png')
+queue.loadFile('/img/projects/terre_de_bois.png')
+queue.loadFile('/img/moi_Default.jpg')
+queue.loadFile('/img/moi_Hover.png')
+queue.loadFile('/img/displacement/disp.jpg')
+
+// glsl
+queue.loadFile('/glsl/fragmentShader.glsl')
+queue.loadFile('/glsl/vertexShader.glsl')
+
+// font
+queue.loadFile('/font/AndBasR.woff')
+queue.loadFile('/font/AndBasR.woff2')
+queue.loadFile('/font/Chapaza.woff')
+queue.loadFile('/font/Chapaza.woff2')
+queue.loadFile('/font/Rossanova.woff')
+queue.loadFile('/font/Rossanova.woff2')
+
+// 3D
+queue.loadFile('/3D/iceberg_2.0.gltf')
+
+// Sound
+queue.loadFile('/sound/music.mp3')
+
+// Librairies
+queue.loadFile(GLTFLoader)
+queue.loadFile(Interaction)
+queue.loadFile(ScrollTrigger)
+queue.loadFile(LocomotiveScroll)
+
+queue.on("progress", event => {
+    let progressValue =  Math.floor(event.progress*100)
+    progressLoaderValue.innerHTML = `<span class="loadValue">${ progressValue }</span>`
+
+    if (progressValue <= 20 && progressValue >= 0) {
+
+    } else if (progressValue <= 60 && progressValue > 20) {
+        maskContainer.forEach(element => {
+            TweenMax.to(element, .5, { yPercent: -100 })
+        })
+        TweenMax.to(loadingText_1, .25, { opacity: 0 })
+        TweenMax.to(loadingText_2, .25, { opacity: 1 })
+    } else if (progressValue <= 90 && progressValue > 60) {
+        maskContainer.forEach(element => {
+            TweenMax.to(element, .5, { yPercent: -200 })
+        })
+        TweenMax.to(loadingText_2, .25, { opacity: 0 })
+        TweenMax.to(loadingText_3, .25, { opacity: 1 })
+    } else {
+        maskContainer.forEach(element => {
+            TweenMax.to(element, .5, { yPercent: -300 })
+        })
+        TweenMax.to(loadingText_3, .25, { opacity: 0 })
+        TweenMax.to(loadingText_4, .25, { opacity: 1 })
+    }
+})
+
+queue.on("complete", () => {
+    TweenMax.to(progressLoaderValue, .75, { opacity: 0 })
+    TweenMax.to(loadingText_4, .75, { opacity: 0, delay: 1})
+    TweenMax.to(loaderContainer, 2, { yPercent: -200, ease: Expo.easeInOut, delay: 1 })
+
+    TweenMax.from(hudContainerTop, 1, { yPercent: -300, ease: Expo.easeOut, delay: 2.5 })
+    TweenMax.from(hudContainerBottom, 1, { yPercent: 300, ease: Expo.easeOut, delay: 2.5 })
+    
+    TweenMax.from(heroContentTitle, 1, { yPercent: 50, opacity: 0, ease: Power3.easeOut, delay: 2.75 })
+    TweenMax.from(heroContentSubtitle, 1, { yPercent: 50, opacity: 0, ease: Power3.easeOut, delay: 3 })
+
+    TweenLite.from(icebergModel.scale, 2, { x: 0, y: 0, z: 0, ease: Elastic.easeOut.config(1, 0.5), delay: 3 })
+    TweenLite.from(icebergModel.rotation, 6, { y: 0, ease: Elastic.easeOut, delay: 3 })
+
+    setTimeout(() => {
+        locoScroll.start()
+    }, 4000);
+})
+
+const loaderContainer = document.querySelector('.loader--container')
+const progressLoaderValue = document.querySelector('.loadValue')
+const maskContainer = document.querySelectorAll('.mask-container span')
+const loadingText_1 = document.querySelector('.loading-text_1')
+const loadingText_2 = document.querySelector('.loading-text_2')
+const loadingText_3 = document.querySelector('.loading-text_3')
+const loadingText_4 = document.querySelector('.loading-text_4')
+
+const heroContentTitle = document.querySelector('.hero--content h1')
+const heroContentSubtitle = document.querySelector('.hero--content h2')
 
 const backgroundContainer = document.querySelector('.background--container')
 const hudContainer = document.querySelector('.hud--container')
@@ -141,10 +245,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     })
     projectIndicatorContainer.style.display = 'none'
     document.querySelector('.mobileNotAvailable').style.display = "flex"
-} else {
 }
-
-// console.log(window.navigator.userAgent)
 
 // --------------------------------------- Init THREE.js features ---------------------------------------
 // Scene
@@ -222,42 +323,11 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         icebergModel.traverse((e) => {
             if (e.isMesh) e.material = toonMaterial
         })
+
         icebergModel.scale.set(.28, .28, .28)
         icebergModel.rotation.y = rotationYHome
         icebergModel.position.set(4, 1, 0)
-        // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
-        // gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
         mainScene.add(icebergModel)
-        
-        // timelineIcebergPosHome
-        //     .to(icebergModel.position, 3.5, { x: 4, ease: Elastic.easeOut })
-        //     .to(icebergModel.rotation, 3.5, { y: rotationYHome, ease: Power2.easeOut }, 0)
-        //     .progress(1)
-            
-        // timelineIcebergPosAbout
-        //     .to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-        //     .to(icebergModel.rotation, 3.5, { y: rotationYAbout, ease: Power2.easeOut }, 0)
-        //     .progress(1)
-            
-        // timelineIcebergPosProjects
-        //     .to(icebergModel.position, 3.5, { x: -8, ease: Elastic.easeOut })
-        //     .to(icebergModel.rotation, 3.5, { y: rotationYProjects, ease: Power2.easeOut }, 0)
-        //     .progress(1)
-        
-
-
-        // icebergModel.on('click', () => {
-        //canvasContainer.style.zIndex = -1
-        //if (icebergModel.scale.x == 0.02) {
-            // gsap.to(icebergModel.scale, 1, { x: 0.28, y: 0.28, z: 0.28, ease: Elastic.easeOut })
-            // gsap.to(icebergModel.position, 1, { x: 4, ease: Elastic.easeOut })
-            // gsap.to(icebergModel.rotation, .5, { y: icebergModel.rotation.y += Math.PI * .25, ease: Power4.easeInOut })
-        //} 
-        // else if (icebergModel.scale.x == 0.28) {
-        //     gsap.to(icebergModel.scale, 1, { x: 0.02, y: 0.02, z: 0.02, ease: Expo.easeInOut })
-        //     gsap.to(icebergModel.position, 1, { x: 0, ease: Expo.easeInOut })
-        // }
-        // })
 
         icebergModel.on('click', () => {
             if (!navScrollActive) {
@@ -268,30 +338,6 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
                 }, 1200)
             }
         })
-
-        // icebergModel.on('mousedown', () => {
-        //     if (icebergModel.scale.x == 0.28) {
-        //         onMouseDown = true
-        //         mouseOnModel = true
-        //         gsap.to(icebergModel.scale, 1, { x: .28 + .1, y: .28 + .1, z: .28 + .1, ease: Power4.easeOut })
-        //     }
-        // })
-        
-        // icebergModel.on('mouseup', () => {
-        //     if (mouseOnModel) {
-        //         if (mouseOnModel) {
-        //             test()
-        //         }
-        //         mouseOnModel = false
-        //     }
-        // })
-        
-        // icebergModel.on('mouseout', () => {
-        //     if (mouseOnModel) {
-        //         test()
-        //     }
-        //     mouseOnModel = false
-        // })
     }
 )
 
@@ -1165,6 +1211,8 @@ const locoScroll = new LocomotiveScroll({
         smooth: true
     }
 })
+
+locoScroll.stop()
 
 navAbout.addEventListener('click', () => {
     if (!navScrollActive) {
