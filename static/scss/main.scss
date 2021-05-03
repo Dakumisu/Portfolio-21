@@ -31,7 +31,6 @@ p {
 a {
     text-decoration: none;
     color: $lightBlue;
-    // mix-blend-mode: difference;
 }
 
 #audio {
@@ -48,6 +47,28 @@ svg .darker {
     color: $darkerBlue;
 }
 
+.lineHoverEffect {
+    position: relative;
+    margin: 0;
+    span {
+        &::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            bottom: 0;
+            left: 0;
+            background: $lightBlue;
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.75s ease;
+        }
+    }
+    &:hover span::after {
+        transform-origin: bottom left;
+        transform: scaleX(1);
+    }
+}
 
 body {
     margin: 0;
@@ -78,11 +99,11 @@ body {
     z-index: 101;
     padding: 0;
     margin: 0;
-    color: $lightBlue;
+    color: $darkerBlue;
     font-family: Title;
     width: 100px;
     pointer-events: none;
-    mix-blend-mode: exclusion;
+    // mix-blend-mode: exclusion;
 }
 
 .project__indicator {
@@ -110,8 +131,8 @@ body {
 }
 
 .cursor--canvas {
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     z-index: 101;
 }
 
@@ -150,6 +171,29 @@ body {
     }
 }
 
+.scrollIndication--container {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    bottom: 8%;
+    left: 50%;
+    font-family: Subtitle;
+    color: $darkerBlue;
+
+    .span--container {
+        &_2 {
+            span {
+                opacity: 0;
+            }
+            transform: translateY(15px);
+        }
+        &_1, &_2 {
+            position: absolute;
+            display: flex;
+        }
+    }
+}
+
 
 .hud {
     &--nav__top,  &--nav__bottom {
@@ -164,7 +208,7 @@ body {
         align-items: center;
         position: fixed;
         z-index: 5;
-        mix-blend-mode: difference;
+        color: $darkerBlue;
         pointer-events: none;
     }
     &--nav__top {
@@ -315,7 +359,7 @@ body {
         overflow: hidden;
         top: 0;
         width: 100vw;
-        height: fit-content;
+        height: 230vh;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -500,19 +544,14 @@ body {
         height: fit-content;
         display: flex;
         flex-direction: column;
-        // align-self: center;
-        // justify-self: center;
         justify-content: center;
-        // align-items: center;
     }
     &--content {
         width: 100vw;
         height: 200vh;
         display: flex;
         justify-content: center;
-        // background-color: rgba($lightBlue, .5);
         .container {
-            // background-color: rgba($darkBlue, .5);
             width: 80vw;
             height: 50vh;
             display: flex;
@@ -541,7 +580,7 @@ body {
                     span {
                         height: 1px;
                         width: 50%;
-                        background: $lightBlue;
+                        background: $darkerBlue;
                         padding: 0;
                     }
                     h3 {
@@ -556,16 +595,10 @@ body {
                 }
                 .hoverPlane {
                     font-size: 40px;
-                    opacity: .7;
-                    transition: opacity .5s ease-in-out;
+                    opacity: .75;
                     margin: 0;
                     padding: 10px 10px 10px 0;
                     font-family: Subtitle;
-
-                    &:hover {
-                        opacity: 1;
-                        transition: opacity .75 ease-in-out;
-                    }
                 }
                 .project--container {
                     text-align: left;
@@ -657,7 +690,7 @@ body {
                 align-items: flex-start;
                 margin: 3% 0 0 0;
                 a{
-                    padding: 10px 0;
+                    margin: 10px 0;
                 }
                 span {
                     text-align: center;
@@ -733,19 +766,23 @@ body {
                     font-family: Subtitle;
                     margin: 0;
                 }
-                span {
-                    display: none;
-                    font-family: Title;
-                    font-size: 13px;
-                    color: $lightBlue;
-                    background-color: $darkerBlue;
-                    padding: 5px 10px;
-                    border-radius: 100px;
-                    opacity: .7;
-                    transition: opacity .5s ease-in-out;
-                    &:hover {
-                        opacity: 1;
+                .link--container {
+                    display: flex;
+                    span {
+                        display: none;
+                        font-family: Title;
+                        font-size: 13px;
+                        color: $lightBlue;
+                        background-color: $darkerBlue;
+                        padding: 5px 10px;
+                        margin: 0 5px 0 0;
+                        border-radius: 100px;
+                        opacity: .7;
                         transition: opacity .5s ease-in-out;
+                        &:hover {
+                            opacity: 1;
+                            transition: opacity .5s ease-in-out;
+                        }
                     }
                 }
             }
@@ -852,46 +889,6 @@ body {
         }
     }
 }
-
-// .loader {
-//     &--container {
-//         // display: none;
-//         width: 100vw;
-//         height: 100vh;
-//         position: fixed;
-//         top: 0;
-//         left: 0;
-//         background-color: $normalBlue;
-//         z-index: 10;
-//         display: flex;
-//         align-items: center;
-//         justify-content: center;
-//     }
-//     &--content {
-//         position: relative;
-//         display: flex;
-//         flex-direction: column;
-//         align-items: flex-start;
-//         justify-content: space-between;
-//         width: 80%;
-//         height: 80%;
-
-//         .name, .loader {
-//             position: relative;
-//             display: flex;
-//             flex-direction: column;
-//             align-items: flex-start;
-//             color: $lightBlue;
-//             font-family: Subtitle;
-//             span {
-//                 font-size: 13px;
-//             }
-//             .loadValue {
-//                 font-size: 25px;
-//             }
-//         }
-//     }
-// }
 
 .mobileNotAvailable {
     display: none;

@@ -1,10 +1,11 @@
 import './style.css'
 import './locomotiveBase.css'
 
+import { VarConst, VarLet } from '../static/js/var.js'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { Interaction } from 'three.interaction'
-import { BloomEffect, EffectComposer, ShaderPass, EffectPass, RenderPass } from "postprocessing"
+// import { BloomEffect, EffectComposer, ShaderPass, EffectPass, RenderPass } from "postprocessing"
 import { TweenLite, TweenMax, gsap } from 'gsap'
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
@@ -12,8 +13,21 @@ import LocomotiveScroll from 'locomotive-scroll'
 import howlerjs from 'howler'
 import createjs from 'preload-js'
 
+import { polygon as PolygonCursor, outerHandleMouseLeave } from '../static/js/cursor.js'
+import { AudioSwitcher } from '../static/js/audio.js'
+
 import vertexShader from '../static/glsl/vertexShader.glsl'
 import fragmentShader from '../static/glsl/fragmentShader.glsl'
+
+
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    VarLet.isOnMobile = true
+    VarConst.cursor.forEach(e => {
+        e.style.display = 'none'
+    })
+    VarConst.projectIndicatorContainer.style.display = 'none'
+    document.querySelector('.mobileNotAvailable').style.display = "flex"
+}
 
 
 // Preload
@@ -64,127 +78,65 @@ queue.loadFile(LocomotiveScroll)
 
 queue.on("progress", event => {
     let progressValue =  Math.floor(event.progress*100)
-    progressLoaderValue.innerHTML = `<span class="loadValue">${ progressValue }</span>`
+    if (progressValue < 10)
+        VarConst.progressLoaderValue.innerHTML = `<span class="loadValue">00${ progressValue }</span>`
+    else if (progressValue < 100)
+        VarConst.progressLoaderValue.innerHTML = `<span class="loadValue">0${ progressValue }</span>`
+    else
+        VarConst.progressLoaderValue.innerHTML = `<span class="loadValue">${ progressValue }</span>`
 
     if (progressValue <= 20 && progressValue >= 0) {
 
     } else if (progressValue <= 60 && progressValue > 20) {
-        maskContainer.forEach(element => {
+        VarConst.maskContainer.forEach(element => {
             TweenMax.to(element, .5, { yPercent: -100 })
         })
-        TweenMax.to(loadingText_1, .25, { opacity: 0 })
-        TweenMax.to(loadingText_2, .25, { opacity: 1 })
+        TweenMax.to(VarConst.loadingText_1, .25, { opacity: 0 })
+        TweenMax.to(VarConst.loadingText_2, .25, { opacity: 1 })
     } else if (progressValue <= 90 && progressValue > 60) {
-        maskContainer.forEach(element => {
+        VarConst.maskContainer.forEach(element => {
             TweenMax.to(element, .5, { yPercent: -200 })
         })
-        TweenMax.to(loadingText_2, .25, { opacity: 0 })
-        TweenMax.to(loadingText_3, .25, { opacity: 1 })
+        TweenMax.to(VarConst.loadingText_2, .25, { opacity: 0 })
+        TweenMax.to(VarConst.loadingText_3, .25, { opacity: 1 })
     } else {
-        maskContainer.forEach(element => {
+        VarConst.maskContainer.forEach(element => {
             TweenMax.to(element, .5, { yPercent: -300 })
         })
-        TweenMax.to(loadingText_3, .25, { opacity: 0 })
-        TweenMax.to(loadingText_4, .25, { opacity: 1 })
+        TweenMax.to(VarConst.loadingText_3, .25, { opacity: 0 })
+        TweenMax.to(VarConst.loadingText_4, .25, { opacity: 1 })
     }
 })
 
 queue.on("complete", () => {
-    TweenMax.to(progressLoaderValue, .75, { opacity: 0 })
-    TweenMax.to(loadingText_4, .75, { opacity: 0, delay: 1})
-    TweenMax.to(loaderContainer, 2, { yPercent: -200, ease: Expo.easeInOut, delay: 1 })
+    TweenMax.to(VarConst.progressLoaderValue, .75, { opacity: 0 })
+    TweenMax.to(VarConst.loadingText_4, .75, { opacity: 0, delay: 1})
+    TweenMax.to(VarConst.loaderContainer, 2, { yPercent: -200, ease: Expo.easeInOut, delay: 1 })
 
-    TweenMax.from(hudContainerTop, 1, { yPercent: -300, ease: Expo.easeOut, delay: 2.5 })
-    TweenMax.from(hudContainerBottom, 1, { yPercent: 300, ease: Expo.easeOut, delay: 2.5 })
+    TweenMax.from(VarConst.hudContainerTop, 1, { yPercent: -300, ease: Expo.easeOut, delay: 2.5 })
+    TweenMax.from(VarConst.hudContainerBottom, 1, { yPercent: 300, ease: Expo.easeOut, delay: 2.5 })
+    TweenMax.from(VarConst.scrollIndication_1, 1.5, { yPercent: 300, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Expo.easeOut, delay: 3.5 })
+    TweenMax.from(VarConst.scrollIndication_2, 1.5, { yPercent: 300, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Expo.easeOut, delay: 3.5 })
     
-    TweenMax.from(heroContentTitle, 1, { yPercent: 50, opacity: 0, ease: Power3.easeOut, delay: 2.75 })
-    TweenMax.from(heroContentSubtitle, 1, { yPercent: 50, opacity: 0, ease: Power3.easeOut, delay: 3 })
+    TweenMax.from(VarConst.heroContentTitle, 1, { yPercent: 50, opacity: 0, ease: Power3.easeOut, delay: 2.75 })
+    TweenMax.from(VarConst.heroContentSubtitle, 1, { yPercent: 50, opacity: 0, ease: Power3.easeOut, delay: 3 })
 
     TweenLite.from(icebergModel.scale, 2, { x: 0, y: 0, z: 0, ease: Elastic.easeOut.config(1, 0.5), delay: 3 })
     TweenLite.from(icebergModel.rotation, 6, { y: 0, ease: Elastic.easeOut, delay: 3 })
 
     setTimeout(() => {
         locoScroll.start()
+        TweenMax.to(VarConst.scrollIndication_1, 1, { y: -15, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3.easeInOut, delay: 2.5, repeat: -1, repeatDelay: 2 })
+        TweenMax.to(VarConst.scrollIndication_2, 1, { y: -15, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3.easeInOut, delay: 2.5, repeat: -1, repeatDelay: 2 })
     }, 4000);
 })
 
-const loaderContainer = document.querySelector('.loader--container')
-const progressLoaderValue = document.querySelector('.loadValue')
-const maskContainer = document.querySelectorAll('.mask-container span')
-const loadingText_1 = document.querySelector('.loading-text_1')
-const loadingText_2 = document.querySelector('.loading-text_2')
-const loadingText_3 = document.querySelector('.loading-text_3')
-const loadingText_4 = document.querySelector('.loading-text_4')
-
-const heroContentTitle = document.querySelector('.hero--content h1')
-const heroContentSubtitle = document.querySelector('.hero--content h2')
-
-const backgroundContainer = document.querySelector('.background--container')
-const hudContainer = document.querySelector('.hud--container')
-const hudContainerTop = document.querySelector('.hud--container .hud--nav__top')
-const hudContainerBottom = document.querySelector('.hud--container .hud--nav__bottom')
-const contactContainer = document.querySelector('.contact--container')
-const projectCanvasContainer = document.querySelector('.projectCanvas--container')
-const projectCanvasContentContainer = document.querySelector('.projectCanvas--container .content--container')
-const scrollContainer = document.querySelector('.scroll--container')
-const heroContainer = document.querySelector('.hero--container')
-const aboutContainer = document.querySelector('.about--container')
-const projectsContainer = document.querySelector('.projects--container')
-const endContainer = document.querySelector('.end--container')
-
-const canvasContainer = document.querySelector('.canvas--container')
-const mainCanvas = document.querySelector('.webgl')
-const projectCanvas = document.querySelector('.canvasProject')
-
-const navAbout = document.querySelector('.about')
-const navProjects = document.querySelector('.projects')
-const navNameSpan = document.querySelectorAll('.spanName--container span')
-const navPseudoSpan = document.querySelectorAll('.spanPseudo--container span')
-const soundButton = document.querySelector('.hud--sound--btn')
-
-const titleCat = document.querySelectorAll('.title--cat')
-const outerLinkItems = document.querySelectorAll(".outer--link")
-const innerLinkItems = document.querySelectorAll(".inner--link")
-const noLinkItems = document.querySelectorAll(".no--link")
-const buttonContact = document.querySelector(".btn--contact")
-const crossCloseContact = document.querySelector(".close__contact")
-const crossCloseProject = document.querySelector(".close__project")
-const crossClose = document.querySelectorAll(".close")
-const transitionContainerProject = document.querySelector(".projectCanvas--container .transition--container")
-const transitionContainerContact = document.querySelector(".contact--container .transition--container")
-const contentContactContainer = document.querySelector('.contact--container .content--container')
-const endContainerContent = document.querySelectorAll('.end--container span')
-
-const projectTitle = document.querySelector(".projectCanvas--container .title--container h3")
-const projectText = document.querySelector(".projectCanvas--container .text--container p")
-const projectIndicatorContainer = document.querySelector(".project__indicator--container")
-const btnViewProject = document.querySelector(".project__view")
-const btnVisitProject = document.querySelector(".project__visit")
-const projectIndicator = document.querySelectorAll(".project__indicator")
-
-const icon = {
-    html: document.querySelector("#icon__html"),
-    sass: document.querySelector("#icon__sass"),
-    js: document.querySelector("#icon__js"),
-    gsap: document.querySelector("#icon__gsap"),
-    threejs: document.querySelector("#icon__threejs"),
-    glsl: document.querySelector("#icon__glsl"),
-    php: document.querySelector("#icon__php"),
-    sql: document.querySelector("#icon__sql"),
-    ae: document.querySelector("#icon__ae"),
-    ai: document.querySelector("#icon__ai"),
-    lr: document.querySelector("#icon__lr"),
-    pp: document.querySelector("#icon__pp"),
-    xd: document.querySelector("#icon__xd")
-}
-
-const cursor = document.querySelectorAll('.cursor')
-const cursorCanvas = document.querySelector(".cursor--canvas")
-const innerCursor = document.querySelector(".cursor--small")
-const mouse = new THREE.Vector2()
-const mousePosition = new THREE.Vector3()
-
-const navName = document.querySelector('.nav--name')
+// window.addEventListener('mousewheel', () => {
+//     if (showScrollIndication) {
+//         TweenMax.to(scrollIndication, 1, { opacity: 0, ease: Power3.easeOut })
+//         showScrollIndication = false
+//     }
+// })
 
 const music = new Howl({
     src: ['/sound/music.mp3'],
@@ -193,59 +145,6 @@ const music = new Howl({
     stereo: 0,
     volume: .7,
 })
-
-const lightBlue = "#E9EFEF"
-const normalBlue = "#48717F"
-const darkBlue = "#29363C"
-const darkerBlue = "#171f22"
-
-const THREElightBlue = new THREE.Color("#E9EFEF")
-const THREEnormalBlue = new THREE.Color("#48717F")
-const THREEdarkBlue = new THREE.Color("#29363C")
-const THREEdarkerBlue = new THREE.Color("#171f22")
-
-let onMouseDown = false
-let isIcebergRotating = false
-let isContactActive = false
-let enterProject = false
-let currentProject
-let musicPlayed = false
-let musicMuted = true
-let navScrollActive = false
-let isOnMobile = false
-let isIcebergOnEnd = false
-
-let mouseX = 0
-let mouseY = 0
-let posX = 0
-let posY = 0
-let posXNormalize = 0
-let posYNormalize = 0
-let planeX = 0
-let planeY = 0
-
-let icebergRotY = 0
-let icebergPosX = 0
-let currentRotate = 0
-
-
-const lerp = (a, b, n) => {
-    return (1 - n) * a + n * b
-}
-const map = (value, in_min, in_max, out_min, out_max) => {
-    return (
-        ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
-    )
-}
-
-if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-    isOnMobile = true
-    cursor.forEach(e => {
-        e.style.display = 'none'
-    })
-    projectIndicatorContainer.style.display = 'none'
-    document.querySelector('.mobileNotAvailable').style.display = "flex"
-}
 
 // --------------------------------------- Init THREE.js features ---------------------------------------
 // Scene
@@ -266,12 +165,12 @@ projectScene.add(camera)
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
-    canvas: mainCanvas,
+    canvas: VarConst.mainCanvas,
     antialias: true,
     alpha: true
 })
 const rendererProject = new THREE.WebGLRenderer({
-    canvas: projectCanvas,
+    canvas: VarConst.projectCanvas,
     antialias: true,
     alpha: true
 })
@@ -279,26 +178,25 @@ renderer.setSize(sizes.width, sizes.height)
 rendererProject.setSize(sizes.width, sizes.height)
 
 // Post Processing
-const composer = new EffectComposer(rendererProject)
-const renderPass = new RenderPass(projectScene, camera)
-composer.addPass(renderPass)
+// const composer = new EffectComposer(rendererProject)
+// const renderPass = new RenderPass(projectScene, camera)
+// composer.addPass(renderPass)
 
-const customPass = new ShaderPass({ vertexShader, fragmentShader })
-customPass.renderToScreen = true
-composer.addPass(customPass)
+// const customPass = new ShaderPass({ vertexShader, fragmentShader })
+// customPass.renderToScreen = true
+// composer.addPass(customPass)
 
 // Interaction
 const mainInteraction = new Interaction(renderer, mainScene, camera)
 const projectInteraction = new Interaction(rendererProject, projectScene, camera)
 
 // Lights
-// const light = new THREE.AmbientLight('#ffff00', 0.5)
-const pointLight = new THREE.PointLight(THREEdarkerBlue, .3)
+const pointLight = new THREE.PointLight(VarConst.THREEdarkerBlue, .3)
 pointLight.position.set(0, 0, 5)
 mainScene.add(pointLight)
-const hemisphereLightUp = new THREE.HemisphereLight( THREElightBlue, THREEdarkBlue, 1.3)
+const hemisphereLightUp = new THREE.HemisphereLight(VarConst.THREElightBlue, VarConst.THREEdarkBlue, 1.3)
 mainScene.add(hemisphereLightUp)
-const hemisphereLightDown = new THREE.HemisphereLight( THREEdarkBlue, THREEnormalBlue, 0)
+const hemisphereLightDown = new THREE.HemisphereLight(VarConst.THREEdarkBlue, VarConst.THREEnormalBlue, 0)
 mainScene.add(hemisphereLightDown)
 
 // Texture Loader
@@ -306,7 +204,7 @@ const textureLoader = new THREE.TextureLoader()
 
 // Materials
 const toonMaterial = new THREE.MeshToonMaterial()
-toonMaterial.color = THREElightBlue
+toonMaterial.color = VarConst.THREElightBlue
 toonMaterial.aoMapIntensity = 1
 
 // --------------------------------------- Init Iceberg ---------------------------------------
@@ -315,13 +213,13 @@ let icebergModel
 
 let rotationYHome = Math.PI * 1.7
 let rotationValue = 0
-let rotationOnMouseValue = 0
 let rotationOnScrollValue = rotationYHome
 
 gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         icebergModel = addIcebergModel.scene
         icebergModel.traverse((e) => {
-            if (e.isMesh) e.material = toonMaterial
+            if (e.isMesh)
+                e.material = toonMaterial
         })
 
         icebergModel.scale.set(.28, .28, .28)
@@ -330,23 +228,23 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         mainScene.add(icebergModel)
 
         icebergModel.on('click', () => {
-            if (!navScrollActive) {
-                locoScroll.scrollTo(heroContainer)
-                navScrollActive = true
+            if (!VarLet.navScrollActive) {
+                locoScroll.scrollTo(VarConst.heroContainer)
+                VarLet.navScrollActive = true
                 setTimeout(() => {
-                    navScrollActive = false
+                    VarLet.navScrollActive = false
                 }, 1200)
             }
         })
     }
 )
 
-function test() {
-    gsap.to(icebergModel.scale, 1, { x: .28, y: .28, z: .28, ease: Power4.easeOut})
-    setTimeout(() => {
-        onMouseDown = false
-    }, 1000)
-}
+// function test() {
+//     gsap.to(icebergModel.scale, 1, { x: .28, y: .28, z: .28, ease: Power4.easeOut})
+//     setTimeout(() => {
+//         onMouseDown = false
+//     }, 1000)
+// }
 
 
 // --------------------------------------- Planes ---------------------------------------
@@ -356,6 +254,8 @@ const texture_foliocms = textureLoader.load('/img/projects/folio_cms.png')
 const texture_morpion = textureLoader.load('/img/projects/morpion.png')
 const texture_gamovore = textureLoader.load('/img/projects/gamovore.png')
 const texture_retrowave = textureLoader.load('/img/projects/retrowave.png')
+const texture_particlesfollow = textureLoader.load('/img/projects/particles_follow.png')
+const texture_fod = textureLoader.load('/img/projects/fod.png')
 
 const texture_jamcloud = textureLoader.load('/img/projects/jam_cloud.png')
 const texture_terredebois = textureLoader.load('/img/projects/terre_de_bois.png')
@@ -392,203 +292,245 @@ const planeRectMesh = new THREE.Mesh(
     planeRectMaterial
 )
 
-mousePosition.z = 0
+// VarConst.planePosition.z = 0
 planeRectMesh.position.z = 4
 projectScene.add(planeRectMesh)
 
 document.addEventListener("mousemove", e => {
-    mouse.x = (e.clientX / window.innerWidth) * 2 - 1
-    mouse.y = - (e.clientY / window.innerHeight) * 2 + 1
+    VarConst.mouse.x = (e.clientX / window.innerWidth) * 2 - 1
+    VarConst.mouse.y = - (e.clientY / window.innerHeight) * 2 + 1
 })
 
-const images = document.querySelectorAll('.hoverPlane')
-images.forEach(image => {
+VarConst.images.forEach(image => {
     image.addEventListener('mouseenter', (e) => {
-        if (!enterProject) {
+        if (!VarLet.enterProject) {
             TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power2.easeInOut })
+            TweenMax.to(VarConst.images, .75, { opacity: .25, ease: Power3.easeOut })
             switch (e.target.attributes[1].value) {
                 case 'id2021' :
                     changePlaneTexture(texture_id2021)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'folio2020' :
                     changePlaneTexture(texture_folio2020)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'foliocms' :
                     changePlaneTexture(texture_foliocms)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'morpion' :
                     changePlaneTexture(texture_morpion)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'gamovore' :
                     changePlaneTexture(texture_gamovore)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'retrowave' :
                     changePlaneTexture(texture_retrowave)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
+                    break
+                case 'particles_follow' :
+                    changePlaneTexture(texture_particlesfollow)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
+                    break
+                case 'fod' :
+                    changePlaneTexture(texture_fod)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
     
                 case 'jamcloud' :
                     changePlaneTexture(texture_jamcloud)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'terredebois' :
                     changePlaneTexture(texture_terredebois)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'charamushroom' :
                     changePlaneTexture(texture_charamushroom)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
     
                 case 'depression_achro' :
                     changePlaneTexture(texture_depression)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'mmitv' :
                     changePlaneTexture(texture_mmitv)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'inside' :
                     changePlaneTexture(texture_inside)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
 
                 case 'numeric' :
                     changePlaneTexture(texture_numeric)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
                 case 'argentic' :
                     changePlaneTexture(texture_argentic)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
             }
         }
     })
 
     image.addEventListener('mouseleave', () => {
-        if (!enterProject) {
+        if (!VarLet.enterProject) {
             TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 0, ease: Power4.easeOut })
+            TweenMax.to(VarConst.images, .75, { opacity: .75, ease: Power3.easeOut })
         }
     })
 
     image.addEventListener('click', (e) => {
-        enterProject = true
-        currentProject = e.target.attributes[1].value
+        VarLet.enterProject = true
+        TweenMax.to(VarConst.images, .75, { opacity: .75, ease: Power3.easeOut })
+        VarLet.currentProject = e.target.attributes[1].value
         locoScroll.stop()
 
         switch (e.target.attributes[1].value) {
             case 'id2021' :
-                projectTitle.innerHTML = projectContent.id2021.title
-                projectText.innerHTML = projectContent.id2021.text
-                btnVisitProject.style.display = "block"
-                icon.html.style.display = "inline-block"
-                icon.sass.style.display = "inline-block"
-                icon.js.style.display = "inline-block"
-                icon.gsap.style.display = "inline-block"
-                icon.threejs.style.display = "inline-block"
-                icon.glsl.style.display = "inline-block"
-                document.querySelector('.title--container--content span').style.display = 'block'
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.id2021.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.id2021.text
+                VarConst.btnVisitProject.style.display = "block"
+                VarConst.icon.html.style.display = "inline-block"
+                VarConst.icon.sass.style.display = "inline-block"
+                VarConst.icon.js.style.display = "inline-block"
+                VarConst.icon.gsap.style.display = "inline-block"
+                VarConst.icon.threejs.style.display = "inline-block"
+                VarConst.icon.glsl.style.display = "inline-block"
+                VarConst.icon.awwward.style.display = 'block'
+                VarConst.icon.github.style.display = 'block'
+                VarLet.link = VarConst.githubLink.id
                 break
             case 'folio2020' :
-                projectTitle.innerHTML = projectContent.folio2020.title
-                projectText.innerHTML = projectContent.folio2020.text
-                btnVisitProject.style.display = "block"
-                btnVisitProject.style.display = "block"
-                icon.html.style.display = "inline-block"
-                icon.sass.style.display = "inline-block"
-                icon.js.style.display = "inline-block"
-                icon.php.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.folio2020.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.folio2020.text
+                VarConst.btnVisitProject.style.display = "block"
+                VarConst.btnVisitProject.style.display = "block"
+                VarConst.icon.html.style.display = "inline-block"
+                VarConst.icon.sass.style.display = "inline-block"
+                VarConst.icon.js.style.display = "inline-block"
+                VarConst.icon.php.style.display = "inline-block"
                 break
             case 'foliocms' :
-                projectTitle.innerHTML = projectContent.foliocms.title
-                projectText.innerHTML = projectContent.foliocms.text
-                btnVisitProject.style.display = "block"
-                btnVisitProject.style.display = "block"
-                icon.html.style.display = "inline-block"
-                icon.sass.style.display = "inline-block"
-                icon.php.style.display = "inline-block"
-                icon.sql.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.foliocms.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.foliocms.text
+                VarConst.btnVisitProject.style.display = "block"
+                VarConst.btnVisitProject.style.display = "block"
+                VarConst.icon.html.style.display = "inline-block"
+                VarConst.icon.sass.style.display = "inline-block"
+                VarConst.icon.php.style.display = "inline-block"
+                VarConst.icon.sql.style.display = "inline-block"
                 break
             case 'morpion' :
-                projectTitle.innerHTML = projectContent.morpion.title
-                projectText.innerHTML = projectContent.morpion.text
-                btnVisitProject.style.display = "block"
-                icon.html.style.display = "inline-block"
-                icon.sass.style.display = "inline-block"
-                icon.php.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.morpion.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.morpion.text
+                VarConst.btnVisitProject.style.display = "block"
+                VarConst.icon.html.style.display = "inline-block"
+                VarConst.icon.sass.style.display = "inline-block"
+                VarConst.icon.php.style.display = "inline-block"
                 break
             case 'gamovore' :
-                projectTitle.innerHTML = projectContent.gamovore.title
-                projectText.innerHTML = projectContent.gamovore.text
-                btnVisitProject.style.display = "block"
-                icon.html.style.display = "inline-block"
-                icon.sass.style.display = "inline-block"
-                icon.php.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.gamovore.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.gamovore.text
+                VarConst.btnVisitProject.style.display = "block"
+                VarConst.icon.html.style.display = "inline-block"
+                VarConst.icon.sass.style.display = "inline-block"
+                VarConst.icon.php.style.display = "inline-block"
                 break
             case 'retrowave' :
-                projectTitle.innerHTML = projectContent.retrowave.title
-                projectText.innerHTML = projectContent.retrowave.text
-                btnVisitProject.style.display = "block"
-                icon.html.style.display = "inline-block"
-                icon.sass.style.display = "inline-block"
-                icon.js.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.retrowave.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.retrowave.text
+                VarConst.btnVisitProject.style.display = "block"
+                VarConst.icon.html.style.display = "inline-block"
+                VarConst.icon.sass.style.display = "inline-block"
+                VarConst.icon.js.style.display = "inline-block"
+                VarConst.icon.github.style.display = 'block'
+                VarLet.link = VarConst.githubLink.retrowave
+                break
+            case 'particles_follow' :
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.particles_follow.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.particles_follow.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.processing.style.display = "inline-block"
+                VarConst.icon.java.style.display = "inline-block"
+                break
+            case 'fod' :
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.fod.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.fod.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.unity.style.display = "inline-block"
+                VarConst.icon.csharp.style.display = "inline-block"
                 break
 
             case 'jamcloud' :
-                projectTitle.innerHTML = projectContent.jamcloud.title
-                projectText.innerHTML = projectContent.jamcloud.text
-                btnViewProject.style.display = "block"
-                icon.xd.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.jamcloud.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.jamcloud.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.xd.style.display = "inline-block"
                 break
             case 'terredebois' :
-                projectTitle.innerHTML = projectContent.terredebois.title
-                projectText.innerHTML = projectContent.terredebois.text
-                btnViewProject.style.display = "block"
-                icon.ai.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.terredebois.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.terredebois.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.ai.style.display = "inline-block"
                 break
             case 'charamushroom' :
-                projectTitle.innerHTML = projectContent.charamushroom.title
-                projectText.innerHTML = projectContent.charamushroom.text
-                btnViewProject.style.display = "block"
-                icon.ai.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.charamushroom.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.charamushroom.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.ai.style.display = "inline-block"
                 break
 
             case 'depression_achro' :
-                projectTitle.innerHTML = projectContent.depression_achro.title
-                projectText.innerHTML = projectContent.depression_achro.text
-                btnViewProject.style.display = "block"
-                icon.pp.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.depression_achro.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.depression_achro.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.pp.style.display = "inline-block"
                 break
             case 'mmitv' :
-                projectTitle.innerHTML = projectContent.mmitv.title
-                projectText.innerHTML = projectContent.mmitv.text
-                btnViewProject.style.display = "block"
-                icon.ae.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.mmitv.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.mmitv.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.ae.style.display = "inline-block"
                 break
             case 'inside' :
-                projectTitle.innerHTML = projectContent.inside.title
-                projectText.innerHTML = projectContent.inside.text
-                btnViewProject.style.display = "block"
-                icon.pp.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.inside.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.inside.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.pp.style.display = "inline-block"
                 break
 
             case 'numeric' :
-                projectTitle.innerHTML = projectContent.numeric.title
-                projectText.innerHTML = projectContent.numeric.text
-                btnViewProject.style.display = "block"
-                icon.lr.style.display = "inline-block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.numeric.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.numeric.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.lr.style.display = "inline-block"
                 break
             case 'argentic' :
-                projectTitle.innerHTML = projectContent.argentic.title
-                projectText.innerHTML = projectContent.argentic.text
-                btnViewProject.style.display = "block"
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.argentic.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.argentic.text
+                VarConst.btnViewProject.style.display = "block"
                 break
         }
 
-        TweenMax.to(projectsContainer, 1, { opacity: 0, pointerEvents: 'none', ease: Power4.easeOut })
-        TweenMax.to(transitionContainerProject, 1.5, { yPercent: 100, ease: Expo.easeInOut })
+        TweenMax.to(VarConst.projectsContainer, 1, { opacity: 0, pointerEvents: 'none', ease: Power4.easeOut })
+        TweenMax.to(VarConst.transitionContainerProject, 1.5, { yPercent: 100, ease: Expo.easeInOut })
 
         TweenMax.to('.content--container .title--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .50 })
         TweenMax.to('.content--container .text--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .75 })
         TweenMax.to('.content--container .icon--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
-        TweenMax.to(crossCloseProject, 1.5, { yPercent: 500, ease: Power4.easeInOut, delay: .75 })
+        TweenMax.to(VarConst.crossCloseProject, 1.5, { yPercent: 500, ease: Power4.easeInOut, delay: .75 })
 
-        projectCanvasContainer.style.position = 'absolute'
+        VarConst.projectCanvasContainer.style.position = 'absolute'
         setTimeout(() => {            
-            projectCanvasContainer.style.pointerEvents = 'all'
-            projectCanvasContainer.style.zIndex = 5
-            cursor.forEach(e => {
+            VarConst.projectCanvasContainer.style.pointerEvents = 'all'
+            VarConst.projectCanvasContainer.style.zIndex = 5
+            VarConst.cursor.forEach(e => {
                 e.style.mixBlendMode = 'hard-light'
             })
         }, 500)
@@ -604,42 +546,47 @@ images.forEach(image => {
     })
 })
 
-crossCloseProject.addEventListener('click', () => {
+VarConst.crossCloseProject.addEventListener('click', () => {
     outerHandleMouseLeave()
-    TweenMax.to(projectsContainer, 0, { opacity: 1 })
-    TweenMax.to(projectsContainer, 0, { pointerEvents: 'all', delay: 2 })
+    TweenMax.to(VarConst.projectsContainer, 0, { opacity: 1 })
+    TweenMax.to(VarConst.projectsContainer, 0, { pointerEvents: 'all', delay: 2 })
 
-    TweenMax.to(transitionContainerProject, 1.25, { yPercent: 200, ease: Expo.easeInOut, delay: .75 })
-    TweenMax.to(transitionContainerProject, 0, { yPercent: 0, delay: 2 })
+    TweenMax.to(VarConst.transitionContainerProject, 1.25, { yPercent: 200, ease: Expo.easeInOut, delay: .75 })
+    TweenMax.to(VarConst.transitionContainerProject, 0, { yPercent: 0, delay: 2 })
 
     TweenMax.to('.content--container .title--container', 1.5, { opacity: 0, ease: Power4.easeOut })
     TweenMax.to('.content--container .text--container', 1.5, { opacity: 0, ease: Power4.easeOut, delay: .25 })
     TweenMax.to('.content--container .icon--container', 1.5, { opacity: 0, ease: Power4.easeOut, delay: .5 })
-    TweenMax.to(crossCloseProject, 1.5, {yPercent: -500, ease: Power4.easeInOut })
+    TweenMax.to(VarConst.crossCloseProject, 1.5, { yPercent: -500, ease: Power4.easeInOut })
 
-    projectCanvasContainer.style.pointerEvents = 'none'
+    VarConst.projectCanvasContainer.style.pointerEvents = 'none'
     setTimeout(() => {
         locoScroll.start()
     }, 1500);
     setTimeout(() => {
-        projectCanvasContainer.style.position = 'fixed'
-        btnVisitProject.style.display = "none"
-        btnViewProject.style.display = "none"
-        icon.html.style.display = "none"
-        icon.sass.style.display = "none"
-        icon.js.style.display = "none"
-        icon.gsap.style.display = "none"
-        icon.threejs.style.display = "none"
-        icon.glsl.style.display = "none"
-        icon.php.style.display = "none"
-        icon.sql.style.display = "none"
-        icon.ae.style.display = "none"
-        icon.ai.style.display = "none"
-        icon.lr.style.display = "none"
-        icon.pp.style.display = "none"
-        icon.xd.style.display = "none"
-        document.querySelector('.title--container--content span').style.display = 'none'
-        cursor.forEach(e => {
+        VarConst.projectCanvasContainer.style.position = 'fixed'
+        VarConst.btnVisitProject.style.display = "none"
+        VarConst.btnViewProject.style.display = "none"
+        VarConst.icon.html.style.display = "none"
+        VarConst.icon.sass.style.display = "none"
+        VarConst.icon.js.style.display = "none"
+        VarConst.icon.gsap.style.display = "none"
+        VarConst.icon.threejs.style.display = "none"
+        VarConst.icon.glsl.style.display = "none"
+        VarConst.icon.php.style.display = "none"
+        VarConst.icon.sql.style.display = "none"
+        VarConst.icon.ae.style.display = "none"
+        VarConst.icon.ai.style.display = "none"
+        VarConst.icon.lr.style.display = "none"
+        VarConst.icon.pp.style.display = "none"
+        VarConst.icon.xd.style.display = "none"
+        VarConst.icon.processing.style.display = "none"
+        VarConst.icon.java.style.display = "none"
+        VarConst.icon.unity.style.display = "none"
+        VarConst.icon.csharp.style.display = "none"
+        VarConst.icon.awwward.style.display = 'none'
+        VarConst.icon.github.style.display = 'none'
+        VarConst.cursor.forEach(e => {
             e.style.mixBlendMode = 'difference'
         })
     }, 2000)
@@ -650,13 +597,13 @@ crossCloseProject.addEventListener('click', () => {
     TweenLite.to(planeRectMesh.position, { z: 4, delay: 1 })
 
     setTimeout(() => {
-        projectCanvasContainer.style.zIndex = -1
-        enterProject = false
+        VarConst.projectCanvasContainer.style.zIndex = -1
+        VarLet.enterProject = false
     }, 1500)
 })
 
 planeRectMesh.on('click', () => {
-    switch (currentProject) {
+    switch (VarLet.currentProject) {
         case 'id2021':
             window.open('https://www.immersions-digitales.fr/')
             break
@@ -674,6 +621,12 @@ planeRectMesh.on('click', () => {
             break
         case 'retrowave':
             window.open('http://retrowave.dakumisu.fr/')
+            break
+        case 'particles_follow':
+            window.open('https://openprocessing.org/sketch/1173476')
+            break
+        case 'fod':
+            window.open('https://kangourou-gang.itch.io/fear-of-daemon')
             break
 
         case 'jamcloud':
@@ -705,8 +658,11 @@ planeRectMesh.on('click', () => {
     }
 })
 
-document.querySelector('.title--container--content span').addEventListener('click', () => {
+document.querySelector('.honorable_mention').addEventListener('click', () => {
     window.open('https://www.awwwards.com/sites/immersions-digitales-2021')
+})
+document.querySelector('.github').addEventListener('click', () => {
+    window.open(VarLet.link)
 })
 
 function changePlaneTexture(texture) {
@@ -725,14 +681,14 @@ function changePlaneTexture(texture) {
 }
 
 planeRectMesh.on('mouseover', () => {
-    TweenMax.to(innerCursor, 1, { padding: 50, backgroundColor: 'rgba(233, 239, 239, 1)', ease: Power4.easeOut })
+    TweenMax.to(VarConst.innerCursor, 1, { padding: 50, backgroundColor: 'rgba(233, 239, 239, 1)', ease: Power4.easeOut })
     gsap.to(polygon.strokeColor, 1, { alpha: 0, ease: Power4.easeOut })
-    TweenMax.to(projectIndicator, .75, { scale: 1, ease: Power4.easeOut, delay: .25 })
+    TweenMax.to(VarConst.projectIndicator, .75, { scale: 1, ease: Power4.easeOut, delay: .25 })
 })
 planeRectMesh.on('mouseout', () => {
-    TweenMax.to(innerCursor, 1, { padding: 5, backgroundColor: 'rgba(233, 239, 239, 0)', ease: Power4.easeOut })
+    TweenMax.to(VarConst.innerCursor, 1, { padding: 5, backgroundColor: 'rgba(233, 239, 239, 0)', ease: Power4.easeOut })
     gsap.to(polygon.strokeColor, 1, { alpha: 1, ease: Power4.easeInOut })
-    TweenMax.to(projectIndicator, 1, { scale: 0, ease: Power4.easeOut })
+    TweenMax.to(VarConst.projectIndicator, 1, { scale: 0, ease: Power4.easeOut })
 })
 
 function viewSize() {
@@ -750,150 +706,87 @@ function viewSize() {
 function hoverPositionUpdate() {
     let offset = planeRectMesh.position
         .clone()
-        .sub(mousePosition)
+        .sub(VarConst.planePosition)
         .multiplyScalar(-.7)
     planeRectMaterial.uniforms.uOffset.value = offset
 }
 
 function mapCursorXPlane(in_min, in_max, out_min, out_max) {
-    return ((mouse.x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+    return ((VarConst.mouse.x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
 }
 function mapCursorYPlane(in_min, in_max, out_min, out_max) {
-    return ((mouse.y - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
+    return ((VarConst.mouse.y - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min
 }
 
-
-// --------------------------------------- Projects content ---------------------------------------
-const projectContent = {
-    id2021: {
-        title: 'Immersions Digitales 2021',
-        text: `Website created for the 2021 technical university open days at Tarbes (France) entitled "Immersions Digitales". This project taught me a lot of knowledge and made me step-up very quickly. I’m really proud of it and gave me the confidence and motivation that I needed.`
-    },
-    folio2020: {
-        title: 'Portfolio 2020',
-        text: `First real portfolio made in 3 weeks on my first year of university. It was my first time using Javascript and libraries for a project. I took fun to do it even if I'm not proud of it.`
-    },
-    foliocms: {
-        title: 'CMS Portfolio',
-        text: `First website using SQL for a project in university. This one taught some stuff about back-end development but it mostly made me realize that I like front-end development more than back-end.`
-    },
-    morpion: {
-        title: 'E-Morpion',
-        text: `Tic-tac-toe in English, little game made for a project in PHP. Have fun :)`
-    },
-    gamovore: {
-        title: 'Gamovore',
-        text: `Website regrouping some games sorted by genre. It’s my first project using PHP and taught me a lot of stuff like the syntax and the logical of this language.`
-    },
-    retrowave: {
-        title: 'Retrowave\'s Trending',
-        text: `This site has been created as part of a university project. After making the design, the site was developed in HTML, CSS, and JavaScript. My teammate and I tried to create as many CSS animations as possible.`
-    },
-
-    jamcloud: {
-        title: 'Jam Cloud',
-        text: `First web design made for a fictional website to play instruments online with random people called “Jam Cloud”. As you can see, I often use minimal and simple design to get an uncluttered render.`
-    },
-    terredebois: {
-        title: 'Terre de Bois',
-        text: `Graphical charter made for a cooperative of eco-builders called “Terre de Bois” (seems logical). I made a very minimalist design because it’s just my favorite trend. I like minimalist stuff in general. Minimalism is cool.`
-    },
-    charamushroom: {
-        title: 'Chara-Mushroom',
-        text: `Take a mushroom from Mario’s world and any character you want and mix them… You’ll get a beautiful chara-mushroom ! This project was an exercise on my first year in my university, I took a lot of fun doing this and it also taught me how to use Adobe Illustrator.`
-    },
-
-    depression_achro: {
-        title: 'Achromatic Depression',
-        text: `Short film about someone who take medicine to reduce her depression (feel the joy). However, this one have several side effects like achromatopsia and a loss of emotions per example. This short film was inspired by the book “The Giver” and has been produced in one day and edited in one evening. Good session :)`
-    },
-    mmitv: {
-        title: 'MMI TV',
-        text: `First motion design made in 4 days, for an outdated newspaper for a work in my university. This project taught me a lot about motion design and Adobe After Effects compositing.`
-    },
-    inside: {
-        title: 'Inside',
-        text: `Background video made for an immersion for a university project of a VR game. For this, I used the plugin Universe from Red Giant.`
-    },
-
-    numeric: {
-        title: 'Numeric photography',
-        text: `Packaging photography with a watch and an environment in connection with the model’s color. It’s my first photography on a macro model and I’m pretty proud of the render. I like to take photographs, it’s a hobby that I’ll always enjoy I think, mostly because I’m a bit nostalgic and I like to immortalize random moments of my life.`
-    },
-    argentic: {
-        title: 'Argentic photography',
-        text: `Honestly I prefer take argentic photographs because I have a retro side, I generally prefer retro stuff that’s why I take a lot of photographs like this. I love the physical side of these and the way that they're unique. Also, I prefer to take pictures with models than landscapes.`
-    }
-}
 
 // --------------------------------------- Home Page ---------------------------------------
-navName.addEventListener('mouseenter', () => {
-    TweenMax.to(navNameSpan, .4, { y: -20, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
-    TweenMax.to(navPseudoSpan, .4, { y: -30, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
+VarConst.navName.addEventListener('mouseenter', () => {
+    TweenMax.to(VarConst.navNameSpan, .4, { y: -20, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
+    TweenMax.to(VarConst.navPseudoSpan, .4, { y: -30, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
 })
-navName.addEventListener('mouseleave', () => {
-    TweenMax.to(navNameSpan, .4, { y: 0, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
-    TweenMax.to(navPseudoSpan, .4, { y: -10, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
+VarConst.navName.addEventListener('mouseleave', () => {
+    TweenMax.to(VarConst.navNameSpan, .4, { y: 0, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
+    TweenMax.to(VarConst.navPseudoSpan, .4, { y: -10, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3, delay: .1 })
 })
 
 // --------------------------------------- Contact ---------------------------------------
-buttonContact.addEventListener('click', () => {
+VarConst.buttonContact.addEventListener('click', () => {
     outerHandleMouseLeave()
     locoScroll.stop()
-    icebergRotY = icebergModel.rotation.y
-    icebergPosX = icebergModel.position.x
+    VarLet.icebergRotY = icebergModel.rotation.y
+    VarLet.icebergPosX = icebergModel.position.x
     TweenLite.to(icebergModel.scale, .75, { x: 0, y: 0, z: 0, ease: Back.easeIn })
-    TweenLite.to(icebergModel.rotation, .75, { y: icebergRotY - Math.PI * .75,  ease: Power2.easeIn })
+    TweenLite.to(icebergModel.rotation, .75, { y: VarLet.icebergRotY - Math.PI * .75,  ease: Power2.easeIn })
     
-    TweenMax.to(contactContainer, 0, { pointerEvents: 'all', delay: .75 })
-    TweenMax.to(crossCloseContact, 1.5, { yPercent: 500, ease: Power4.easeInOut, delay: .75 })
-    TweenMax.to(transitionContainerContact, 1.5, { yPercent: -100, ease: Expo.easeInOut, delay: .25 })
-    TweenMax.to(contentContactContainer, 1.25, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
+    TweenMax.to(VarConst.contactContainer, 0, { pointerEvents: 'all', delay: .75 })
+    TweenMax.to(VarConst.crossCloseContact, 1.5, { yPercent: 500, ease: Power4.easeInOut, delay: .75 })
+    TweenMax.to(VarConst.transitionContainerContact, 1.5, { yPercent: -100, ease: Expo.easeInOut, delay: .25 })
+    TweenMax.to(VarConst.contentContactContainer, 1.25, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
     
     TweenLite.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 1.5 })
 
-    isIcebergRotating = true
+    VarLet.isIcebergRotating = true
     setTimeout(() => {
-        isContactActive = true
-        canvasContainer.style.zIndex = 7
-        canvasContainer.style.pointerEvents = 'none'
+        VarLet.isContactActive = true
+        VarConst.canvasContainer.style.zIndex = 7
+        VarConst.canvasContainer.style.pointerEvents = 'none'
         icebergModel.scale.set(.30, .35, .30)
         icebergModel.position.x = 25
     }, 1000)
 })
 
-crossCloseContact.addEventListener('click', () => {
+VarConst.crossCloseContact.addEventListener('click', () => {
     outerHandleMouseLeave()
     TweenLite.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
 
-    TweenMax.to(transitionContainerContact, 1.25, { yPercent: -200, ease: Expo.easeInOut, delay: .5 })
-    TweenMax.to(transitionContainerContact, 0, { yPercent: 0, delay: 1.75 })
-    TweenMax.to(contactContainer, 0, { pointerEvents: 'none', delay: .5 })
-    TweenMax.to(contentContactContainer, 1.25, { opacity: 0, ease: Power4.easeInOut, delay: .25 })
-    TweenMax.to(crossCloseContact, 1.5, {yPercent: -500, ease: Power4.easeInOut })
+    TweenMax.to(VarConst.transitionContainerContact, 1.25, { yPercent: -200, ease: Expo.easeInOut, delay: .5 })
+    TweenMax.to(VarConst.transitionContainerContact, 0, { yPercent: 0, delay: 1.75 })
+    TweenMax.to(VarConst.contactContainer, 0, { pointerEvents: 'none', delay: .5 })
+    TweenMax.to(VarConst.contentContactContainer, 1.25, { opacity: 0, ease: Power4.easeInOut, delay: .25 })
+    TweenMax.to(VarConst.crossCloseContact, 1.5, {yPercent: -500, ease: Power4.easeInOut })
 
-    TweenLite.to(icebergModel.rotation, 1.5, { y: icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
+    TweenLite.to(icebergModel.rotation, 1.5, { y: VarLet.icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
     TweenLite.to(icebergModel.scale, 2, { x: .28, y: .28, z: .28, ease: Elastic.easeOut, delay: 1.1 })
     
     setTimeout(() => {
         locoScroll.start()
         icebergModel.scale.set(0.00001, 0.00001, 0.00001)
-        icebergModel.position.x = icebergPosX
-        if (isIcebergOnEnd) {
-            canvasContainer.style.pointerEvents = 'all'
-            canvasContainer.style.zIndex = 1
+        icebergModel.position.x = VarLet.icebergPosX
+        if (VarLet.isIcebergOnEnd) {
+            VarConst.canvasContainer.style.pointerEvents = 'all'
+            VarConst.canvasContainer.style.zIndex = 1
         } else {
-            canvasContainer.style.pointerEvents = 'none'
-            canvasContainer.style.zIndex = -1
+            VarConst.canvasContainer.style.pointerEvents = 'none'
+            VarConst.canvasContainer.style.zIndex = -1
         }
-        isContactActive = false
+        VarLet.isContactActive = false
         setTimeout(() => {
-            isIcebergRotating = false
+            VarLet.isIcebergRotating = false
         }, 1000);
     }, 1000)
 })
 
-crossClose.forEach(e => {
+VarConst.crossClose.forEach(e => {
     e.addEventListener('mouseenter', () => {
         TweenMax.to('.line-1', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
         TweenMax.to('.line-2', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
@@ -905,290 +798,69 @@ crossClose.forEach(e => {
 })
 
 // --------------------------------------- Link ---------------------------------------
-navName.addEventListener('click', () => {
+VarConst.navName.addEventListener('click', () => {
     window.location.replace('https://www.dakumisu.fr/')
 })
 
 // --------------------------------------- Mouse move interaction ---------------------------------------
-if (!isOnMobile) {
+if (!VarLet.isOnMobile) {
     TweenMax.to({}, 0.01, {
         repeat: -1,
         onRepeat: function () {
-            posX += (mouseX - posX) / 4
-            posY += (mouseY - posY) / 4
+            VarLet.posX += (VarLet.mouseX - VarLet.posX) / 4
+            VarLet.posY += (VarLet.mouseY - VarLet.posY) / 4
     
-            TweenMax.set(innerCursor, {
-                x: posX,
-                y: posY
+            TweenMax.set(VarConst.innerCursor, {
+                x: VarLet.posX,
+                y: VarLet.posY
             })
     
-            TweenMax.set(projectIndicatorContainer, {
-                x: posX,
-                y: posY,
+            TweenMax.set(VarConst.projectIndicatorContainer, {
+                x: VarLet.posX,
+                y: VarLet.posY,
                 delay: .01
             })
     
-            if (icebergModel && !isIcebergRotating && !isContactActive) {
-                TweenLite.to(icebergModel.rotation, 1, { z: posYNormalize / 30 })
-                rotationOnMouseValue = posXNormalize / 10
+            if (icebergModel && !VarLet.isIcebergRotating && !VarLet.isContactActive) {
+                TweenLite.to(icebergModel.rotation, 1, { z: VarLet.posYNormalize * .05 })
             }
-            TweenMax.set(hudContainerTop, { x: posXNormalize * -3 })
-            TweenMax.set(hudContainerTop, { y: posYNormalize * 3 })
-            TweenMax.set(hudContainerBottom, { x: posXNormalize * -3 })
-            TweenMax.set(hudContainerBottom, { y: posYNormalize * 3 })
+            TweenMax.set(VarConst.hudContainerTop, { x: VarLet.posXNormalize * -3 })
+            TweenMax.set(VarConst.hudContainerTop, { y: VarLet.posYNormalize * 3 })
+            TweenMax.set(VarConst.hudContainerBottom, { x: VarLet.posXNormalize * -3 })
+            TweenMax.set(VarConst.hudContainerBottom, { y: VarLet.posYNormalize * 3 })
         }
     })
 }
 
 document.addEventListener("mousemove", e => {
-    mouseX = e.clientX
-    mouseY = e.clientY
+    VarLet.mouseX = e.clientX
+    VarLet.mouseY = e.clientY
 
-    posXNormalize = (posX / window.innerWidth) * 2 - 1
-    posYNormalize = - (posY / window.innerWidth) * 2 + 1
+    VarLet.posXNormalize = (VarLet.posX / window.innerWidth) * 2 - 1
+    VarLet.posYNormalize = - (VarLet.posY / window.innerWidth) * 2 + 1
 })
 
 // --------------------------------------- Cursor Custom ---------------------------------------
-let lastX = 0
-let lastY = 0
-let isStuck = false
-let showCursor = false
-let group, stuckX, stuckY, fillOuterCursor
-
-const shapeBounds = {
-    width: 75,
-    height: 75
-}
-paper.setup(cursorCanvas)
-const strokeColor = lightBlue
-const fillColor = normalBlue
-const strokeWidth = .5
-const segments = 8
-const radius = 15
-
-const noiseScale = 150 // speed
-const noiseRange = 4 // range of distortion
-let isNoisy = false // state
-
-const polygon = new paper.Path.RegularPolygon(
-    new paper.Point(0, 0),
-    segments,
-    radius
-)
-polygon.scale(1)
-polygon.strokeColor = strokeColor
-polygon.strokeWidth = strokeWidth
-polygon.smooth()
-group = new paper.Group([polygon])
-group.applyMatrix = false
-
-const noiseObjects = polygon.segments.map(() => new SimplexNoise())
-let bigCoordinates = []
-
-paper.view.onFrame = event => {
-    lastX = lerp(lastX, mouseX, 0.7)
-    lastY = lerp(lastY, mouseY, 0.7)
-    group.position = new paper.Point(lastX, lastY)
-}
-
-noLinkItems.forEach(e => {
-    e.addEventListener("mouseenter", noHandleMouseEnter)
-    e.addEventListener("mouseleave", noHandleMouseLeave)
-})
-
-innerLinkItems.forEach(e => {
-    e.addEventListener("mouseenter", innerHandleMouseEnter)
-    e.addEventListener("mouseleave", innerHandleMouseLeave)
-})
-
-outerLinkItems.forEach(e => {
-    e.addEventListener("mouseenter", outerHandleMouseEnter)
-    e.addEventListener("mouseleave", outerHandleMouseLeave)
-})
-
-function noHandleMouseEnter() {
-    TweenMax.to(innerCursor, .75, { opacity: 0, ease: Expo.easeOut })
-    gsap.to(polygon.strokeColor, .75, { alpha: 0, ease: Expo.easeOut })
-}
-function noHandleMouseLeave() {
-    TweenMax.to(innerCursor, .75, { opacity: 1, ease: Expo.easeOut })
-    gsap.to(polygon.strokeColor, .75, { alpha: 1, ease: Expo.easeOut })
-}
-
-function innerHandleMouseEnter() {
-    TweenMax.to(innerCursor, .75, { padding: 25, backgroundColor: lightBlue, ease: Expo.easeOut })
-    gsap.to(polygon.strokeColor, .75, { alpha: 0, ease: Expo.easeOut })
-}
-function innerHandleMouseLeave() {
-    TweenMax.to(innerCursor, .75, { padding: 5, backgroundColor: 'transparent', ease: Expo.easeOut })
-    gsap.to(polygon.strokeColor, .75, { alpha: 1, ease: Expo.easeOut })
-}
-
-function outerHandleMouseEnter(e) {
-    const navItem = e.currentTarget
-    const navItemBox = navItem.getBoundingClientRect()
-    stuckX = Math.round(navItemBox.left + navItemBox.width / 2)
-    stuckY = Math.round(navItemBox.top + navItemBox.height / 2)
-    isStuck = true
-    TweenMax.to(innerCursor, .75, { padding: 0, opacity: 0, ease: Expo.easeOut })
-}
-function outerHandleMouseLeave() {
-    isStuck = false
-    TweenMax.to(innerCursor, .75, { padding: 5, opacity: 1, ease: Expo.easeOut })
-}
-
-paper.view.onFrame = event => {
-    if (!isStuck) {
-        lastX = lerp(lastX, mouseX, 0.2)
-        lastY = lerp(lastY, mouseY, 0.2)
-        group.position = new paper.Point(lastX, lastY)
-        polygon.scale(1)
-    } else if (isStuck) {
-        lastX = lerp(lastX, stuckX, 0.15)
-        lastY = lerp(lastY, stuckY, 0.15)
-        group.position = new paper.Point(lastX, lastY)
-        polygon.scale(1)
-    }
-
-    if (isStuck && polygon.bounds.width < shapeBounds.width) {
-        polygon.scale(1.1)
-    } 
-    else if (!isStuck && polygon.bounds.width > 30) {
-        if (isNoisy) {
-            polygon.segments.forEach((segment, i) => {
-                segment.point.set(bigCoordinates[i][0], bigCoordinates[i][1])
-            })
-            isNoisy = false
-            bigCoordinates = []
-        }
-        const scaleDown = .93
-        polygon.scale(scaleDown)
-    }
-
-    if (isStuck && polygon.bounds.width >= shapeBounds.width) {
-        isNoisy = true
-        // first get coordinates of large circle
-        if (bigCoordinates.length === 0) {
-            polygon.segments.forEach((segment, i) => {
-                bigCoordinates[i] = [segment.point.x, segment.point.y]
-            })
-        }
-
-        // loop over all points of the polygon
-        polygon.segments.forEach((segment, i) => {
-            const noiseX = noiseObjects[i].noise2D(event.count / noiseScale, 0)
-            const noiseY = noiseObjects[i].noise2D(event.count / noiseScale, 1)
-
-            const distortionX = map(noiseX, -1, 1, -noiseRange, noiseRange)
-            const distortionY = map(noiseY, -1, 1, -noiseRange, noiseRange)
-
-            const newX = bigCoordinates[i][0] + distortionX
-            const newY = bigCoordinates[i][1] + distortionY
-
-            segment.point.set(newX, newY)
-        })
-    } 
-    polygon.smooth()
-}
+const polygon = PolygonCursor
 
 // --------------------------------------- Audio ---------------------------------------
-const deg = (a) => a * Math.PI / 180 
-
-class AudioSwitcher {
-    constructor(opt) {
-        Object.assign(this, opt)
-
-        this.active = false
-        this.hover = false
-        this.volume = 0
-        this.settings = {
-            width: 60,
-            height: 4.5,
-            amplitude: -0.18,
-            hoverHeight: 1.2,
-            hoverAmplitude: -0.1,
-            speed: 3
-        }
-
-        this.init()
-    }
-
-    init() {
-        this.button.addEventListener('click', () => {
-            this.active = !this.active
-            this.button.classList.toggle('active')
-            this.hover = false
-        })
-
-        this.button.addEventListener('mouseenter', () => {
-            this.hover = true
-        })
-        this.button.addEventListener('mouseleave', () => {
-            this.hover = false
-        })
-
-        this.ctx = this.soundCanvas.getContext('2d')
-        this.width = this.soundCanvas.clientWidth
-        this.height = this.soundCanvas.clientHeight
-        this.amp = 0
-        this.h = 0
-        this.devicePixelRatio = window.devicePixelRatio || 1
-        this.soundCanvas.width = this.width * this.devicePixelRatio
-        this.soundCanvas.height = this.height * this.devicePixelRatio
-        this.soundCanvas.style.width = `${this.width}px`
-        this.soundCanvas.style.height = `${this.height}px`
-        this.ctx.scale(this.devicePixelRatio, this.devicePixelRatio)
-    }
-
-    clear() {
-        this.ctx.clearRect(0, 0, this.soundCanvas.width, this.soundCanvas.height)
-    }
-
-    draw(time) {
-        this.ctx.fillStyle = this.color
-
-        for (let i = 0; i < this.settings.width; i++) {
-            this.ctx.beginPath()
-            const x = (this.width / 2) - (this.settings.width / 2 * 0.5) + i * .6
-            const t = (time * this.settings.speed) + (i * this.amp)
-            const y = (this.height / 2) + (-Math.cos(t) * this.h)
-            this.ctx.ellipse(x, y, .5, .5, deg(360), 0, deg(360))
-            this.ctx.closePath()
-            this.ctx.fill()
-        }
-    }
-
-    animate(time) {
-        let height = this.hover ? this.settings.hoverHeight : 0
-        height = this.active ? this.settings.height : height
-        this.h = lerp(this.h, height, 0.04)
-
-        let amplitude = this.hover ? this.settings.hoverAmplitude : 0
-        amplitude = this.active ? this.settings.amplitude : amplitude
-        this.amp = lerp(this.amp, amplitude, 0.04)
-
-        this.clear()
-        this.draw(time)
-    }
-}
-
 const audioSwitcher = new AudioSwitcher({
-    button: soundButton,
+    button: VarConst.soundButton,
     soundCanvas: document.querySelector('#canvas-audio'),
-    color: lightBlue
+    color: VarConst.darkerBlue
 })
 
-soundButton.addEventListener('click', () => {
-    if (!musicPlayed) {
-        musicPlayed = true
-        musicMuted = false
+VarConst.soundButton.addEventListener('click', () => {
+    if (!VarLet.musicPlayed) {
+        VarLet.musicPlayed = true
+        VarLet.musicMuted = false
         music.play()
     } else {
-        if (!musicMuted) {
-            musicMuted = true
+        if (!VarLet.musicMuted) {
+            VarLet.musicMuted = true
             music.fade(1, 0, 1000)
         } else {
-            musicMuted = false
+            VarLet.musicMuted = false
             music.fade(0, 1, 1000)
         }
     }
@@ -1196,7 +868,7 @@ soundButton.addEventListener('click', () => {
 
 // --------------------------------------- Scroll Smooth ---------------------------------------
 const locoScroll = new LocomotiveScroll({
-    el: scrollContainer,
+    el: VarConst.scrollContainer,
     direction: 'vertical',
     smooth: true,
     getDirection: true,
@@ -1214,21 +886,29 @@ const locoScroll = new LocomotiveScroll({
 
 locoScroll.stop()
 
-navAbout.addEventListener('click', () => {
-    if (!navScrollActive) {
-        locoScroll.scrollTo(aboutContainer)
-        navScrollActive = true
+VarConst.navAbout.addEventListener('click', () => {
+    if (VarLet.showScrollIndication) {
+        TweenMax.to(VarConst.scrollIndication, 1, { opacity: 0, ease: Power3.easeOut })
+        VarLet.showScrollIndication = false
+    }
+    if (!VarLet.navScrollActive) {
+        locoScroll.scrollTo(VarConst.aboutContainer)
+        VarLet.navScrollActive = true
         setTimeout(() => {
-            navScrollActive = false
+            VarLet.navScrollActive = false
         }, 1200)
     }
 })
-navProjects.addEventListener('click', () => {
-    if (!navScrollActive) {
-        locoScroll.scrollTo(projectsContainer)
-        navScrollActive = true
+VarConst.navProjects.addEventListener('click', () => {
+    if (VarLet.showScrollIndication) {
+        TweenMax.to(VarConst.scrollIndication, 1, { opacity: 0, ease: Power3.easeOut })
+        VarLet.showScrollIndication = false
+    }
+    if (!VarLet.navScrollActive) {
+        locoScroll.scrollTo(VarConst.projectsContainer)
+        VarLet.navScrollActive = true
         setTimeout(() => {
-            navScrollActive = false
+            VarLet.navScrollActive = false
         }, 1200)
     }
 })
@@ -1237,7 +917,7 @@ navProjects.addEventListener('click', () => {
 /* ADD LOCOSCROLL */
 locoScroll.on("scroll", ScrollTrigger.update)
 
-ScrollTrigger.scrollerProxy(scrollContainer, {
+ScrollTrigger.scrollerProxy(VarConst.scrollContainer, {
     scrollTop(value) {
         return arguments.length ? locoScroll.scrollTo(value, 0, 0) : locoScroll.scroll.instance.scroll.y
     },
@@ -1249,14 +929,26 @@ ScrollTrigger.scrollerProxy(scrollContainer, {
             height: window.innerHeight
         }
     },
-    pinType: scrollContainer.style.transform ? "transform" : "fixed"
+    pinType: VarConst.scrollContainer.style.transform ? "transform" : "fixed"
 })
 
 ScrollTrigger.create({
-    trigger: aboutContainer,
-    scroller: scrollContainer,
+    trigger: VarConst.aboutContainer,
+    scroller: VarConst.scrollContainer,
+    start: "16% bottom", 
+    onToggle: () => {
+        if (VarLet.showScrollIndication) {
+            TweenMax.to(VarConst.scrollIndication, 1, { opacity: 0, ease: Power3.easeOut })
+            VarLet.showScrollIndication = false
+        }
+    }
+})
+
+ScrollTrigger.create({
+    trigger: VarConst.aboutContainer,
+    scroller: VarConst.scrollContainer,
     start: "25% bottom", 
-    end: "50% bottom",
+    end: "43% bottom",
     scrub: true,
     onUpdate: selfAbout => {
         icebergModel.position.x = 4 + selfAbout.progress * -4
@@ -1264,23 +956,23 @@ ScrollTrigger.create({
 })
 
 ScrollTrigger.create({
-    trigger: aboutContainer,
-    scroller: scrollContainer,
+    trigger: VarConst.aboutContainer,
+    scroller: VarConst.scrollContainer,
     start: "60% bottom", 
     end: "150% bottom",
     scrub: true,
     onUpdate: selfAbout => {
         if (selfAbout.progress <= .5) {
-            canvasContainer.style.opacity = 1 - selfAbout.progress
+            VarConst.canvasContainer.style.opacity = 1 - selfAbout.progress
         } else {
-            canvasContainer.style.opacity = selfAbout.progress
+            VarConst.canvasContainer.style.opacity = selfAbout.progress
         }
     }
 })
 
 ScrollTrigger.create({
-    trigger: projectsContainer,
-    scroller: scrollContainer,
+    trigger: VarConst.projectsContainer,
+    scroller: VarConst.scrollContainer,
     start: "25% bottom",
     end: "50% bottom",
     scrub: true,
@@ -1290,8 +982,8 @@ ScrollTrigger.create({
 })
 
 ScrollTrigger.create({
-    trigger: projectsContainer,
-    scroller: scrollContainer,
+    trigger: VarConst.projectsContainer,
+    scroller: VarConst.scrollContainer,
     start: "35% bottom", 
     endTrigger: "html",
     onToggle: toggleOnProjects => {
@@ -1299,24 +991,34 @@ ScrollTrigger.create({
             TweenLite.to(hemisphereLightUp, .5, { intensity: 0 })
             TweenLite.to(hemisphereLightDown, .5, { intensity: .9 })
 
-            TweenMax.to(backgroundContainer, .5, { backgroundColor: darkerBlue })
-            TweenMax.to(aboutContainer, .5, { color: lightBlue })
-            TweenMax.to(projectsContainer, .5, { color: lightBlue })
-            TweenMax.to(titleCat, .5, { webkitTextStrokeColor: lightBlue })
+            TweenMax.to(VarConst.backgroundContainer, .5, { backgroundColor: VarConst.darkerBlue })
+            TweenMax.to(VarConst.aboutContainer, .5, { color: VarConst.lightBlue })
+            TweenMax.to(VarConst.projectsContainer, .5, { color: VarConst.lightBlue })
+            TweenMax.to(VarConst.titleCat, .5, { webkitTextStrokeColor: VarConst.lightBlue })
+            TweenMax.to(VarConst.lines, .5, { backgroundColor: VarConst.lightBlue })
+            
+            TweenMax.to(VarConst.hudContainerTop, .5, { color: VarConst.lightBlue })
+            TweenMax.to(VarConst.hudContainerBottom, .5, { color: VarConst.lightBlue })
+            TweenLite.to(audioSwitcher, .5, { color: VarConst.lightBlue })
 
-            titleCat.forEach(e => {
+            VarConst.titleCat.forEach(e => {
                 e.style.webkitTextStrokeWidth = ".5px"
             })
         } else {
             TweenLite.to(hemisphereLightUp, .5, { intensity: 1.3 })
             TweenLite.to(hemisphereLightDown, .5, { intensity: 0 })
 
-            TweenMax.to(backgroundContainer, .5, { backgroundColor: lightBlue })
-            TweenMax.to(aboutContainer, .5, { color: darkerBlue })
-            TweenMax.to(projectsContainer, .5, { color: darkerBlue })
-            TweenMax.to(titleCat, .5, { webkitTextStrokeColor: darkerBlue })
+            TweenMax.to(VarConst.backgroundContainer, .5, { backgroundColor: VarConst.lightBlue })
+            TweenMax.to(VarConst.aboutContainer, .5, { color: VarConst.darkerBlue })
+            TweenMax.to(VarConst.projectsContainer, .5, { color: VarConst.darkerBlue })
+            TweenMax.to(VarConst.titleCat, .5, { webkitTextStrokeColor: VarConst.darkerBlue })
+            TweenMax.to(VarConst.lines, .5, { backgroundColor: VarConst.darkerBlue })
 
-            titleCat.forEach(e => {
+            TweenMax.to(VarConst.hudContainerTop, .5, { color: VarConst.darkerBlue })
+            TweenMax.to(VarConst.hudContainerBottom, .5, { color: VarConst.darkerBlue })
+            TweenLite.to(audioSwitcher, .5, { color: VarConst.darkerBlue })
+
+            VarConst.titleCat.forEach(e => {
                 e.style.webkitTextStrokeWidth = "1.5px"
             })
         }
@@ -1324,8 +1026,8 @@ ScrollTrigger.create({
 })
 
 ScrollTrigger.create({
-    trigger: endContainer,
-    scroller: scrollContainer,
+    trigger: VarConst.endContainer,
+    scroller: VarConst.scrollContainer,
     start: "30% bottom",
     end: "bottom bottom",
     scrub: true,
@@ -1333,28 +1035,28 @@ ScrollTrigger.create({
         icebergModel.position.x = -7.5 + selfEnd.progress * 7
         rotationOnScrollValue += (selfEnd.getVelocity() * -.00003) * Math.PI
         if (selfEnd.progress >= .3) {
-            isIcebergOnEnd = true
-            canvasContainer.style.zIndex = 1
-            canvasContainer.style.pointerEvents = 'all'
+            VarLet.isIcebergOnEnd = true
+            VarConst.canvasContainer.style.zIndex = 1
+            VarConst.canvasContainer.style.pointerEvents = 'all'
         } else {
-            isIcebergOnEnd = false
-            canvasContainer.style.zIndex = -1
-            canvasContainer.style.pointerEvents = 'none'
+            VarLet.isIcebergOnEnd = false
+            VarConst.canvasContainer.style.zIndex = -1
+            VarConst.canvasContainer.style.pointerEvents = 'none'
         }
     }
 })
 
 ScrollTrigger.create({
-    trigger: endContainer,
-    scroller: scrollContainer,
+    trigger: VarConst.endContainer,
+    scroller: VarConst.scrollContainer,
     start: "75% bottom",
     endTrigger: "html",
     scrub: true,
     onToggle: selfEnd => {
         if (selfEnd.isActive) {
-            TweenMax.to(endContainerContent, .5, { opacity: 1, ease: Power4.easeInOut })
+            TweenMax.to(VarConst.endContainerContent, .5, { opacity: 1, ease: Power4.easeInOut })
         } else {
-            TweenMax.to(endContainerContent, .5, { opacity: 0, ease: Power4.easeOut })
+            TweenMax.to(VarConst.endContainerContent, .5, { opacity: 0, ease: Power4.easeOut })
         }
     }
 })
@@ -1365,8 +1067,8 @@ let proxy = { skew: 0 },
     clamp = gsap.utils.clamp(-10, 10)
 
 ScrollTrigger.create({
-    scroller: scrollContainer,
-    trigger: scrollContainer,
+    scroller: VarConst.scrollContainer,
+    trigger: VarConst.scrollContainer,
     onUpdate: (self) => {
         let skew = clamp(self.getVelocity() / -500)
         if (Math.abs(skew) > Math.abs(proxy.skew)) {
@@ -1382,32 +1084,6 @@ ScrollTrigger.create({
         rotationOnScrollValue += (self.getVelocity() * -.00001) * Math.PI
     }
 })
-
-// --------------------------------------- Gsap Timeline ---------------------------------------
-// let icebergMoving = gsap.timeline({ smoothChildTiming: true })
-
-// document.onkeydown = function (e) {
-//     switch (e.keyCode) {
-//         case 65:
-//             tl = gsap.timeline()
-//                 .to(icebergModel.position, { duration: 5, x: 0, ease: Elastic.easeOut })
-//             break
-//         case 90:
-//             tl.pause()
-//             break
-//         case 69:
-//             tl.resume()
-//             break
-//         case 82:
-//             tl.seek(2.5)
-//             break
-//         case 84:
-//             tl.restart()
-//             break
-//     }
-// }
-// gsap.to(icebergModel.position, 3.5, { x: 0, ease: Elastic.easeOut })
-// gsap.to(icebergModel.rotation, 1.5, { y: rotationYAbout , ease: Power2.easeOut })
 
 window.addEventListener('resize', () => {
     // Update sizes
@@ -1426,65 +1102,66 @@ window.addEventListener('resize', () => {
 })
 
 const clock = new THREE.Clock()
+let lowestElapsedTime = 0
 const raf = () => {
     const elapsedTime = clock.getElapsedTime()
+    lowestElapsedTime += 0.0006
 
     if (icebergModel) {
         icebergModel.position.y = Math.sin(elapsedTime) * .15 + .85
-        if (isContactActive) {
-            currentRotate += .03 * Math.PI * -0.03
-            if (currentRotate < -Math.PI * 2) {
-                currentRotate += Math.PI * 2
+        if (VarLet.isContactActive) {
+            VarLet.currentRotate += .03 * Math.PI * -0.03
+            if (VarLet.currentRotate < -Math.PI * 2) {
+                VarLet.currentRotate += Math.PI * 2
             }
-            icebergModel.rotation.y = currentRotate
+            icebergModel.rotation.y = VarLet.currentRotate
         } else {
-            if (!isIcebergRotating) {
-                TweenLite.to(icebergModel.rotation, { y: rotationOnScrollValue + rotationOnMouseValue })
+            if (!VarLet.isIcebergRotating) {
+                TweenLite.to(icebergModel.rotation, { y: rotationOnScrollValue + VarLet.posXNormalize * .1 })
             }
         }
     }
 
     if (music) {
-        gsap.to(music, 0, { stereo: Math.sin(elapsedTime) * .4 })
+        music.stereo = Math.sin(lowestElapsedTime) * .6
     }
 
     // Render
     renderer.render(mainScene, camera)
     rendererProject.render(projectScene, camera)
-    composer.render()
+    // composer.render()
 
 
-    const time = performance.now() / 1000
     if (audioSwitcher) {
-        audioSwitcher.animate(time)
+        audioSwitcher.animate(elapsedTime * .9)
     }
 
-    if (enterProject)
+    if (VarLet.enterProject)
         planeRectMaterial.uniforms.uProgress.value = elapsedTime * .5
 
-    if (mouse && !enterProject) {
-        if (!enterProject) {
+    if (VarConst.mouse && !VarLet.enterProject) {
+        if (!VarLet.enterProject) {
 
-            TweenLite.to(pointLight.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
-            TweenLite.to(planeRectMesh.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
+            TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
+            TweenLite.to(planeRectMesh.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
             
             hoverPositionUpdate()
             
-            planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
-            planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+            VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+            VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
             
-            mousePosition.x = planeX
-            mousePosition.y = planeY
+            VarConst.planePosition.x = VarLet.planeX
+            VarConst.planePosition.y = VarLet.planeY
             
         } else {
-            TweenLite.to(pointLight.position, 1, { x: planeX, y: planeY, ease: Power4.easeOut })
+            TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
             hoverPositionUpdate()
             
-            planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
-            planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+            VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+            VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
             
-            mousePosition.x = planeX
-            mousePosition.y = planeY
+            VarConst.planePosition.x = VarLet.planeX
+            VarConst.planePosition.y = VarLet.planeY
         }
     }
 
@@ -1496,4 +1173,4 @@ raf()
 ScrollTrigger.addEventListener("refresh", () => locoScroll.update())
 ScrollTrigger.refresh()
 
-console.log(`%c ${'there\'s nothing here go away 👀'}`, `color: ${lightBlue}; font-weight: bold; font-size: 1rem;`)
+console.log(`%c ${'there\'s nothing here go away 👀'}`, `color: ${VarConst.lightBlue}; font-weight: bold; font-size: 1rem;`)

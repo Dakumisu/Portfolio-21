@@ -31,10 +31,29 @@
     </div>
 
     <div class="cursor cursor--small"></div>
-    <canvas class="cursor cursor--canvas" resize></canvas>
+    <canvas class="cursor cursor--canvas" data-paper-keepalive="true" data-paper-hidpi="off" resize></canvas>
     <div class="project__indicator--container">
         <span class="project__indicator project__visit">visit project</span>
         <span class="project__indicator project__view">view project</span>
+    </div>
+
+    <div class="scrollIndication--container">
+        <div class="span--container_1">
+            <span>S</span>
+            <span>C</span>
+            <span>R</span>
+            <span>O</span>
+            <span>L</span>
+            <span>L</span>
+        </div>
+        <div class="span--container_2">
+            <span>S</span>
+            <span>C</span>
+            <span>R</span>
+            <span>O</span>
+            <span>L</span>
+            <span>L</span>
+        </div>
     </div>
 
     <div class="loader--container">
@@ -105,13 +124,13 @@
             </div>
             <h2 class="title--cat">Contact</h2>
             <div class="content">
-                <a class="inner--link" href="https://www.instagram.com/dakumisu.psd/" target="_blank"><span>Instagram</span></a>
-                <a class="inner--link" href="https://twitter.com/Dakumisu_psd" target="_blank"><span>Twitter</span></a>
-                <a class="inner--link" href="https://www.behance.net/dakumisu" target="_blank"><span>Behance</span></a>
-                <a class="inner--link" href="https://www.linkedin.com/in/alex-gattefosse/" target="_blank"><span>Linkedin</span></a>
-                <a class="inner--link" href="https://github.com/Dakumisu" target="_blank"><span>GitHub</span></a>
-                <a class="inner--link" href="https://www.awwwards.com/Dakumisu/" target="_blank"><span>Awwwards</span></a>
-                <a class="inner--link mail" href="mailto:dakumisu.psd@gmail.com"><span>Mail</span></a>
+                <a class="inner--link lineHoverEffect" href="https://www.instagram.com/dakumisu.psd/" target="_blank"><span>Instagram</span></a>
+                <a class="inner--link lineHoverEffect" href="https://twitter.com/Dakumisu_psd" target="_blank"><span>Twitter</span></a>
+                <a class="inner--link lineHoverEffect" href="https://www.behance.net/dakumisu" target="_blank"><span>Behance</span></a>
+                <a class="inner--link lineHoverEffect" href="https://www.linkedin.com/in/alex-gattefosse/" target="_blank"><span>Linkedin</span></a>
+                <a class="inner--link lineHoverEffect" href="https://github.com/Dakumisu" target="_blank"><span>GitHub</span></a>
+                <a class="inner--link lineHoverEffect" href="https://www.awwwards.com/Dakumisu/" target="_blank"><span>Awwwards</span></a>
+                <a class="inner--link lineHoverEffect mail" href="mailto:dakumisu.psd@gmail.com"><span>Mail</span></a>
             </div>
         </div>
         <div class="transition--container"></div>
@@ -126,7 +145,10 @@
             <div class="title--container">
                 <div class="title--container--content">
                     <h3></h3>
-                    <span class="inner--link">Honorable Mention</span>
+                    <div class="link--container">
+                        <span class="inner--link honorable_mention">Honorable Mention</span>
+                        <span class="inner--link github">GitHub</span>
+                    </div>
                 </div>
             </div>
             <div class="text--container">
@@ -146,6 +168,10 @@
                 <span id="icon__pp">premiere pro</span>
                 <span id="icon__lr">lightroom</span>
                 <span id="icon__xd">xd</span>
+                <span id="icon__processing">processing</span>
+                <span id="icon__java">java</span>
+                <span id="icon__unity">unity</span>
+                <span id="icon__csharp">c#</span>
             </div>
         </div>
         <canvas class="canvasProject"></canvas>
@@ -165,7 +191,7 @@
         <section class="about--container" data-scroll-section>
             <div class="about--main">
                 <div class="container">
-                    <div class="about--img inner--link" data-scroll data-scroll-speed="2">
+                    <div class="about--img" data-scroll data-scroll-speed="2">
                         <div class="img--default">
                             <img src="../static/img/moi_Default.jpg" alt="Alex Gattefossé">
                         </div>
@@ -195,7 +221,7 @@
                     </div>
                 </div>
             </div>
-            <div class="about--content" data-scroll>
+            <div class="about--content">
                 <div class="container">
                     <h2 class="title--cat" data-scroll data-scroll-speed="1.5">About me</h2>
                     <div class="text--container" data-scroll data-scroll-speed="3">
@@ -232,8 +258,8 @@
                     <div class="text--container" data-scroll data-scroll-speed="1">
                         <div class="projects projects--web_dev">
                             <div class="title" data-scroll data-scroll-speed="1.5" data-scroll-delay=".5">
-                                <span></span>
-                                <h3>Web Development</h3>
+                                <span class="line"></span>
+                                <h3>Development</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
                                 <span class="no--link hoverPlane" data-id_project="id2021">ID 2021</span>
@@ -253,10 +279,16 @@
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
                                 <span class="no--link hoverPlane" data-id_project="retrowave">Retrowave's Trending</span>
                             </div>
+                            <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
+                                <span class="no--link hoverPlane" data-id_project="particles_follow">Particles Followers</span>
+                            </div>
+                            <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".1">
+                                <span class="no--link hoverPlane" data-id_project="fod">Fear Of Daemon</span>
+                            </div>
                         </div>
                         <div class="projects projects--design">
                             <div class="title" data-scroll data-scroll-speed="1.5" data-scroll-delay=".53">
-                                <span></span>
+                                <span class="line"></span>
                                 <h3>Design</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".13">
@@ -271,7 +303,7 @@
                         </div>
                         <div class="projects projects--video">
                             <div class="title" data-scroll data-scroll-speed="1.5" data-scroll-delay=".56">
-                                <span></span>
+                                <span class="line"></span>
                                 <h3>Video</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".16">
@@ -286,7 +318,7 @@
                         </div>
                         <div class="projects projects--photo">
                             <div class="title" data-scroll data-scroll-speed="1.5" data-scroll-delay=".59">
-                                <span></span>
+                                <span class="line"></span>
                                 <h3>Photographs</h3>
                             </div>
                             <div class="project--container" data-scroll data-scroll-speed="1.5" data-scroll-delay=".19">
@@ -305,7 +337,7 @@
             <div class="end--content">
                 <div class="container">
                     <span>you're too deep, there's no more content here !</span>
-                    <span>click on the iceberg to rise to the surface...</span>
+                    <span>click on the iceberg to rise the surface...</span>
                 </div>
             </div>
         </section>
