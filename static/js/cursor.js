@@ -1,7 +1,7 @@
-import {
-   VarConst,
-   VarLet
-} from './var.js'
+import { VarConst, VarLet } from './var.js'
+import { paper } from 'paper'
+// import { SimplexNoise } from 'simplex-noise'
+var SimplexNoise = require('simplex-noise')
 
 let lastX = 0
 let lastY = 0

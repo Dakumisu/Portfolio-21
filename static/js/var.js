@@ -203,6 +203,7 @@ let VarLet = {
    isOnMobile: false,
    isIcebergOnEnd: false,
    showScrollIndication: true,
+   loadFinished: false,
    
    mouseX: 0,
    mouseY: 0,

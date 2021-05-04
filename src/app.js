@@ -6,10 +6,10 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { Interaction } from 'three.interaction'
 // import { BloomEffect, EffectComposer, ShaderPass, EffectPass, RenderPass } from "postprocessing"
-import { TweenLite, TweenMax, gsap } from 'gsap'
+import LocomotiveScroll from 'locomotive-scroll'
+// import { TweenLite, TweenMax, gsap } from 'gsap'
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
-import LocomotiveScroll from 'locomotive-scroll'
 import howlerjs from 'howler'
 import createjs from 'preload-js'
 
@@ -109,6 +109,7 @@ queue.on("progress", event => {
 })
 
 queue.on("complete", () => {
+    VarLet.loadFinished = true
     TweenMax.to(VarConst.progressLoaderValue, .75, { opacity: 0 })
     TweenMax.to(VarConst.loadingText_4, .75, { opacity: 0, delay: 1})
     TweenMax.to(VarConst.loaderContainer, 2, { yPercent: -200, ease: Expo.easeInOut, delay: 1 })
@@ -130,13 +131,6 @@ queue.on("complete", () => {
         TweenMax.to(VarConst.scrollIndication_2, 1, { y: -15, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3.easeInOut, delay: 2.5, repeat: -1, repeatDelay: 2 })
     }, 4000);
 })
-
-// window.addEventListener('mousewheel', () => {
-//     if (showScrollIndication) {
-//         TweenMax.to(scrollIndication, 1, { opacity: 0, ease: Power3.easeOut })
-//         showScrollIndication = false
-//     }
-// })
 
 const music = new Howl({
     src: ['/sound/music.mp3'],
@@ -292,7 +286,6 @@ const planeRectMesh = new THREE.Mesh(
     planeRectMaterial
 )
 
-// VarConst.planePosition.z = 0
 planeRectMesh.position.z = 4
 projectScene.add(planeRectMesh)
 
@@ -1103,68 +1096,69 @@ window.addEventListener('resize', () => {
 
 const clock = new THREE.Clock()
 let lowestElapsedTime = 0
-const raf = () => {
-    const elapsedTime = clock.getElapsedTime()
-    lowestElapsedTime += 0.0006
-
-    if (icebergModel) {
-        icebergModel.position.y = Math.sin(elapsedTime) * .15 + .85
-        if (VarLet.isContactActive) {
-            VarLet.currentRotate += .03 * Math.PI * -0.03
-            if (VarLet.currentRotate < -Math.PI * 2) {
-                VarLet.currentRotate += Math.PI * 2
-            }
-            icebergModel.rotation.y = VarLet.currentRotate
-        } else {
-            if (!VarLet.isIcebergRotating) {
-                TweenLite.to(icebergModel.rotation, { y: rotationOnScrollValue + VarLet.posXNormalize * .1 })
+function raf() {
+    if (VarLet.loadFinished) {
+        const elapsedTime = clock.getElapsedTime()
+        lowestElapsedTime += 0.0006
+    
+        if (icebergModel) {
+            icebergModel.position.y = Math.sin(elapsedTime) * .15 + .85
+            if (VarLet.isContactActive) {
+                VarLet.currentRotate += .03 * Math.PI * -0.03
+                if (VarLet.currentRotate < -Math.PI * 2) {
+                    VarLet.currentRotate += Math.PI * 2
+                }
+                icebergModel.rotation.y = VarLet.currentRotate
+            } else {
+                if (!VarLet.isIcebergRotating) {
+                    TweenLite.to(icebergModel.rotation, { y: rotationOnScrollValue + VarLet.posXNormalize * .1 })
+                }
             }
         }
-    }
-
-    if (music) {
-        music.stereo = Math.sin(lowestElapsedTime) * .6
-    }
-
-    // Render
-    renderer.render(mainScene, camera)
-    rendererProject.render(projectScene, camera)
-    // composer.render()
-
-
-    if (audioSwitcher) {
-        audioSwitcher.animate(elapsedTime * .9)
-    }
-
-    if (VarLet.enterProject)
-        planeRectMaterial.uniforms.uProgress.value = elapsedTime * .5
-
-    if (VarConst.mouse && !VarLet.enterProject) {
-        if (!VarLet.enterProject) {
-
-            TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
-            TweenLite.to(planeRectMesh.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
-            
-            hoverPositionUpdate()
-            
-            VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
-            VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
-            
-            VarConst.planePosition.x = VarLet.planeX
-            VarConst.planePosition.y = VarLet.planeY
-            
-        } else {
-            TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
-            hoverPositionUpdate()
-            
-            VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
-            VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
-            
-            VarConst.planePosition.x = VarLet.planeX
-            VarConst.planePosition.y = VarLet.planeY
+    
+        if (music) {
+            music.stereo = Math.sin(lowestElapsedTime) * .6
         }
+    
+        // Render
+        renderer.render(mainScene, camera)
+        rendererProject.render(projectScene, camera)
+        // composer.render()
+    
+    
+        if (audioSwitcher)
+            audioSwitcher.animate(elapsedTime * .9)
+    
+        if (VarLet.enterProject)
+            planeRectMaterial.uniforms.uProgress.value = elapsedTime * .5
+    
+        if (VarConst.mouse && !VarLet.enterProject) {
+            if (!VarLet.enterProject) {
+    
+                TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
+                TweenLite.to(planeRectMesh.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
+                
+                hoverPositionUpdate()
+                
+                VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+                VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+                
+                VarConst.planePosition.x = VarLet.planeX
+                VarConst.planePosition.y = VarLet.planeY
+                
+            } else {
+                TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
+                hoverPositionUpdate()
+                
+                VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+                VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+                
+                VarConst.planePosition.x = VarLet.planeX
+                VarConst.planePosition.y = VarLet.planeY
+            }
+        }
+    
     }
-
     window.requestAnimationFrame(raf)
 }
 
