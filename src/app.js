@@ -181,8 +181,8 @@ rendererProject.setSize(sizes.width, sizes.height)
 // composer.addPass(customPass)
 
 // Interaction
-const mainInteraction = new Interaction(renderer, mainScene, camera)
-const projectInteraction = new Interaction(rendererProject, projectScene, camera)
+new Interaction(renderer, mainScene, camera)
+new Interaction(rendererProject, projectScene, camera)
 
 // Lights
 const pointLight = new THREE.PointLight(VarConst.THREEdarkerBlue, .3)
@@ -255,6 +255,7 @@ const texture_jamcloud = textureLoader.load('/img/projects/jam_cloud.png')
 const texture_terredebois = textureLoader.load('/img/projects/terre_de_bois.png')
 const texture_charamushroom = textureLoader.load('/img/projects/chara_mushroom.png')
 
+const texture_shworeel = textureLoader.load('/img/projects/showreel.png')
 const texture_depression = textureLoader.load('/img/projects/depression_achro.png')
 const texture_mmitv = textureLoader.load('/img/projects/mmi_tv.png')
 const texture_inside = textureLoader.load('/img/projects/inside.png')
@@ -346,6 +347,10 @@ VarConst.images.forEach(image => {
                     TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
                     break
     
+                case 'showreel' :
+                    changePlaneTexture(texture_shworeel)
+                    TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
+                    break
                 case 'depression_achro' :
                     changePlaneTexture(texture_depression)
                     TweenMax.to(image, .75, { opacity: 1, ease: Power3.easeOut })
@@ -479,6 +484,12 @@ VarConst.images.forEach(image => {
                 VarConst.icon.ai.style.display = "inline-block"
                 break
 
+            case 'showreel' :
+                VarConst.projectTitle.innerHTML = VarConst.projectContent.showreel.title
+                VarConst.projectText.innerHTML = VarConst.projectContent.showreel.text
+                VarConst.btnViewProject.style.display = "block"
+                VarConst.icon.ae.style.display = "inline-block"
+                break
             case 'depression_achro' :
                 VarConst.projectTitle.innerHTML = VarConst.projectContent.depression_achro.title
                 VarConst.projectText.innerHTML = VarConst.projectContent.depression_achro.text
@@ -632,6 +643,9 @@ planeRectMesh.on('click', () => {
             window.open('https://www.behance.net/gallery/114351103/Chara-Mushroom')
             break
 
+        case 'showreel':
+            window.open('https://vimeo.com/556574460')
+            break
         case 'depression_achro':
             window.open('https://vimeo.com/518747577')
             break
@@ -699,8 +713,8 @@ function viewSize() {
 function hoverPositionUpdate() {
     let offset = planeRectMesh.position
         .clone()
-        .sub(VarConst.planePosition)
-        .multiplyScalar(-.7)
+        .sub(VarConst.planePosition) // Velocité
+        .multiplyScalar(-.5) // Puissance
     planeRectMaterial.uniforms.uOffset.value = offset
 }
 

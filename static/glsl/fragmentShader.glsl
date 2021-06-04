@@ -2,7 +2,6 @@ uniform sampler2D uTexture1;
 uniform sampler2D uTexture2;
 uniform sampler2D uDisp;
 uniform float uAlpha;
-uniform vec2 uOffset;
 uniform float uDispFactor;
 
 varying vec2 vUv;

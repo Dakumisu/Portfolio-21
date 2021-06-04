@@ -155,6 +155,10 @@ const VarConst = {
           text: `Take a mushroom from Mario’s world and any character you want and mix them… You’ll get a beautiful chara-mushroom ! This project was an exercise on my first year in my university, I took a lot of fun doing this and it also taught me how to use Adobe Illustrator.`
       },
   
+      showreel: {
+          title: 'Showreel 21\'',
+          text: `I'm glad to present you my 2021' showreel ! Hope you'll like it :)`
+      },
       depression_achro: {
           title: 'Achromatic Depression',
           text: `Short film about someone who take medicine to reduce her depression (feel the joy). However, this one have several side effects like achromatopsia and a loss of emotions per example. This short film was inspired by the book “The Giver” and has been produced in one day and edited in one evening. Good session :)`
