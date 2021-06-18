@@ -7,7 +7,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { Interaction } from 'three.interaction'
 // import { BloomEffect, EffectComposer, ShaderPass, EffectPass, RenderPass } from "postprocessing"
 import LocomotiveScroll from 'locomotive-scroll'
-// import { TweenLite, TweenMax, gsap } from 'gsap'
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
 import howlerjs from 'howler'
@@ -25,8 +24,16 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     VarConst.cursor.forEach(e => {
         e.style.display = 'none'
     })
+    VarLet.icebergLeftPos = -4.5
+    VarLet.planePosX = 0
+    VarLet.planePosY = 2
+    VarLet.planePosZ = 3
     VarConst.projectIndicatorContainer.style.display = 'none'
-    document.querySelector('.mobileNotAvailable').style.display = "flex"
+} else {
+    VarLet.icebergLeftPos = -7.5
+    VarLet.planePosX = -3
+    VarLet.planePosY = 0
+    VarLet.planePosZ = 6
 }
 
 
@@ -79,11 +86,11 @@ queue.loadFile(LocomotiveScroll)
 queue.on("progress", event => {
     let progressValue =  Math.floor(event.progress*100)
     if (progressValue < 10)
-        VarConst.progressLoaderValue.innerHTML = `<span class="loadValue">00${ progressValue }</span>`
+        VarConst.progressLoaderValue.innerText = `00${ progressValue }`
     else if (progressValue < 100)
-        VarConst.progressLoaderValue.innerHTML = `<span class="loadValue">0${ progressValue }</span>`
+        VarConst.progressLoaderValue.innerText = `0${ progressValue }`
     else
-        VarConst.progressLoaderValue.innerHTML = `<span class="loadValue">${ progressValue }</span>`
+        VarConst.progressLoaderValue.innerText = `${ progressValue }`
 
     if (progressValue <= 20 && progressValue >= 0) {
 
@@ -112,6 +119,19 @@ queue.on("complete", () => {
     VarLet.loadFinished = true
     TweenMax.to(VarConst.progressLoaderValue, .75, { opacity: 0 })
     TweenMax.to(VarConst.loadingText_4, .75, { opacity: 0, delay: 1})
+    
+    TweenMax.to(VarConst.soundActivation, .75, { opacity: 1, delay: 1.5, pointerEvents: 'all' })
+    TweenMax.from(VarConst.soundActivation, .75, { y: 40, delay: 1.3, ease: Power3.easeOut })
+})
+
+function startExperience() {
+    if (VarLet.isOnMobile) {
+        document.body.requestFullscreen();
+    }
+    
+    TweenMax.to(VarConst.soundActivation, 1.2, { y: -40, delay: .5, ease: Power3.easeInOut })
+    TweenMax.to(VarConst.soundActivation, .75, { opacity: 0, delay: .75, ease: Power3.easeOut })
+
     TweenMax.to(VarConst.loaderContainer, 2, { yPercent: -200, ease: Expo.easeInOut, delay: 1 })
 
     TweenMax.from(VarConst.hudContainerTop, 1, { yPercent: -300, ease: Expo.easeOut, delay: 2.5 })
@@ -130,6 +150,24 @@ queue.on("complete", () => {
         TweenMax.to(VarConst.scrollIndication_1, 1, { y: -15, rotationZ: -15, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Power3.easeInOut, delay: 2.5, repeat: -1, repeatDelay: 2 })
         TweenMax.to(VarConst.scrollIndication_2, 1, { y: -15, rotationZ: 0, opacity: 1, stagger: { each: .05, from: 'start'}, ease: Power3.easeInOut, delay: 2.5, repeat: -1, repeatDelay: 2 })
     }, 4000);
+}
+
+VarConst.choices.forEach(choice => {
+    choice.addEventListener('click', () => {
+        VarConst.soundActivation.style.pointerEvents = 'none'
+        if (choice.innerText == "Yes") {
+            startExperience()
+
+            VarLet.musicPlayed = true
+            VarLet.musicMuted = false
+            music.play()
+
+            audioSwitcher.active = true
+            audioSwitcher.hover = false
+        } else {
+            startExperience()
+        }
+    })
 })
 
 const music = new Howl({
@@ -159,11 +197,13 @@ projectScene.add(camera)
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
+    powerPreference: 'high-performance',
     canvas: VarConst.mainCanvas,
     antialias: true,
     alpha: true
 })
 const rendererProject = new THREE.WebGLRenderer({
+    powerPreference: 'high-performance',
     canvas: VarConst.projectCanvas,
     antialias: true,
     alpha: true
@@ -216,7 +256,7 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
                 e.material = toonMaterial
         })
 
-        icebergModel.scale.set(.28, .28, .28)
+        icebergModel.scale.set(VarLet.initialIcebergScaleValue, VarLet.initialIcebergScaleValue, VarLet.initialIcebergScaleValue)
         icebergModel.rotation.y = rotationYHome
         icebergModel.position.set(4, 1, 0)
         mainScene.add(icebergModel)
@@ -232,14 +272,6 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         })
     }
 )
-
-// function test() {
-//     gsap.to(icebergModel.scale, 1, { x: .28, y: .28, z: .28, ease: Power4.easeOut})
-//     setTimeout(() => {
-//         onMouseDown = false
-//     }, 1000)
-// }
-
 
 // --------------------------------------- Planes ---------------------------------------
 const texture_id2021 = textureLoader.load('/img/projects/id_2021.png')
@@ -298,7 +330,9 @@ document.addEventListener("mousemove", e => {
 VarConst.images.forEach(image => {
     image.addEventListener('mouseenter', (e) => {
         if (!VarLet.enterProject) {
-            TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power2.easeInOut })
+            if (!VarLet.isOnMobile) {
+                TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power2.easeInOut })
+            }
             TweenMax.to(VarConst.images, .75, { opacity: .25, ease: Power3.easeOut })
             switch (e.target.attributes[1].value) {
                 case 'id2021' :
@@ -528,6 +562,9 @@ VarConst.images.forEach(image => {
         TweenMax.to('.content--container .title--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .50 })
         TweenMax.to('.content--container .text--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: .75 })
         TweenMax.to('.content--container .icon--container', 2.5, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
+        TweenMax.from('.content--container .title--container', 2.5, { y: 50, ease: Power4.easeInOut, delay: .25 })
+        TweenMax.from('.content--container .text--container', 2.5, { y: 50, ease: Power4.easeInOut, delay: .37 })
+        TweenMax.from('.content--container .icon--container', 2.5, { y: 50, ease: Power4.easeInOut, delay: .5 })
         TweenMax.to(VarConst.crossCloseProject, 1.5, { yPercent: 500, ease: Power4.easeInOut, delay: .75 })
 
         VarConst.projectCanvasContainer.style.position = 'absolute'
@@ -539,18 +576,25 @@ VarConst.images.forEach(image => {
             })
         }, 500)
 
-        TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
+        if (VarLet.isOnMobile) {
+            TweenLite.to(planeRectMaterial.uniforms.uAlpha, 1.5, { value: 1, ease: Power4.easeInOut, delay: .5 })
+        } else {
+            TweenLite.to(planeRectMaterial.uniforms.uAlpha, .5, { value: 1, ease: Power4.easeOut })
+        }
         
         TweenLite.to(planeRectMaterial.uniforms.uOffset.value, .5, { x: 0, y: 0, ease: Power4.easeOut })
 
         TweenLite.to(planeRectMaterial.uniforms.uFrequency.value, 4, { x: 5, y: 5, ease: Expo.easeOut })
         TweenLite.to(planeRectMaterial.uniforms.uFrequency.value, 3, { x: 1, y: 1, ease: Power4.easeOut, delay: 1 })
 
-        TweenLite.to(planeRectMesh.position, 2, { x: -3, y: 0, z: 6, ease: Expo.easeInOut })
+        TweenLite.to(planeRectMesh.position, 2, { x: VarLet.planePosX, y: VarLet.planePosY, z: VarLet.planePosZ, ease: Expo.easeInOut })  
     })
 })
 
 VarConst.crossCloseProject.addEventListener('click', () => {
+    if (VarLet.isOnMobile) {
+        document.body.requestFullscreen();
+    }
     outerHandleMouseLeave()
     TweenMax.to(VarConst.projectsContainer, 0, { opacity: 1 })
     TweenMax.to(VarConst.projectsContainer, 0, { pointerEvents: 'all', delay: 2 })
@@ -742,6 +786,7 @@ VarConst.buttonContact.addEventListener('click', () => {
     locoScroll.stop()
     VarLet.icebergRotY = icebergModel.rotation.y
     VarLet.icebergPosX = icebergModel.position.x
+    VarLet.currentIcebergScaleValue = icebergModel.scale.x
     TweenLite.to(icebergModel.scale, .75, { x: 0, y: 0, z: 0, ease: Back.easeIn })
     TweenLite.to(icebergModel.rotation, .75, { y: VarLet.icebergRotY - Math.PI * .75,  ease: Power2.easeIn })
     
@@ -750,6 +795,9 @@ VarConst.buttonContact.addEventListener('click', () => {
     TweenMax.to(VarConst.transitionContainerContact, 1.5, { yPercent: -100, ease: Expo.easeInOut, delay: .25 })
     TweenMax.to(VarConst.contentContactContainer, 1.25, { opacity: 1, ease: Power4.easeInOut, delay: 1 })
     
+    TweenMax.from(VarConst.textContactContainer, 1.25, { y: 50, ease: Power3.easeInOut, stagger: { each: .05, from: 'start'}, delay: 1 })
+    TweenMax.from(VarConst.textContactContainer, 1.25, { opacity: 0, ease: Power3.easeInOut, stagger: { each: .05, from: 'start'}, delay: 1.2 })
+
     TweenLite.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 1.5 })
 
     VarLet.isIcebergRotating = true
@@ -763,6 +811,9 @@ VarConst.buttonContact.addEventListener('click', () => {
 })
 
 VarConst.crossCloseContact.addEventListener('click', () => {
+    if (VarLet.isOnMobile) {
+        document.body.requestFullscreen();
+    }
     outerHandleMouseLeave()
     TweenLite.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
 
@@ -773,7 +824,8 @@ VarConst.crossCloseContact.addEventListener('click', () => {
     TweenMax.to(VarConst.crossCloseContact, 1.5, {yPercent: -500, ease: Power4.easeInOut })
 
     TweenLite.to(icebergModel.rotation, 1.5, { y: VarLet.icebergRotY,  ease: Power2.easeOut, delay: 1.1 })
-    TweenLite.to(icebergModel.scale, 2, { x: .28, y: .28, z: .28, ease: Elastic.easeOut, delay: 1.1 })
+    
+    TweenLite.to(icebergModel.scale, 2, { x: VarLet.currentIcebergScaleValue, y: VarLet.currentIcebergScaleValue, z: VarLet.currentIcebergScaleValue, ease: Elastic.easeOut, delay: 1.1 })
     
     setTimeout(() => {
         locoScroll.start()
@@ -921,7 +973,7 @@ VarConst.navProjects.addEventListener('click', () => {
 })
 
 // --------------------------------------- Scroll Trigger ---------------------------------------
-/* ADD LOCOSCROLL */
+// Add Locoscroll
 locoScroll.on("scroll", ScrollTrigger.update)
 
 ScrollTrigger.scrollerProxy(VarConst.scrollContainer, {
@@ -963,6 +1015,55 @@ ScrollTrigger.create({
 })
 
 ScrollTrigger.create({
+    trigger: VarConst.textAboutContainer.children[0],
+    scroller: VarConst.scrollContainer,
+    start: "top 70%", 
+    onToggle: () => {
+        if (!VarLet.isFirstTextToggle) {
+            VarLet.isFirstTextToggle = true
+            TweenMax.from(VarConst.textAboutContainer.children[0], 1.5, { y: 50, ease: Power3.easeOut })
+            TweenMax.to(VarConst.textAboutContainer.children[0], 1.5, { opacity: 1, ease: Power3.easeOut })
+        }
+    }
+})
+ScrollTrigger.create({
+    trigger: VarConst.textAboutContainer.children[1],
+    scroller: VarConst.scrollContainer,
+    start: "top 70%", 
+    onToggle: () => {
+        if (!VarLet.isSecondTextToggle) {
+            VarLet.isSecondTextToggle = true
+            TweenMax.from(VarConst.textAboutContainer.children[1], 1.5, { y: 50, ease: Power3.easeOut })
+            TweenMax.to(VarConst.textAboutContainer.children[1], 1.5, { opacity: 1, ease: Power3.easeOut })
+        }
+    }
+})
+ScrollTrigger.create({
+    trigger: VarConst.textAboutContainer.children[2],
+    scroller: VarConst.scrollContainer,
+    start: "top 70%", 
+    onToggle: () => {
+        if (!VarLet.isThirdTextToggle) {
+            VarLet.isThirdTextToggle = true
+            TweenMax.from(VarConst.textAboutContainer.children[2], 1.5, { y: 50, ease: Power3.easeOut })
+            TweenMax.to(VarConst.textAboutContainer.children[2], 1.5, { opacity: 1, ease: Power3.easeOut })
+        }
+    }
+})
+ScrollTrigger.create({
+    trigger: VarConst.textAboutContainer.children[3],
+    scroller: VarConst.scrollContainer,
+    start: "top 70%", 
+    onToggle: () => {
+        if (!VarLet.isFourthTextToggle) {
+            VarLet.isFourthTextToggle = true
+            TweenMax.from(VarConst.textAboutContainer.children[3], 1.5, { y: 50, ease: Power3.easeOut })
+            TweenMax.to(VarConst.textAboutContainer.children[3], 1.5, { opacity: 1, ease: Power3.easeOut })
+        }
+    }
+})
+
+ScrollTrigger.create({
     trigger: VarConst.aboutContainer,
     scroller: VarConst.scrollContainer,
     start: "60% bottom", 
@@ -984,7 +1085,7 @@ ScrollTrigger.create({
     end: "50% bottom",
     scrub: true,
     onUpdate: selfProjects => {
-        icebergModel.position.x = 0 + selfProjects.progress * -7.5
+        icebergModel.position.x = 0 + selfProjects.progress * VarLet.icebergLeftPos
     }
 })
 
@@ -1039,7 +1140,15 @@ ScrollTrigger.create({
     end: "bottom bottom",
     scrub: true,
     onUpdate: selfEnd => {
-        icebergModel.position.x = -7.5 + selfEnd.progress * 7
+        if (VarLet.isOnMobile) {
+            icebergModel.position.x = VarLet.icebergLeftPos + selfEnd.progress * Math.abs(VarLet.icebergLeftPos)
+            icebergModel.scale.x = VarLet.initialIcebergScaleValue - (selfEnd.progress * .1)
+            icebergModel.scale.y = VarLet.initialIcebergScaleValue - (selfEnd.progress * .1)
+            icebergModel.scale.z = VarLet.initialIcebergScaleValue - (selfEnd.progress * .1)
+        } else {
+            icebergModel.position.x = VarLet.icebergLeftPos + selfEnd.progress * 7
+        }
+
         rotationOnScrollValue += (selfEnd.getVelocity() * -.00003) * Math.PI
         if (selfEnd.progress >= .3) {
             VarLet.isIcebergOnEnd = true
@@ -1056,7 +1165,7 @@ ScrollTrigger.create({
 ScrollTrigger.create({
     trigger: VarConst.endContainer,
     scroller: VarConst.scrollContainer,
-    start: "75% bottom",
+    start: "50% bottom",
     endTrigger: "html",
     scrub: true,
     onToggle: selfEnd => {

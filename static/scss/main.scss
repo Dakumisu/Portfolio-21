@@ -4,6 +4,15 @@
 * {
     user-select: none;
     box-sizing: border-box;
+}
+
+body {
+    background-color: $normalBlue;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.index {
     cursor: none;
 }
 
@@ -68,11 +77,6 @@ svg .darker {
         transform-origin: bottom left;
         transform: scaleX(1);
     }
-}
-
-body {
-    margin: 0;
-    overflow-x: hidden;
 }
 
 .background--container {
@@ -278,6 +282,7 @@ body {
                 #canvas-audio {
                     padding: 4px 0;
                     width: 100%;
+                    cursor: none;
                 }
             }
             &--contact {
@@ -390,13 +395,18 @@ body {
         justify-content: center;
         align-items: center;
         pointer-events: none;
-        h1 {
+        .name--container {
+            font-family: Title;
             width: fit-content;
             margin: 0;
             span {
                 font-size: 125px;
                 display: inline-block;
                 letter-spacing: 1px;
+
+                @media only screen and (max-width: 800px) {
+                    font-size: 45px
+                }
             }
             .name{
                 color: transparent;
@@ -459,6 +469,10 @@ body {
         height: 100vh;
         display: flex;
         justify-content: center;
+
+        @media only screen and (max-width: 800px) {
+            margin-bottom: 50vh;
+        }
         .container {
             width: 80vw;
             height: fit-content;
@@ -471,6 +485,10 @@ body {
             h2 {
                 font-size: 100px;
                 margin: 0;
+                
+                @media only screen and (max-width: 800px) {
+                    font-size: 65px;
+                }
             }
 
             .text--container {
@@ -483,6 +501,12 @@ body {
                     font-size: 17px;
                     width: 70%;
                     text-align: justify;
+                    opacity: 0;
+
+                    @media only screen and (max-width: 800px) {
+                        font-size: 12px;
+                        width: 85%;
+                    }
                     
                     &:nth-child(1) {
                         margin: 0 0 40px 0;
@@ -551,6 +575,11 @@ body {
         height: 200vh;
         display: flex;
         justify-content: center;
+
+        // @media only screen and (max-width: 800px) {
+        //     margin-top: 50vh;
+        // }
+
         .container {
             width: 80vw;
             height: 50vh;
@@ -563,6 +592,10 @@ body {
             h2 {
                 font-size: 100px;
                 margin: 0;
+
+                @media only screen and (max-width: 800px) {
+                    font-size: 65px;
+                }
             }
 
             .text--container {
@@ -573,6 +606,10 @@ body {
                 width: 50%;
                 text-align: center;
                 mix-blend-mode: difference;
+
+                @media only screen and (max-width: 800px) {
+                    width: 70%;
+                }
                 .title {
                     display: flex;
                     flex-direction: row;
@@ -599,9 +636,18 @@ body {
                     margin: 0;
                     padding: 10px 10px 10px 0;
                     font-family: Subtitle;
+
+                    @media only screen and (max-width: 800px) {
+                        font-size: 20px;
+                        padding: 0;
+                    }
                 }
                 .project--container {
                     text-align: left;
+
+                    @media only screen and (max-width: 800px) {
+                        margin-bottom: 10px;
+                    }
                 }
             }
         } 
@@ -635,6 +681,11 @@ body {
         top: 75%;
         transform: translate(50%, -50%);
         pointer-events: none;
+
+        @media only screen and (max-width: 800px) {
+            right: 50%;
+            top: 80%;
+        }
 
         .container {
             display: flex;
@@ -698,6 +749,7 @@ body {
                     opacity: .8;
                     margin: 0;
                     font-family: Text;
+                    cursor: none;
                 }
             }
         }
@@ -749,12 +801,22 @@ body {
         top: 50%;
         color: $lightBlue;
         transform: translate(0, -50%);
+
+        @media only screen and (max-width: 800px) {
+            width: 100%;
+            top: 70%;
+            right: 0;
+            align-items: center;
+        }
+
         .title--container {
             position: relative;
             width: fit-content;
             margin-bottom: 10px;
             text-align: center;
             opacity: 0;
+
+
             .title--container--content {
                 display: flex;
                 flex-direction: column;
@@ -765,6 +827,10 @@ body {
                     letter-spacing: 2px;
                     font-family: Subtitle;
                     margin: 0;
+
+                    @media only screen and (max-width: 800px) {
+                        font-size: 5.5vw;
+                    }
                 }
                 .link--container {
                     display: flex;
@@ -794,6 +860,10 @@ body {
             p {
                 margin: 0;
                 opacity: .8;
+
+                @media only screen and (max-width: 800px) {
+                    text-align: justify;
+                }
             }
         }
         .icon--container {
@@ -814,6 +884,10 @@ body {
                 &:hover {
                     opacity: 1;
                     transition: opacity .5s ease-in-out;
+                }
+
+                @media only screen and (max-width: 800px) {
+                    font-size: 10px;
                 }
             }
         }
@@ -846,6 +920,11 @@ body {
         justify-content: space-between;
         width: 80%;
 
+        span {
+            font-size: 16px;
+            cursor: none;
+        }
+
         .loader {
             position: relative;
             display: flex;
@@ -876,9 +955,6 @@ body {
                     }
                 }
             }
-            span {
-                font-size: 16px;
-            }
             .loadValue {
                 font-size: 150px;
                 color: $darkBlue;
@@ -887,21 +963,93 @@ body {
                 font-style: italic;
             }
         }
+
+        .soundActivation {
+            width: 100%;
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: $lightBlue;
+            font-family: Subtitle;
+
+            span {
+                margin-bottom: 10px;
+                cursor: none;
+            }
+
+            .choice {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                width: 100px;
+
+                button {
+                    font-family: Subtitle;
+                    color: $lightBlue;
+                    outline: none;
+                    border: none;
+                    background: none;
+                    cursor: none;
+                }
+
+            }
+        }
     }
 }
 
-.mobileNotAvailable {
-    display: none;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: $darkerBlue;
+.error {
     color: $lightBlue;
-    font-family: Title;
-    font-size: 5vw;
-    z-index: 500;
+    cursor: auto !important;
+    background-color: $darkBlue;
+    
+    .container {
+        font-family: subtitle;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .background {
+        color: rgba($darkerBlue, .5);
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        font-family: title;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        position: fixed;
+        font-size: 18vw;
+        z-index: -2;
+        
+        #numbers {
+            font-family: subtitle;
+        }
+    }
+
+    .backgroundTransition {
+        width: 100vw;
+        height: 100vh;
+        background-color: $normalBlue;
+        position: absolute;
+        top: 100%;
+        left: 0;
+    }
+
+    .loader--container {
+        opacity: 0;
+        pointer-events: none;
+    }
 }

@@ -16,18 +16,14 @@
     <meta name="theme-color" content="#171f22">
     <meta name="msapplication-navbutton-color" content="#171f22">
     <meta name="apple-mobile-web-app-status-bar-style" content="#171f22">
-    <title>Alex Gattefossé - 21'</title>
+    <title>Dakumisu - 21'</title>
     <link rel="icon" href="/img/icon/favicon.png" />
     <link rel="apple-touch-icon" href="/img/icon/favicon.png" />
     <meta property="og:image" content="/img/icon/favicon.png" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js" defer></script>
 </head>
 
-<body>
-    <div class="mobileNotAvailable">
-        <span>Mobile version coming soon ... :) </span>
-    </div>
-
+<body class="index">
     <div class="cursor cursor--small"></div>
     <canvas class="cursor cursor--canvas" data-paper-keepalive="true" data-paper-hidpi="off" resize></canvas>
     <div class="project__indicator--container">
@@ -64,6 +60,13 @@
                     <span class="loading-text_4">Have a nice day... or night 👀</span>
                 </div>
                 <span class="loadValue">000</span>
+            </div>
+            <div class="soundActivation">
+                <span>Do you want some ambiant sound ?</span>
+                <div class="choice">
+                    <button class="inner--link lineHoverEffect"><span>Yes</span></button>
+                    <button class="inner--link lineHoverEffect"><span>No</span></button>
+                </div>
             </div>
         </div>
     </div>
@@ -199,7 +202,7 @@
                         </div>
                     </div>
                     <div class="about--title" data-scroll data-scroll-speed="1">
-                        <h1>
+                        <div class="name--container">
                             <span class="name" data-scroll data-scroll-speed="5" data-scroll-delay="0.20">A</span>
                             <span class="name" data-scroll data-scroll-speed="5" data-scroll-delay="0.19">l</span>
                             <span class="name" data-scroll data-scroll-speed="5" data-scroll-delay="0.18">e</span>
@@ -215,7 +218,7 @@
                             <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.08">s</span>
                             <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.07">s</span>
                             <span class="lastname" data-scroll data-scroll-speed="5" data-scroll-delay="0.06">é</span>
-                        </h1>
+                        </div>
                         <span class="about--title__subtitle" data-scroll data-scroll-speed="5" data-scroll-delay="0.07">a.k.a. Dakumisu</span>
                     </div>
                 </div>

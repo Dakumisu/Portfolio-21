@@ -6,10 +6,11 @@ const path = require('path')
 module.exports = {
     entry: {
         main: path.resolve(__dirname, '../src/app.js'),
+        error: path.resolve(__dirname, '../static/js/404.js'),
     },
     output:
     {
-        filename: 'bundle.[contenthash].js',
+        filename: 'bundle.[name].js',
         path: path.resolve(__dirname, '../dist')
     },
     devtool: 'source-map',
@@ -24,6 +25,12 @@ module.exports = {
             filename: 'index.html',
             template: path.resolve(__dirname, '../src/index.html'),
             chunks: ['main'],
+            minify: true
+        }),
+        new HtmlWebpackPlugin({
+            filename: '404.html',
+            template: path.resolve(__dirname, '../src/404.html'),
+            chunks: ['error'],
             minify: true
         }),
         new MiniCSSExtractPlugin()
