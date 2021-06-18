@@ -1,3 +1,5 @@
 dist
 externes
 node_modules
+.htaccess
+.htpasswd
