@@ -3,3 +3,5 @@ externes
 node_modules
 .htaccess
 .htpasswd
+./src/style.css
+./src/style.css.map
