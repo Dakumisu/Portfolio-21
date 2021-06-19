@@ -11,6 +11,9 @@ Run this followed commands :
 # Install dependencies (only the first time)
 npm install
 
+# Run Sass to compile scss files
+npm run sass
+
 # Run the local server at localhost:8080
 npm run dev
 
