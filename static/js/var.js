@@ -237,6 +237,9 @@ let VarLet = {
     icebergRotY: 0,
     icebergPosX: 0,
     currentRotate: 0,
+
+    locoMultiplier: .5,
+    locoLerp: .08
 }
 
 export { VarConst, VarLet }

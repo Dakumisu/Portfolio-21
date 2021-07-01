@@ -8,7 +8,9 @@
   "scripts": {
     "build": "webpack --config ./bundler/webpack.prod.js",
     "dev": "webpack serve --config ./bundler/webpack.dev.js",
-    "sass": "sass --watch ./static/scss/main.scss:./src/style.css --style compressed"
+    "prepublish": "npm run sass",
+    "sass": "sass ./static/scss/main.scss:./src/style.css --style compressed",
+    "sass_watch": "sass --watch ./static/scss/main.scss:./src/style.css --style compressed"
   },
   "dependencies": {
     "@babel/core": "^7.12.10",

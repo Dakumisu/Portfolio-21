@@ -926,14 +926,19 @@ VarConst.soundButton.addEventListener('click', () => {
 })
 
 // --------------------------------------- Scroll Smooth ---------------------------------------
+if (VarLet.isOnMobile) {
+    VarLet.locoLerp = .1
+    VarLet.locoMultiplier = .6
+}
+
 const locoScroll = new LocomotiveScroll({
     el: VarConst.scrollContainer,
     direction: 'vertical',
     smooth: true,
     getDirection: true,
     scrollFromAnywhere: true,
-    multiplier: 0.5,
-    lerp: 0.08,
+    multiplier: VarLet.locoMultiplier,
+    lerp: VarLet.locoLerp,
     reloadOnContextChange: true,
     smartphone: {
         smooth: true
