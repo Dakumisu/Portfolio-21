@@ -9,10 +9,12 @@ Run this followed commands :
 
 ``` bash
 # Install dependencies (only the first time)
-npm install
+npm install (it will run sass once too)
 
 # Run Sass to compile scss files
-npm run sass
+npm run sass (compile once)
+
+npm run sass-watch (compile at each changes)
 
 # Run the local server at localhost:8080
 npm run dev
