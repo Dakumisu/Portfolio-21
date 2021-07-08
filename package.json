@@ -10,7 +10,7 @@
     "dev": "webpack serve --config ./bundler/webpack.dev.js",
     "prepublish": "npm run sass",
     "sass": "sass ./static/scss/main.scss:./src/style.css --style compressed",
-    "sass_watch": "sass --watch ./static/scss/main.scss:./src/style.css --style compressed"
+    "sass-watch": "sass --watch ./static/scss/main.scss:./src/style.css --style compressed"
   },
   "dependencies": {
     "@babel/core": "^7.12.10",
