@@ -5,14 +5,13 @@ import { VarConst, VarLet } from '../static/js/var.js'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { Interaction } from 'three.interaction'
-// import { BloomEffect, EffectComposer, ShaderPass, EffectPass, RenderPass } from "postprocessing"
 import LocomotiveScroll from 'locomotive-scroll'
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 gsap.registerPlugin(ScrollTrigger)
-import howlerjs from 'howler'
+import { Howl } from 'howler'
 import createjs from 'preload-js'
 
-import { polygon as PolygonCursor, outerHandleMouseLeave } from '../static/js/cursor.js'
+import { polygon as PolygonCursor, outerHandleMouseLeave, imageHandleMouseEnter, imageHandleMouseLeave } from '../static/js/cursor.js'
 import { AudioSwitcher } from '../static/js/audio.js'
 
 import vertexShader from '../static/glsl/vertexShader.glsl'
@@ -28,6 +27,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
     VarLet.planePosX = 0
     VarLet.planePosY = 2
     VarLet.planePosZ = 3
+    VarLet.icebergPosContact = 6
     VarConst.projectIndicatorContainer.style.display = 'none'
 } else {
     VarLet.icebergLeftPos = -7.5
@@ -41,27 +41,8 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 let queue = new createjs.LoadQueue(false)
 
 // images
-queue.loadFile('/img/projects/argentic.png')
-queue.loadFile('/img/projects/chara_mushroom.png')
-queue.loadFile('/img/projects/depression_achro.png')
-queue.loadFile('/img/projects/folio_2020.png')
-queue.loadFile('/img/projects/folio_cms.png')
-queue.loadFile('/img/projects/gamovore.png')
-queue.loadFile('/img/projects/id_2021.png')
-queue.loadFile('/img/projects/inside.png')
-queue.loadFile('/img/projects/jam_cloud.png')
-queue.loadFile('/img/projects/mmi_tv.png')
-queue.loadFile('/img/projects/morpion.png')
-queue.loadFile('/img/projects/numeric.png')
-queue.loadFile('/img/projects/retrowave.png')
-queue.loadFile('/img/projects/terre_de_bois.png')
 queue.loadFile('/img/moi_Default.jpg')
 queue.loadFile('/img/moi_Hover.png')
-queue.loadFile('/img/displacement/disp.jpg')
-
-// glsl
-queue.loadFile('/glsl/fragmentShader.glsl')
-queue.loadFile('/glsl/vertexShader.glsl')
 
 // font
 queue.loadFile('/font/AndBasR.woff')
@@ -76,12 +57,6 @@ queue.loadFile('/3D/iceberg_2.0.gltf')
 
 // Sound
 queue.loadFile('/sound/music.mp3')
-
-// Librairies
-queue.loadFile(GLTFLoader)
-queue.loadFile(Interaction)
-queue.loadFile(ScrollTrigger)
-queue.loadFile(LocomotiveScroll)
 
 queue.on("progress", event => {
     let progressValue =  Math.floor(event.progress*100)
@@ -134,7 +109,7 @@ function startExperience() {
 
     TweenMax.to(VarConst.loaderContainer, 2, { yPercent: -200, ease: Expo.easeInOut, delay: 1 })
 
-    TweenMax.from(VarConst.hudContainerTop, 1, { yPercent: -300, ease: Expo.easeOut, delay: 2.5 })
+    TweenMax.from(VarConst.hudContainerTop, 1, { yPercent: -350, ease: Expo.easeOut, delay: 2.5 })
     TweenMax.from(VarConst.hudContainerBottom, 1, { yPercent: 300, ease: Expo.easeOut, delay: 2.5 })
     TweenMax.from(VarConst.scrollIndication_1, 1.5, { yPercent: 300, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Expo.easeOut, delay: 3.5 })
     TweenMax.from(VarConst.scrollIndication_2, 1.5, { yPercent: 300, opacity: 0, stagger: { each: .05, from: 'start'}, ease: Expo.easeOut, delay: 3.5 })
@@ -193,7 +168,7 @@ const sizes = {
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
 camera.position.z = 10
 mainScene.add(camera)
-projectScene.add(camera)
+// projectScene.add(camera)
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -210,15 +185,6 @@ const rendererProject = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 rendererProject.setSize(sizes.width, sizes.height)
-
-// Post Processing
-// const composer = new EffectComposer(rendererProject)
-// const renderPass = new RenderPass(projectScene, camera)
-// composer.addPass(renderPass)
-
-// const customPass = new ShaderPass({ vertexShader, fragmentShader })
-// customPass.renderToScreen = true
-// composer.addPass(customPass)
 
 // Interaction
 new Interaction(renderer, mainScene, camera)
@@ -246,7 +212,6 @@ const gltfLoader = new GLTFLoader()
 let icebergModel
 
 let rotationYHome = Math.PI * 1.7
-let rotationValue = 0
 let rotationOnScrollValue = rotationYHome
 
 gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
@@ -261,6 +226,14 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
         icebergModel.position.set(4, 1, 0)
         mainScene.add(icebergModel)
 
+        icebergModel.on('mouseover', () => {
+            imageHandleMouseEnter()
+        })
+
+        icebergModel.on('mouseout', () => {
+            imageHandleMouseLeave()
+        })
+
         icebergModel.on('click', () => {
             if (!VarLet.navScrollActive) {
                 locoScroll.scrollTo(VarConst.heroContainer)
@@ -274,26 +247,26 @@ gltfLoader.load('/3D/iceberg_2.0.gltf', (addIcebergModel) => {
 )
 
 // --------------------------------------- Planes ---------------------------------------
-const texture_id2021 = textureLoader.load('/img/projects/id_2021.png')
-const texture_folio2020 = textureLoader.load('/img/projects/folio_2020.png')
-const texture_foliocms = textureLoader.load('/img/projects/folio_cms.png')
-const texture_morpion = textureLoader.load('/img/projects/morpion.png')
-const texture_gamovore = textureLoader.load('/img/projects/gamovore.png')
-const texture_retrowave = textureLoader.load('/img/projects/retrowave.png')
-const texture_particlesfollow = textureLoader.load('/img/projects/particles_follow.png')
-const texture_fod = textureLoader.load('/img/projects/fod.png')
+const texture_id2021 = textureLoader.load('/img/projects/id_2021.jpg')
+const texture_folio2020 = textureLoader.load('/img/projects/folio_2020.jpg')
+const texture_foliocms = textureLoader.load('/img/projects/folio_cms.jpg')
+const texture_morpion = textureLoader.load('/img/projects/morpion.jpg')
+const texture_gamovore = textureLoader.load('/img/projects/gamovore.jpg')
+const texture_retrowave = textureLoader.load('/img/projects/retrowave.jpg')
+const texture_particlesfollow = textureLoader.load('/img/projects/particles_follow.jpg')
+const texture_fod = textureLoader.load('/img/projects/fod.jpg')
 
-const texture_jamcloud = textureLoader.load('/img/projects/jam_cloud.png')
-const texture_terredebois = textureLoader.load('/img/projects/terre_de_bois.png')
-const texture_charamushroom = textureLoader.load('/img/projects/chara_mushroom.png')
+const texture_jamcloud = textureLoader.load('/img/projects/jam_cloud.jpg')
+const texture_terredebois = textureLoader.load('/img/projects/terre_de_bois.jpg')
+const texture_charamushroom = textureLoader.load('/img/projects/chara_mushroom.jpg')
 
-const texture_shworeel = textureLoader.load('/img/projects/showreel.png')
-const texture_depression = textureLoader.load('/img/projects/depression_achro.png')
-const texture_mmitv = textureLoader.load('/img/projects/mmi_tv.png')
-const texture_inside = textureLoader.load('/img/projects/inside.png')
+const texture_shworeel = textureLoader.load('/img/projects/showreel.jpg')
+const texture_depression = textureLoader.load('/img/projects/depression_achro.jpg')
+const texture_mmitv = textureLoader.load('/img/projects/mmi_tv.jpg')
+const texture_inside = textureLoader.load('/img/projects/inside.jpg')
 
-const texture_numeric = textureLoader.load('/img/projects/numeric.png')
-const texture_argentic = textureLoader.load('/img/projects/argentic.png')
+const texture_numeric = textureLoader.load('/img/projects/numeric.jpg')
+const texture_argentic = textureLoader.load('/img/projects/argentic.jpg')
 
 const planeRectGeometry = new THREE.PlaneGeometry(16*.3, 9*.3, 32, 32)
 
@@ -798,7 +771,7 @@ VarConst.buttonContact.addEventListener('click', () => {
     TweenMax.from(VarConst.textContactContainer, 1.25, { y: 50, ease: Power3.easeInOut, stagger: { each: .05, from: 'start'}, delay: 1 })
     TweenMax.from(VarConst.textContactContainer, 1.25, { opacity: 0, ease: Power3.easeInOut, stagger: { each: .05, from: 'start'}, delay: 1.2 })
 
-    TweenLite.to(icebergModel.position, 1, { x: 13, ease: Back.easeOut, delay: 1.5 })
+    TweenLite.to(icebergModel.position, 1, { x: VarLet.icebergPosContact, ease: Back.easeOut, delay: 1.5 })
 
     VarLet.isIcebergRotating = true
     setTimeout(() => {
@@ -854,11 +827,6 @@ VarConst.crossClose.forEach(e => {
         TweenMax.to('.line-1', 1.75, { rotateZ: 45, ease: Elastic.easeOut })
         TweenMax.to('.line-2', 1.75, { rotateZ: -45, ease: Elastic.easeOut })
     })
-})
-
-// --------------------------------------- Link ---------------------------------------
-VarConst.navName.addEventListener('click', () => {
-    window.location.replace('https://www.dakumisu.fr/')
 })
 
 // --------------------------------------- Mouse move interaction ---------------------------------------
@@ -950,6 +918,16 @@ const locoScroll = new LocomotiveScroll({
 
 locoScroll.stop()
 
+VarConst.navName.addEventListener('click', () => {
+    if (!VarLet.navScrollActive) {
+        locoScroll.scrollTo(VarConst.heroContainer)
+        VarLet.navScrollActive = true
+        setTimeout(() => {
+            VarLet.navScrollActive = false
+        }, 1200)
+    }
+})
+
 VarConst.navAbout.addEventListener('click', () => {
     if (VarLet.showScrollIndication) {
         TweenMax.to(VarConst.scrollIndication, 1, { opacity: 0, ease: Power3.easeOut })
@@ -963,6 +941,7 @@ VarConst.navAbout.addEventListener('click', () => {
         }, 1200)
     }
 })
+
 VarConst.navProjects.addEventListener('click', () => {
     if (VarLet.showScrollIndication) {
         TweenMax.to(VarConst.scrollIndication, 1, { opacity: 0, ease: Power3.easeOut })
@@ -1016,6 +995,21 @@ ScrollTrigger.create({
     scrub: true,
     onUpdate: selfAbout => {
         icebergModel.position.x = 4 + selfAbout.progress * -4
+    }
+})
+
+ScrollTrigger.create({
+    trigger: VarConst.aboutContainer,
+    scroller: VarConst.scrollContainer,
+    start: "25% bottom", 
+    end: "120% bottom",
+    scrub: true,
+    onToggle: selfToggleAbout => {
+        if (selfToggleAbout.isActive) {
+            document.getElementById('aboutNav--container').classList.add('navActive')
+        } else {
+            document.getElementById('aboutNav--container').classList.remove('navActive')
+        }
     }
 })
 
@@ -1074,11 +1068,11 @@ ScrollTrigger.create({
     start: "60% bottom", 
     end: "150% bottom",
     scrub: true,
-    onUpdate: selfAbout => {
-        if (selfAbout.progress <= .5) {
-            VarConst.canvasContainer.style.opacity = 1 - selfAbout.progress
+    onUpdate: selfUpdateAbout => {
+        if (selfUpdateAbout.progress <= .5) {
+            VarConst.canvasContainer.style.opacity = 1 - selfUpdateAbout.progress
         } else {
-            VarConst.canvasContainer.style.opacity = selfAbout.progress
+            VarConst.canvasContainer.style.opacity = selfUpdateAbout.progress
         }
     }
 })
@@ -1101,6 +1095,8 @@ ScrollTrigger.create({
     endTrigger: "html",
     onToggle: toggleOnProjects => {
         if (toggleOnProjects.isActive) {
+            VarLet.isInProjectSection = true
+
             TweenLite.to(hemisphereLightUp, .5, { intensity: 0 })
             TweenLite.to(hemisphereLightDown, .5, { intensity: .9 })
 
@@ -1118,6 +1114,10 @@ ScrollTrigger.create({
                 e.style.webkitTextStrokeWidth = ".5px"
             })
         } else {
+            setTimeout(() => {
+                VarLet.isInProjectSection = false
+            }, 500);
+
             TweenLite.to(hemisphereLightUp, .5, { intensity: 1.3 })
             TweenLite.to(hemisphereLightDown, .5, { intensity: 0 })
 
@@ -1134,6 +1134,30 @@ ScrollTrigger.create({
             VarConst.titleCat.forEach(e => {
                 e.style.webkitTextStrokeWidth = "1.5px"
             })
+        }
+    },
+})
+
+ScrollTrigger.create({
+    trigger: VarConst.projectsContainer,
+    scroller: VarConst.scrollContainer,
+    start: "35% bottom", 
+    end: "bottom 50%",
+    onToggle: toggleOnProjects => {
+        if (toggleOnProjects.isActive) {
+            document.getElementById('aboutNav--container').classList.add('lineHoverEffect')
+            document.getElementById('aboutNav--container').classList.remove('lineHoverEffectNav')
+
+            document.getElementById('projectsNav--container').classList.add('navActive')
+            document.getElementById('projectsNav--container').classList.add('lineHoverEffect')
+            document.getElementById('projectsNav--container').classList.remove('lineHoverEffectNav')
+        } else {
+            document.getElementById('aboutNav--container').classList.add('lineHoverEffectNav')
+            document.getElementById('aboutNav--container').classList.remove('lineHoverEffect')
+
+            document.getElementById('projectsNav--container').classList.remove('navActive')
+            document.getElementById('projectsNav--container').classList.add('lineHoverEffectNav')
+            document.getElementById('projectsNav--container').classList.remove('lineHoverEffect')
         }
     },
 })
@@ -1176,8 +1200,12 @@ ScrollTrigger.create({
     onToggle: selfEnd => {
         if (selfEnd.isActive) {
             TweenMax.to(VarConst.endContainerContent, .5, { opacity: 1, ease: Power4.easeInOut })
+            document.getElementById('projectsNav--container').classList.remove('lineHoverEffectNav')
+            document.getElementById('projectsNav--container').classList.add('lineHoverEffect')
         } else {
             TweenMax.to(VarConst.endContainerContent, .5, { opacity: 0, ease: Power4.easeOut })
+            document.getElementById('projectsNav--container').classList.remove('lineHoverEffect')
+            document.getElementById('projectsNav--container').classList.add('lineHoverEffectNav')
         }
     }
 })
@@ -1224,6 +1252,7 @@ window.addEventListener('resize', () => {
 
 const clock = new THREE.Clock()
 let lowestElapsedTime = 0
+
 function raf() {
     if (VarLet.loadFinished) {
         const elapsedTime = clock.getElapsedTime()
@@ -1250,43 +1279,45 @@ function raf() {
     
         // Render
         renderer.render(mainScene, camera)
-        rendererProject.render(projectScene, camera)
-        // composer.render()
-    
-    
-        if (audioSwitcher)
-            audioSwitcher.animate(elapsedTime * .9)
-    
-        if (VarLet.enterProject)
-            planeRectMaterial.uniforms.uProgress.value = elapsedTime * .5
-    
-        if (VarConst.mouse && !VarLet.enterProject) {
-            if (!VarLet.enterProject) {
-    
-                TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
-                TweenLite.to(planeRectMesh.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
-                
-                hoverPositionUpdate()
-                
-                VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
-                VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
-                
-                VarConst.planePosition.x = VarLet.planeX
-                VarConst.planePosition.y = VarLet.planeY
-                
-            } else {
-                TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
-                hoverPositionUpdate()
-                
-                VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
-                VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
-                
-                VarConst.planePosition.x = VarLet.planeX
-                VarConst.planePosition.y = VarLet.planeY
-            }
+        if (VarLet.isInProjectSection) {
+            rendererProject.render(projectScene, camera)    
         }
     
+        if (audioSwitcher) {
+            audioSwitcher.animate(elapsedTime * .9)
+        }
+    
+        if (VarLet.enterProject) {
+            planeRectMaterial.uniforms.uProgress.value = elapsedTime * .5
+        }
+    
+        if (VarLet.isInProjectSection) {
+            if (VarConst.mouse && !VarLet.enterProject) {
+                if (!VarLet.enterProject) {
+                    TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
+                    TweenLite.to(planeRectMesh.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
+                    
+                    hoverPositionUpdate()
+                    
+                    VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+                    VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+                    
+                    VarConst.planePosition.x = VarLet.planeX
+                    VarConst.planePosition.y = VarLet.planeY
+                } else {
+                    TweenLite.to(pointLight.position, 1, { x: VarLet.planeX, y: VarLet.planeY, ease: Power4.easeOut })
+                    hoverPositionUpdate()
+                    
+                    VarLet.planeX = mapCursorXPlane(-1, 1, -viewSize().width / 2, viewSize().width / 2)
+                    VarLet.planeY = mapCursorYPlane(-1, 1, -viewSize().height / 2, viewSize().height / 2)
+                    
+                    VarConst.planePosition.x = VarLet.planeX
+                    VarConst.planePosition.y = VarLet.planeY
+                }
+            }
+        }
     }
+
     window.requestAnimationFrame(raf)
 }
 
@@ -1295,4 +1326,4 @@ raf()
 ScrollTrigger.addEventListener("refresh", () => locoScroll.update())
 ScrollTrigger.refresh()
 
-console.log(`%c ${'there\'s nothing here go away 👀'}`, `color: ${VarConst.lightBlue}; font-weight: bold; font-size: 1rem;`)
+console.log(`%c    there\'s nothing here go away 👀   `, `background: ${VarConst.darkerBlue}; padding:5px; font-size: 12px; color: ${VarConst.lightBlue}`)

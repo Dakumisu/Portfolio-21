@@ -200,6 +200,8 @@ const VarConst = {
 let VarLet = {
     link: "",
 
+    isInProjectSection: false,
+
     onMouseDown: false,
     isIcebergRotating: false,
     isContactActive: false,
@@ -236,6 +238,7 @@ let VarLet = {
 
     icebergRotY: 0,
     icebergPosX: 0,
+    icebergPosContact: 13,
     currentRotate: 0,
 
     locoMultiplier: .5,

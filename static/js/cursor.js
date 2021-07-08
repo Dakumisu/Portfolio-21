@@ -51,6 +51,9 @@ VarConst.innerLinkItems.forEach(e => {
 document.querySelector('.about--img').addEventListener("mouseenter", imageHandleMouseEnter)
 document.querySelector('.about--img').addEventListener("mouseleave", imageHandleMouseLeave)
 
+// document.querySelector('.webgl').addEventListener("mouseenter", imageHandleMouseEnter)
+// document.querySelector('.webgl').addEventListener("mouseleave", imageHandleMouseLeave)
+
 VarConst.outerLinkItems.forEach(e => {
    e.addEventListener("mouseenter", outerHandleMouseEnter)
    e.addEventListener("mouseleave", outerHandleMouseLeave)
@@ -205,4 +208,4 @@ paper.view.onFrame = event => {
    polygon.smooth()
 }
 
-export { polygon, outerHandleMouseLeave }
+export { polygon, outerHandleMouseLeave, imageHandleMouseEnter, imageHandleMouseLeave }
