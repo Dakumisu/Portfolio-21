@@ -1279,9 +1279,7 @@ function raf() {
     
         // Render
         renderer.render(mainScene, camera)
-        if (VarLet.isInProjectSection) {
-            rendererProject.render(projectScene, camera)    
-        }
+        rendererProject.render(projectScene, camera)    
     
         if (audioSwitcher) {
             audioSwitcher.animate(elapsedTime * .9)
