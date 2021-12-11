@@ -101,7 +101,7 @@ queue.on("complete", () => {
 
 function startExperience() {
     if (VarLet.isOnMobile) {
-        document.body.requestFullscreen();
+        document.body.requestFullscreen()
     }
     
     TweenMax.to(VarConst.soundActivation, 1.2, { y: -40, delay: .5, ease: Power3.easeInOut })
@@ -566,7 +566,7 @@ VarConst.images.forEach(image => {
 
 VarConst.crossCloseProject.addEventListener('click', () => {
     if (VarLet.isOnMobile) {
-        document.body.requestFullscreen();
+        document.body.requestFullscreen()
     }
     outerHandleMouseLeave()
     TweenMax.to(VarConst.projectsContainer, 0, { opacity: 1 })
@@ -626,7 +626,7 @@ VarConst.crossCloseProject.addEventListener('click', () => {
 planeRectMesh.on('click', () => {
     switch (VarLet.currentProject) {
         case 'id2021':
-            window.open('https://www.immersions-digitales.fr/')
+            window.open('https://immersions-digitales.dakumisu.fr/')
             break
         case 'folio2020':
             window.open('http://2020.dakumisu.fr/')
@@ -785,7 +785,7 @@ VarConst.buttonContact.addEventListener('click', () => {
 
 VarConst.crossCloseContact.addEventListener('click', () => {
     if (VarLet.isOnMobile) {
-        document.body.requestFullscreen();
+        document.body.requestFullscreen()
     }
     outerHandleMouseLeave()
     TweenLite.to(icebergModel.position, .75, { x: 25, ease: Back.easeIn })
